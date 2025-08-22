@@ -9,6 +9,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     message: e.message ?? 'Something went wrong',
     details:e.details ?? '',
     hint:e.details ?? '',
+    error_id:e.error_id??'',
   };
   res.status(status).json(body);
 }

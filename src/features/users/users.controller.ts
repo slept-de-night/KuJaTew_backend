@@ -8,10 +8,8 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
   let upload_profile = {}; 
   const parsed = UserSchema.parse(req.body);
   const file = ProfileNullableSchema.parse(req.files);
-  const user = await UsersService.create(parsed);
-  if(file){
-    const upload_profile = await UsersService.upload_profile(file,user.user_id);
-  }
+  const user = await UsersService.create(parsed,file);
+ 
   res.status(201).json({ data: user ,...upload_profile });
-  
+
 });
