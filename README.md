@@ -13,9 +13,13 @@ implementation for express js backend for application KuJaTew
 
 3. Config .env
 
-create .env file in root dict
-`PORT=port
-SUPABASE_URL=supabase_url
-SUPABASE_supabase=supabsae_anno_key`
-from setting -> data api & api key
+Create .env file in root dict and adding these parameters
+
+`PORT=port`
+
+`SUPABASE_URL=supabase_url`
+From Supabase Setting -> Data API
+
+`SUPABASE_supabase=supabsae_anno_key`
+From Supabase Setting -> API Key
 
