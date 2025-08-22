@@ -7,6 +7,7 @@ export class AppError extends Error {
     message: string,
     public status:number,
     public code: AppErrorCode ,
+    public error_id?:string,
     public details?:string,
     public hint?:string,
   ) {
@@ -23,5 +24,5 @@ export const NotFound  = (m = 'Not found')   => new AppError(m, 404, 'NOT_FOUND'
 export const Unauthorized = (m = 'Unauthorized') => new AppError(m, 401, 'UNAUTHORIZED');
 export const Forbidden    = (m = 'Forbidden')    => new AppError(m, 403, 'FORBIDDEN');
 export const INTERNAL = (m = 'backend error') => new AppError(m, 500, 'INTERNAL');
-export const POSTGREST_ERR = (err:PostgrestError):AppError  => new AppError("PostgresError", 405,'POSTGREST_ERR',err.details,err.hint);
+export const POSTGREST_ERR = (err:PostgrestError):AppError  => new AppError("PostgresError", 400,'POSTGREST_ERR',err.code, err.details,err.hint);
 export const STORAGE_ERR = (err:StorageError):AppError  => new AppError(err.message, 406,'STORAGE_ERR');
