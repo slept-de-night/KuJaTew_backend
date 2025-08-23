@@ -23,3 +23,7 @@ From Supabase Setting -> Data API
 `SUPABASE_supabase=supabsae_anno_key`
 From Supabase Setting -> API Key
 
+
+API routing 
+https://www.notion.so/API-routing-Doc-14a1b0b3601380dfbe4ff257a8ec25eb?source=copy_link
+
