@@ -3,17 +3,44 @@ import z from 'zod';
 
 export const UserSchema = z.object({
     name:z.string().min(1, 'name is required'),
+    phone:z.string().min(6, 'phone is too short'), 
+})
+
+export const UsersFullSchema = z.object({
+    name:z.string().min(1, 'name is required'),
+    phone:z.string(),
     email:z.string(),
-    phone:z.string().min(6, 'phone is too short'),
+    user_id:z.string(),
+    profile_picture_path:z.string()
 })
 
 export const ProfileFileSchema = z.object({
   fieldname: z.literal('profile'),                   
   originalname: z.string(),
-  mimetype: z.union([z.literal('image/jpeg'), z.literal('image/jpg')]),
+  encoding:z.string(),
+  mimetype: z.union([z.literal('image/jpeg'), z.literal('image/jpg'),z.literal('image/png')]),
+  buffer: z.instanceof(Buffer),        
   size: z.number().max(5 * 1024 * 1024, 'Max 5MB'),
-  buffer: z.instanceof(Buffer),                         
+  
+         
 });
-
-export const ProfileNullableSchema = ProfileFileSchema.nullable().optional();
+export type JWT_OBJ = {"Refresh_token":string,"Access_token":string};
+export const ProfileNullableSchema = ProfileFileSchema.nullable();
 export type ProfileFile = z.infer<typeof ProfileFileSchema>;
+export const IdTokenSchema = z.object({
+  idToken:z.string()
+})
+export const GoogleAuthSchema = z.object({
+  iss: z.string(),
+  azp: z.string(),
+  aud: z.string(),
+  sub: z.string(),
+  email: z.string(),
+  email_verified: z.boolean(),
+  name:  z.string(),
+  picture:  z.string(),
+  given_name:  z.string(),
+  //family_name:  z.string(),
+  iat: z.int(),
+  exp: z.int()
+})

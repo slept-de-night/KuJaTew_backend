@@ -4,7 +4,8 @@ import swaggerUi from 'swagger-ui-express';
 import fs from "fs";
 import YAML from 'yaml';
 import { errorHandler } from "./core/middleware/errorHandler";
-import { usersRouter } from "./features/users/users.routes";
+import { usersRouter, usersRouterPublic } from "./features/users/users.routes";
+import { authHandler } from "./core/middleware/authHandler";
 
 export function buildApp(){
     const app=express();
@@ -12,6 +13,13 @@ export function buildApp(){
     const swaggerDocument = YAML.parse(file);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     app.use(express.json({ limit: '1mb' }));
+
+    // route without authentication
+    app.use('/api/users', usersRouterPublic);
+
+    app.use(authHandler);
+
+    // route without authentication
     app.use('/api/users', usersRouter);
 
     app.use(errorHandler);

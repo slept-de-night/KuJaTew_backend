@@ -1,7 +1,7 @@
 
 import { supabase } from '../../config/db';
-import { UserSchema, ProfileFile } from './users.schema';
-import { POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
+import { UserSchema, ProfileFile, UsersFullSchema } from './users.schema';
+import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import crypto from 'crypto';
 export type User = z.infer<typeof UserSchema>;
@@ -11,30 +11,69 @@ export type Profile = {
     fullPath: string;
 }
 
-
 export const UsersRepo = {
-    async create(data: Omit<User, 'profile_picture_url'>): Promise<User & { user_id: string }> {
-        const udata = { user_id: crypto.randomUUID(), ...data, profile_picture_url: null };
-        console.log(udata);
-        const { error } = await supabase.from('users').insert(udata);
+    async create_user(data: User &{email:string}): Promise<User &{user_id:string,email:string,profile_picture_path:string|null}> {
+        const user_data = { user_id: crypto.randomUUID(), ...data,profile_picture_path:null };
+        console.log(user_data);
+        const { error } = await supabase.from('users').insert(user_data);
         if (error) throw POSTGREST_ERR(error);
-        return udata;
+        
+        return user_data;
     },
     async upload_profile(profile: ProfileFile, uuid: string): Promise<Profile> {
+        console.log(profile);
         const contentType = profile.mimetype || 'application/octet-stream';
-        const filename = uuid + '_profile';
-        const { data, error } = await supabase.storage.from('profiles').upload(filename, profile.buffer, {
+        const path = uuid + '_profile';
+        console.log(path)
+        const { data, error } = await supabase.storage.from('profiles').upload(path, profile.buffer, {
             contentType,
             cacheControl: '3600',
-            upsert: false,
+            upsert: true,
         });
         if (error) throw STORAGE_ERR(error);
         return data;
     },
     async update_profile_path(path:string,user_id:string):Promise<string>{
-        const {error} = await supabase.from('users').update({'profile_picture_url':path}).eq('user_id',user_id);
+        const {error} = await supabase.from('users').update({'profile_picture_path':path}).eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
         return path;
-    }
+    },
+    async get_user_details(user_id:string):Promise<z.infer<typeof UsersFullSchema>>{
+
+        const {data,error} = await supabase.from('users').select("*").eq("user_id",user_id);
+        if (error) throw POSTGREST_ERR(error);
+        const parsed = UsersFullSchema.safeParse(data);
+        if(!parsed.success) throw INTERNAL("Can't Parsed data");
+
+        return parsed.data;
+    },
+    async get_user_details_byemail(email:string):Promise<z.infer<typeof UsersFullSchema>|null>{
+
+        const {data,error} = await supabase.from('users').select("*").eq("email",email);
+        if (error) throw POSTGREST_ERR(error);
+        console.log(data[0])
+        const parsed = UsersFullSchema.safeParse(data[0]);
+        console.log(parsed.data);
+        if(!parsed.success) return null;
+        return parsed.data;
+    },
+    async get_file_link(path:string,bucket:string,duration:number):Promise<{signedUrl:string}>{
+      
+        const {data,error} = await supabase.storage.from(bucket).createSignedUrl(path,duration);
+        if (error) throw STORAGE_ERR(error);
+        return data;
+
+    },
+    async update_user(user_data: User,user_id:string ){
+        console.log(user_data);
+        if(user_data.name){
+            const { error } = await supabase.from('users').update({"name":user_data.name}).eq('user_id',user_id);
+            if (error) throw POSTGREST_ERR(error);
+        }
+        if(user_data.phone){
+            const { error } = await supabase.from('users').update({"phone":user_data.phone}).eq('user_id',user_id);
+            if (error) throw POSTGREST_ERR(error);
+        }
+    },
 
 }
