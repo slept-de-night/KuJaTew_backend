@@ -1,6 +1,6 @@
 import { UsersRepo, User } from "./users.repo";
 import { BadRequest } from "../../core/errors";
-import { JWT_OBJ, ProfileFile,UsersFullSchema } from "./users.schema";
+import { InvitedSchema, JWT_OBJ, ProfileFile,UsersFullSchema } from "./users.schema";
 import { OAuth2Client } from "google-auth-library";
 import { env } from "../../config/env";
 import { gen_jwt_token } from "../../core/jwt,generator";
@@ -62,6 +62,30 @@ export const UsersService = {
         const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path,"profiles",3600);
         return {...remians,'profile_picture_link': profile_link.signedUrl};
 
+    },
+    async gen_name(name:string):Promise<string>{
+      const min = 1;
+      const max = 10000;
+      let check_name = name;
+
+      while (UsersRepo.is_name_exist(check_name)){
+        const randomIntInRange = Math.floor(Math.random() * (max - min + 1)) + min;
+        check_name = name+randomIntInRange.toString()
+      }
+      
+      return check_name;
+    },
+    async get_invited(user_id:string):Promise<z.infer<typeof InvitedSchema>>{
+      const invited_list = await UsersRepo.get_invited(user_id);
+      await invited_list.forEach(async element => {
+        if(element.trip_path){
+          element.poster_trip_url =( await UsersRepo.get_file_link(element.trip_path,"poster",3600)).signedUrl;
+        }
+        else{
+          element.poster_trip_url = "";
+        }
+      });
+      return invited_list;
     },
   
 }

@@ -1,6 +1,6 @@
 
-import { supabase } from '../../config/db';
-import { UserSchema, ProfileFile, UsersFullSchema } from './users.schema';
+import { pool, supabase } from '../../config/db';
+import { UserSchema, ProfileFile, UsersFullSchema,InvitedSchema } from './users.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import crypto from 'crypto';
@@ -75,5 +75,23 @@ export const UsersRepo = {
             if (error) throw POSTGREST_ERR(error);
         }
     },
+    async is_name_exist(name:string):Promise<boolean>{
+        const {data , error} = await supabase.from('users').select('name').eq('name',name);
+        if(error) throw POSTGREST_ERR(error);
+        if (data.length>0){
+            return true;
+        }
+        return false;
+    },
+    async get_invited(user_id:string):Promise<z.infer<typeof InvitedSchema>>{
+        const query = "WITH invited_trip AS (SELECT a.trip_id FROM trip_collaborators a WHERE a.user_id = $1 AND a.accepted = False)\
+            SELECT b.trip_id,b.title,b.start_date,b.end_date,c.name AS owner_name,b.trip_path FROM invited_trip a JOIN trips b \
+            ON a.trip_id = b.trip_id JOIN users c ON b.user_id = c.user_id";
+        
+        const result = await pool.query(query,[user_id]);
+        const data = InvitedSchema.safeParse(result.rows);
+        if(!data.success) throw INTERNAL("Fail to parsed data");
+        return data.data;
+    }
 
 }

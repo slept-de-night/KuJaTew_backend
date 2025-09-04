@@ -21,9 +21,18 @@ export const ProfileFileSchema = z.object({
   mimetype: z.union([z.literal('image/jpeg'), z.literal('image/jpg'),z.literal('image/png')]),
   buffer: z.instanceof(Buffer),        
   size: z.number().max(5 * 1024 * 1024, 'Max 5MB'),
-  
          
 });
+
+export const InvitedSchema = z.array(z.object({
+    trip_id:z.number(),
+    trip_name:z.string(),
+    trip_owner:z.string(),
+    start_date:z.date(),
+    end_date:z.date(),
+    trip_path:z.string().optional(),
+    poster_trip_url:z.string().optional()
+  }))
 export type JWT_OBJ = {"Refresh_token":string,"Access_token":string};
 export const ProfileNullableSchema = ProfileFileSchema.nullable();
 export type ProfileFile = z.infer<typeof ProfileFileSchema>;
@@ -44,3 +53,4 @@ export const GoogleAuthSchema = z.object({
   iat: z.int(),
   exp: z.int()
 })
+

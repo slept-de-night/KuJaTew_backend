@@ -23,11 +23,11 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 
-export const getUsersDetails = asyncHandler(async (req: Request, res: Response) => {
-  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+export const Users_Details= asyncHandler(async (req: Request, res: Response) => {
+  const parsed = z.string().safeParse((req.params.user_id));
   if(!parsed.success) throw BadRequest("Invalide Request");
-  const user_data = UsersService.get_user_details(parsed.data.user_id);
-
+  const user_data = UsersService.get_user_details(parsed.data);
+  
   res.status(201).json(user_data);
 });
 
@@ -39,6 +39,12 @@ export const getTokenRefresh= asyncHandler(async (req: Request, res: Response) =
   res.status(200).json(token);
 });
 
+export const getinviteds= asyncHandler(async (req: Request, res: Response) => {
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  const invited_list = await UsersService.get_invited(parsed.data.user_id);
+  res.status(200).json(invited_list);
+});
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
   
@@ -63,10 +69,10 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const profile_parsed = ProfileFileSchema.safeParse(profile) ;
     if(!profile_parsed.success) console.log("Fail to retrive profile picture");
     console.log(profile_parsed.data);
-    
-    const user = await UsersService.create_user({email:parsed_payload.data.email,phone:"",name:parsed_payload.data.name},profile_parsed.data ?? null);
+    const unique_name = await UsersService.gen_name(parsed_payload.data.name);
+    const user = await UsersService.create_user({email:parsed_payload.data.email,phone:"",
+      name:unique_name},profile_parsed.data ?? null);
     const token = await UsersService.gen_jwt(user.user_id);
     res.status(201).json({...user,...token});
   }
-
 });
