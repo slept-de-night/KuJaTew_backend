@@ -43,7 +43,7 @@ export const getinviteds= asyncHandler(async (req: Request, res: Response) => {
   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
   if(!parsed.success) throw BadRequest("Invalide Request");
   const invited_list = await UsersService.get_invited(parsed.data.user_id);
-  res.status(200).json(invited_list);
+  res.status(200).json({invited:invited_list});
 });
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
