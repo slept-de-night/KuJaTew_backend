@@ -39,9 +39,9 @@ export async function delete_place_bookmark(req: Request, res: Response, next: N
   try {
     const userId = TEST_USER_ID; //for testing only
 
-    const { place_id } = schema.place_id_schema.parse(req.params);
+    const { bookmark_id } = schema.bookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_place(userId, place_id);
+    const removed = await service.remove_place(userId, bookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Bookmark not found" });
     }
@@ -88,9 +88,9 @@ export async function delete_guide_bookmark(req: Request, res: Response, next: N
   try {
     const userId = TEST_USER_ID; //for testing only
 
-    const { trip_id } = schema.trip_id_schema.parse(req.params);
+    const { gbookmark_id } = schema.gbookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_place(userId, trip_id);
+    const removed = await service.remove_place(userId, gbookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Bookmark not found" });
     }
