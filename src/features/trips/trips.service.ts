@@ -59,6 +59,6 @@ export const TripsService = {
   async delete_trip(user_id:string, trip_id:string){
     if (!user_id || !trip_id) throw INTERNAL("User ID AND Trip ID are required");
     const trips = await TripsRepo.delete_trip(trip_id, user_id);
-    return trips ?? [];
+    return trips;
   }
 };

@@ -4,6 +4,7 @@ import { TripSchema } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import crypto from 'crypto';
+import { patch } from 'axios';
 // export type User = z.infer<typeof UserSchema>;
 // export type Profile = {
 //     id: string;
@@ -64,9 +65,10 @@ export const TripsRepo = {
 		const sql = `
 			INSERT INTO trips (
 			user_id, title, description, start_date, end_date,
-			status, budget, trip_url, trip_code, trip_pass, trip_picture_url
+			status, budget, trip_url, trip_code, trip_pass, trip_picture_url,
+			visibility_status, planning_status
 			)
-			VALUES ($1, $2, NULL, $3, $4, NULL, NULL, NULL, $5, $6, $7)
+			VALUES ($1, $2, NULL, $3, $4, NULL, NULL, NULL, $5, $6, $7, false, false)
 			RETURNING *;
 		`;
 
@@ -83,4 +85,7 @@ export const TripsRepo = {
 		return (result.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
 	},
 
+	async patch_trip_detail (user_id:string, trip_id:string){
+		
+	}
 }

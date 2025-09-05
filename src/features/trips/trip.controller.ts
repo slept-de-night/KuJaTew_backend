@@ -53,3 +53,14 @@ export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
       res.status(400).json({ error: err.message });
     }
 });
+
+export const Delete_Trip = asyncHandler(async (req: Request, res: Response) => {
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  const { trip_id } = req.params;
+  if (!trip_id) throw BadRequest("trip_id is required");
+
+  const result = await TripsService.delete_trip(parsed.data.user_id, trip_id);
+
+  res.status(200).json(result);
+});
