@@ -8,9 +8,9 @@ import { usersRouter, usersRouterPublic } from "./features/users/users.routes";
 import { authHandler } from "./core/middleware/authHandler";
 import { testRouter } from "./test/test.routes";
 import { pool } from "./config/db";
+import { bookmarkRouter } from "./features/bookmarks/bookmarks.routes";
 
 export function buildApp(){
-
     const app=express();
     const file = fs.readFileSync('./swagger.yaml', 'utf8');
     const swaggerDocument = YAML.parse(file);
@@ -19,6 +19,7 @@ export function buildApp(){
 
     // route without authentication
     app.use('/api/test',testRouter);
+    app.use('/api/users', bookmarkRouter);
     app.use('/api/users', usersRouterPublic);
 
     app.use(authHandler);

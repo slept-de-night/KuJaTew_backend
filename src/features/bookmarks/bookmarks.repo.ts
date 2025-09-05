@@ -2,7 +2,7 @@ import { query } from "../../core/db";
 
 export async function get_place(userId: string) {
   const sql = `
-    SELECT b.bookmark_id, p.place_id, p.rating, p.rating_count, p.address, p.place_picture_url
+    SELECT b.bookmark_id, p.name, p.place_id, p.rating, p.rating_count, p.address, p.places_picture_url
     FROM bookmark b
     JOIN places p ON p.place_id = b.place_id
     WHERE b.user_id = $1
@@ -33,12 +33,12 @@ export async function get_guide(userId: string) {
     SELECT 
       t.trip_id, 
       g.gbookmark_id, 
-      g.bookmark_count, 
       (t.end_date - t.start_date) AS duration, 
-      t.trip_poster_url, 
-      t.trip_owner
+      t.trip_picture_url, 
+      u.name as trip_owner
     FROM guide_bookmark g
     JOIN trips t ON t.trip_id = g.trip_id
+    JOIN users u ON u.user_id = t.user_id
     WHERE g.user_id = $1
     ORDER BY g.gbookmark_id DESC
   `;
