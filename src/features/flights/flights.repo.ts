@@ -1,111 +1,110 @@
 import { query, pool } from "../../core/db";
 
-export type FlightInput = {
-  dep_date: string;        // e.g. "2025-09-05"
-  dep_time: string;        // e.g. "08:30:00"
-  dep_country: string;     // e.g. "Thailand"
-  dep_airp_code: string;   // e.g. "BKK"
-
-  arr_date: string;        // e.g. "2025-09-05"
-  arr_time: string;        // e.g. "12:00:00"
-  arr_country: string;     // e.g. "Japan"
-  arr_airp_code: string;   // e.g. "NRT"
-
-  airl_name: string;       // airline name
-};
-
-export async function post_flight(input: FlightInput, trip_id: number) {
-  const flightSql = `
-    INSERT INTO flights (
-      origin, origin_country, destination, destination_country,
-      airline, depart_date, arrive_date, depart_time, arrive_time
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    RETURNING flight_id
-  `;
-
-  const post_flight_table = await query<{ flight_id: number }>(flightSql, [
-    input.dep_airp_code,
-    input.dep_country,
-    input.arr_airp_code,
-    input.arr_country,
-    input.airl_name,
-    input.dep_date,
-    input.arr_date,
-    input.dep_time,
-    input.arr_time
-  ]);
-
-  if (!post_flight_table.rows[0]) {
-  throw new Error("Insert failed: no flight_id returned"); // need to find a better way to handle this... unless it might crash the entire thing :(
-  }
-  const flightId = post_flight_table.rows[0].flight_id;
-
-  const post_fit = `
-    INSERT INTO flight_in_trip (flight_id, trip_id)
-    VALUES ($1, $2)
-    RETURNING fit_id
-  `;
-
-  const fitRes = await query<{ fit_id: number }>(post_fit, [flightId, trip_id]);
-
-  if (!fitRes.rows[0]) {
-  throw new Error("Insert failed: no fit_id returned"); // need to find a better way to handle this... unless it might crash the entire thing :(
-  }
-
-  return true
-}
-
 export async function get_flight(trip_id: number) {
   const sql = `
-    SELECT
-      f.flight_id,
-      f.depart_date,
-      f.depart_time,
-      f.origin_country,
-      f.origin,
-      f.arrive_date,
-      f.arrive_time,
-      f.destination_country,
-      f.destination,
+    SELECT 
+      f.flight_id, 
+      f.depart_date as dep_date,
+      f.depart_time as dep_time, 
+      f.origin_country as dep_country,
+      f.origin as dep_airport_code,
+      f.arrive_date as arr_date, 
+      f.arrive_time as arr_time,
+      f.destination_country as arr_country,
+      f.destination as arr_ariport_code,
       f.airline
-    FROM flight_in_trip fit
-    JOIN flights f ON f.flight_id = fit.flight_id
-    WHERE fit.trip_id = $1
-    ORDER BY f.flight_id DESC
+    FROM flight f
+    where f.trip_id = $1
+    ORDER BY b.bookmark_id DESC
   `;
-  const { rows } = await query(sql, [trip_id]);
-  return rows; // raw rows from DB
+  const res = await query(sql, [trip_id]);
+  return res.rows;
 }
 
 export async function delete_flight(trip_id: number, flight_id: number) {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
+  const sql = `DELETE FROM flights WHERE trip_id = $1 AND flight_id = $2`;
+  const res = await query(sql, [trip_id, flight_id]);
+  return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
+}
 
-    // 1) remove the association
-    const r1 = await client.query(
-      `DELETE FROM flight_in_trip WHERE trip_id = $1 AND flight_id = $2`,
-      [trip_id, flight_id]
-    );
+export type FlightInsert = {
+  dep_date:string,
+  dep_time:string,
+  dep_country:string,
+  dep_airp_code:string,
+  arr_date:string,
+  arr_time:string,
+  arr_country:string,
+  arr_airp_code:string,
+  airl_name:string,
+};
 
-    if ((r1.rowCount ?? 0) === 0) {
-      await client.query("ROLLBACK");
-      return false; // nothing to delete (not linked)
-    }
+export async function post_flight(input: FlightInsert, trip_id: number) {
+  const sql = `
+    INSERT INTO flights (
+      trip_id, 
+      depart_date, 
+      depart_time,
+      origin_country,
+      origin,
+      arrive_date,
+      arrive_time,
+      destination_country,
+      destination,
+      airline
+    )
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+    RETURNING *;
+  `;
 
-    // 2) delete the flight itself
-    const r2 = await client.query(
-      `DELETE FROM flights WHERE flight_id = $1`,
-      [flight_id]
-    );
+  const params = [
+    trip_id,
+    input.dep_date,
+    input.dep_time,
+    input.dep_country,
+    input.dep_airp_code,
+    input.arr_date,
+    input.arr_time,
+    input.arr_country,
+    input.arr_airp_code,
+    input.airl_name,
+  ];
 
-    await client.query("COMMIT");
-    return (r2.rowCount ?? 0) > 0;
-  } catch (e) {
-    await client.query("ROLLBACK");
-    throw e;
-  } finally {
-    client.release();
-  }
+  const { rows } = await query(sql, params);
+  return rows[0];
+}
+
+export async function put_flight(input: FlightInsert, trip_id: number, flight_id: number) {
+  const sql = `
+    UPDATE flights 
+    SET
+      depart_date = $1, 
+      depart_time = $2,
+      origin_country = $3,
+      origin = $4,
+      arrive_date = $5,
+      arrive_time = $6,
+      destination_country = $7,
+      destination = $8,
+      airline = $9
+    WHERE trip_id = $10 AND flight_id = $11
+    RETURNING *;
+  `;
+
+  const params = [
+    input.dep_date,
+    input.dep_time,
+    input.dep_country,
+    input.dep_airp_code,
+    input.arr_date,
+    input.arr_time,
+    input.arr_country,
+    input.arr_airp_code,
+    input.airl_name,
+    trip_id,
+    flight_id
+  ];
+
+  const { rows } = await query(sql, params);
+  return rows[0];
 }

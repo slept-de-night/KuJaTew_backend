@@ -1,40 +1,50 @@
 import { z } from "zod";
 
-const DATE = /^\d{4}-\d{2}-\d{2}$/;                  
-const TIME = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;  
-const IATA = /^[A-Z]{3}$/;                           
-
-export const create_flight_body_schema = z.object({
-  dep_date: z.string().regex(DATE, "dep_date must be YYYY-MM-DD"),
-  dep_time: z.string().regex(TIME, "dep_time must be HH:MM or HH:MM:SS"),
-  dep_country: z.string().min(1),
-  dep_airp_code: z.string().toUpperCase().regex(IATA, "must be IATA 3-letter"),
-
-  arr_date: z.string().regex(DATE, "arr_date must be YYYY-MM-DD"),
-  arr_time: z.string().regex(TIME, "arr_time must be HH:MM or HH:MM:SS"),
-  arr_country: z.string().min(1),
-  arr_airp_code: z.string().toUpperCase().regex(IATA, "must be IATA 3-letter"),
-
-  airl_name: z.string().min(1),
-});
-
 export const trip_id_schema = z.object({
-  trip_id: z.number().min(1, "trip_id is required"),
+  trip_id: z.coerce.number().min(1, "trip_id is required"),
 });
 
-export const add_place_bookmark = z.object({
-  place_id: z.string().min(1, "place_id is required"),
+
+export const flight_id_schema = z.object({
+  flight_id: z.coerce.number().min(1, "trip_id is required"),
 });
 
 export const delete_flight_schema = z.object({
-  trip_id: z.number().min(1, "trip_id is required"),
-  flight_id: z.number().min(1, "flight_id is required")
+  trip_id: z.coerce.number().min(1, "trip_id is required"),
+  flight_id: z.coerce.number().min(1, "trip_id is required"),
 });
 
-export const add_guide_bookmark = z.object({
-  trip_id: z.string().min(1, "trip_id is required"),
+export const TripParamsSchema = z.object({
+  trip_id: z.coerce.number().int().positive(),
 });
+export type TripParams = z.infer<typeof TripParamsSchema>;
 
-export const remove_guide_bookmark = z.object({
-  trip_id: z.string().min(1, "trip_id is required"),
+// DD/MM/YYYY
+const DateDDMMYYYY = z.string().regex(
+  /^([0-2]\d|3[01])\/(0\d|1[0-2])\/\d{4}$/,
+  "Expected DD/MM/YYYY"
+);
+
+// HH:mm 24-hour
+const TimeHHMM = z.string().regex(
+  /^([01]\d|2[0-3]):([0-5]\d)$/,
+  "Expected HH:mm"
+);
+
+const IATA = z.string().length(3, "3-letter IATA code");
+const CountryFull = z.string().min(2).max(56); // full name like "Thailand"
+
+export const CreateFlightBodySchema = z.object({
+  dep_date: DateDDMMYYYY,
+  dep_time: TimeHHMM,
+  dep_country: CountryFull,
+  dep_airp_code: IATA,
+
+  arr_date: DateDDMMYYYY,
+  arr_time: TimeHHMM,
+  arr_country: CountryFull,
+  arr_airp_code: IATA,
+
+  airl_name: z.string().min(2).max(64), // airline name
 });
+export type CreateFlightBody = z.infer<typeof CreateFlightBodySchema>;
