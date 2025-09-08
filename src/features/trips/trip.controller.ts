@@ -1,66 +1,97 @@
 import { Request, Response } from 'express';
 import { TripsService } from './trips.service';
-import { TripSchema } from './trips.schema';
+import { mrSchema, TripSchema, utSchema } from './trips.schema';
 import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
-import axios from 'axios';
-import z from 'zod';
+import axios, { responseEncoding } from 'axios';
+import z, { number } from 'zod';
 import { parentPort } from 'node:worker_threads';
 import { start } from 'node:repl';
+import { pool } from '../../config/db';
 
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
-  const parsed = z.string().safeParse((req.params.user_id));
-  if(!parsed.success) throw BadRequest("Invalide Request");
-  const trips_data = TripsService.get_user_trips(parsed.data);
-  
-  res.status(201).json(trips_data);
+  const userId = (req.params.user_id || "").trim();
+  const parsed = z.string().min(1).safeParse(userId);
+  if (!parsed.success) throw BadRequest("Invalid Request");
+
+  const trips_data = await TripsService.get_user_trips(parsed.data);
+  res.status(200).json(trips_data);
 });
+
 
 export const Specific_Trip = asyncHandler(async (req: Request, res: Response) => {
   const parsed = z.string().safeParse((req.params.trip_id));
 	if(!parsed.success) throw BadRequest("Invalide Request");
-	const trip_data = TripsService.get_specific_trip(parsed.data);
+	const trip_data = await TripsService.get_specific_trip(parsed.data);
 
-	res.status(201).json(trip_data);
+	res.status(200).json(trip_data);
 });
 
 export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
   try {
-      const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
-      if(!parsed.success) throw BadRequest("Invalide Request");
-      const { title, start_date, end_date, trip_code, trip_pass } = req.body;
-      const file = req.file;
+    const ParamsSchema = z.object({
+      user_id: z.string().trim().min(1, "user_id required"),
+    });
+    const parsedParams = ParamsSchema.parse(req.params);
+    const userId = parsedParams.user_id;
 
-      if (file) {
-        const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-        if (!allowedTypes.includes(file.mimetype)) {
-          return res.status(400).json({ error: "Only .jpeg, .jpg, .png files are allowed" });
-        }
+    const BodySchema = z.object({
+      title: z.string().trim().min(1),
+      start_date: z.coerce.date(),
+      end_date: z.coerce.date(),
+      trip_code: z.string().trim().min(1, "trip_code required"),
+      trip_pass: z.string().trim().min(1, "trip_pass required"),
+    });
+    const body = BodySchema.parse(req.body);
+
+    const file = req.file;
+    if (file) {
+      const allowed = ["image/jpeg", "image/png", "image/jpg"];
+      if (!allowed.includes(file.mimetype)) {
+        return res.status(400).json({ error: "Only .jpeg, .jpg, .png files are allowed" });
       }
-
-      const trip = await TripsService.add_trip(
-        parsed.data.user_id,
-        title,
-        start_date,
-        end_date,
-        trip_code,
-        trip_pass,
-        file
-      );
-
-      res.status(201).json(trip);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
     }
+
+    const trip = await TripsService.add_trip(
+      userId,
+      body.title,
+      body.start_date,
+      body.end_date,
+      body.trip_code,
+      body.trip_pass,
+      file
+    );
+    await TripsService.add_owner_collab(trip.trip_id, userId);
+    return res.status(201).json(trip); // 201 for creation
+  } catch (err: any) {
+    if (err.code === "23503") return res.status(404).json({ error: "User not found" }); // FK violation
+    return res.status(400).json({ error: err.message });
+  }
 });
 
 export const Delete_Trip = asyncHandler(async (req: Request, res: Response) => {
-  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
-  if(!parsed.success) throw BadRequest("Invalide Request");
-  const { trip_id } = req.params;
-  if (!trip_id) throw BadRequest("trip_id is required");
+  const parsed = utSchema.safeParse(req.params);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Fail to parsed" });
+  }
 
-  const result = await TripsService.delete_trip(parsed.data.user_id, trip_id);
+  const { user_id, trip_id } = parsed.data;
+  const result = await TripsService.delete_trip(user_id, trip_id);
+  return res.status(200).json(result);
+});
 
-  res.status(200).json(result);
+export const Edit_Trip_Role = asyncHandler(async (req: Request, res: Response) => {
+  const parsedparams = utSchema.safeParse(req.params)
+  if (!parsedparams.success) {
+    return res.status(400).json({ error: "Fail to parsed params "});
+  }
+
+  const parsedbody = mrSchema.safeParse(req.body);
+  if (!parsedbody.success) {
+    return res.status(400).json({ error: "Fail to parsed body" });
+  }
+  const {user_id, trip_id} = parsedparams.data;
+  const {member_id, role} = parsedbody.data;
+  const result = await TripsService.edit_trip_role(user_id, member_id, trip_id, role);
+  return res.status(200).json(result);
 });

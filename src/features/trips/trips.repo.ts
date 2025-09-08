@@ -1,26 +1,27 @@
-import { pool, supabase } from '../../config/db';
+import { pool } from '../../config/db';
 import { TripSchema } from './trips.schema';
-//import { UserSchema, ProfileFile, UsersFullSchema,InvitedSchema } from './users.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
-import z from 'zod';
-import crypto from 'crypto';
+import z, { check } from 'zod';
+import crypto, { getRandomValues } from 'crypto';
 import { patch } from 'axios';
-// export type User = z.infer<typeof UserSchema>;
-// export type Profile = {
-//     id: string;
-//     path: string;
-//     fullPath: string;
-// }
 
 export const TripsRepo = {
-	async get_user_trips(user_id:string):Promise<z.infer<typeof TripSchema>>{
+	async get_user_trips(user_id:string){
 		const query = `
 			WITH joinedP AS (
-				SELECT trip_id, COUNT(user_id) AS joined_people
-				FROM trip_collaborators
+				SELECT trip_id, COUNT(user_id)::int AS joined_people
+				FROM trip_collaborators tc
+				WHERE tc.accepted = TRUE
 				GROUP BY trip_id
 			)
-			SELECT t.trip_id, t.title, jp.joined_people, t.start_date, t.end_date, t.trip_picture_url
+			SELECT 
+				t.trip_id, 
+				t.title, 
+				jp.joined_people AS joined_people, 
+				t.start_date, 
+				t.end_date, 
+				t.trip_picture_url AS poster_image_link, 
+				t.planning_status
 			FROM joinedP jp
 			JOIN trips t ON jp.trip_id = t.trip_id
 			JOIN trip_collaborators tc ON t.trip_id = tc.trip_id
@@ -28,29 +29,43 @@ export const TripsRepo = {
 			WHERE u.user_id = $1
 		`;
 		
-		const result = await pool.query(query,[user_id]);
-		const data = TripSchema.safeParse(result.rows);
-		if(!data.success) throw INTERNAL("Fail to parsed data");
-		return data.data;
+		const TripsListSchema = z.array(TripSchema);
+
+		const { rows } = await pool.query(query, [user_id]);
+		console.log(rows);
+		const parsed = TripsListSchema.safeParse(rows);
+		if (!parsed.success) throw INTERNAL("Fail to parsed data");
+		return parsed.data;
 	},
 
-	async get_specific_trip(trip_id:string):Promise<z.infer<typeof TripSchema>>{
+	async get_specific_trip(trip_id:string){
 		const query = `
 			WITH joinedP AS (
-				SELECT trip_id, COUNT(user_id) AS joined_people
-				FROM trip_collaborators
+				SELECT trip_id, COUNT(user_id)::int AS joined_people
+				FROM trip_collaborators tc
+				WHERE tc.accepted = TRUE
 				GROUP BY trip_id
 			)
-			SELECT t.trip_id, t.title, jp.joined_people, t.start_date, t.end_date, t.trip_picture_url
+			SELECT
+				t.trip_id, 
+				t.title, 
+				jp.joined_people AS joined_people, 
+				t.start_date, 
+				t.end_date, 
+				t.trip_picture_url as poster_image_link, 
+				t.planning_status
 			FROM joinedP jp
 			JOIN trips t ON jp.trip_id = t.trip_id
 			WHERE t.trip_id = $1
 		`;
 		
-		const result = await pool.query(query,[trip_id]);
-		const data = TripSchema.safeParse(result.rows);
-		if(!data.success) throw INTERNAL("Fail to parsed data");
-		return data.data;
+		const TripListSchema = z.array(TripSchema);
+
+		const { rows } = await pool.query(query,[trip_id]);
+		console.log(rows[0]);
+		const parsed = TripListSchema.safeParse(rows);
+		if(!parsed.success) throw INTERNAL("Fail to parsed data");
+		return parsed.data;
 	},
 	
 	async add_trip(
@@ -64,28 +79,72 @@ export const TripsRepo = {
 	) {
 		const sql = `
 			INSERT INTO trips (
-			user_id, title, description, start_date, end_date,
-			status, budget, trip_url, trip_code, trip_pass, trip_picture_url,
-			visibility_status, planning_status
+			user_id, 
+			title,
+			start_date,
+			end_date, 
+			trip_code, 
+			trip_pass, 
+			trip_picture_url,
+			visibility_status, 
+			planning_status
 			)
-			VALUES ($1, $2, NULL, $3, $4, NULL, NULL, NULL, $5, $6, $7, false, false)
-			RETURNING *;
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			RETURNING *
 		`;
-
-		const values = [user_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_url ?? null];
+		
+		const values = [user_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_url ?? null, false, false];
 
 		const result = await pool.query(sql, values);
-		return (result.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
+		return result.rows[0]; // will be 1 if insert success, 0 if not
 	},
 	
-	async delete_trip( trip_id:string, user_id:string ){
-		const query = `DELETE FROM trips WHERE user_id = $1 AND trip_id = 2$`;
-		const value = [trip_id, user_id];
-		const result = await pool.query(query, value);
-		return (result.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
+	async add_owner_collab(
+		trip_id: number,
+		user_id: string, 
+		role: string,
+		accepted: boolean,
+	) {
+		const query = `
+			INSERT INTO trip_collaborators (trip_id, user_id, role, accepted)
+			VALUES ($1,$2,$3,$4)
+			RETURNING *
+		`;
+
+		const values = [trip_id, user_id, role, accepted];
+
+		const result = await pool.query(query, values);
+		return result.rowCount; // will be 1 if insert success, 0 if not
 	},
 
-	async patch_trip_detail (user_id:string, trip_id:string){
-		
-	}
+	async delete_trip( user_id:string, trip_id:number ){
+		const query = `DELETE FROM trips WHERE user_id = $1 AND trip_id = $2`;
+		const value = [user_id, trip_id];
+		const result = await pool.query(query, value);
+		return result.rowCount;
+	},
+
+	async edit_trip_role (member_id: string, trip_id:number, role:string){
+		const sql = `
+			UPDATE trip_collaborators
+			SET 
+				role = $1
+			WHERE user_id = $2 AND trip_id = $3
+			RETURNING *
+		`;
+		const values = [role, member_id, trip_id];
+		const { rows } = await pool.query(sql, values);
+		return rows[0];
+	},
+
+	async check_owner (owner_id:string, trip_id:number){
+		const query = `
+			SELECT user_id
+			FROM trips
+			WHERE trip_id = $1 and user_id = $2
+		`;
+		const value = [trip_id, owner_id];
+		const parsed = await pool.query(query, value);
+		return parsed.rowCount
+	},
 }

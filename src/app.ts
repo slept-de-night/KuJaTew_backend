@@ -8,6 +8,7 @@ import { usersRouter, usersRouterPublic } from "./features/users/users.routes";
 import { authHandler } from "./core/middleware/authHandler";
 import { testRouter } from "./test/test.routes";
 import { pool } from "./config/db";
+import { tripsRouter} from "./features/trips/trips.routes";
 
 export function buildApp(){
 
@@ -17,11 +18,12 @@ export function buildApp(){
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     app.use(express.json({ limit: '1mb' }));
 
-    // route without authentication
+    //route without authentication
     app.use('/api/test',testRouter);
+    app.use('/api/trips', tripsRouter);
     app.use('/api/users', usersRouterPublic);
 
-    app.use(authHandler);
+    //app.use(authHandler);
 
     // route without authentication
     app.use('/api/users', usersRouter);
