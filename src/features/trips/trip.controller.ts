@@ -75,22 +75,6 @@ export const Delete_Trip = asyncHandler(async (req: Request, res: Response) => {
   return res.status(200).json(result);
 });
 
-export const Edit_Trip_Role = asyncHandler(async (req: Request, res: Response) => {
-  const parsedparams = utSchema.safeParse(req.params)
-  if (!parsedparams.success) {
-    return res.status(400).json({ error: "Fail to parsed params "});
-  }
-
-  const parsedbody = mrSchema.safeParse(req.body);
-  if (!parsedbody.success) {
-    return res.status(400).json({ error: "Fail to parsed body" });
-  }
-  const {user_id, trip_id} = parsedparams.data;
-  const {member_id, role} = parsedbody.data;
-  const result = await TripsService.edit_trip_role(user_id, member_id, trip_id, role);
-  return res.status(200).json(result);
-});
-
 export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) => {
   const parsedparams = utSchema.safeParse(req.params);
   if (!parsedparams.success) {

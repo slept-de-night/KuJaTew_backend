@@ -64,15 +64,6 @@ export const TripsService = {
     return trips;
   },
 
-  async edit_trip_role(owner_id:string, member_id:string, trip_id:number, role:string){
-    if (!member_id || !trip_id || !role) throw INTERNAL("MemberID, Trip_id and Role required");
-    const isOwner = await TripsRepo.check_owner(owner_id, trip_id);
-    if (!isOwner){
-      throw new Error("Only Owner can edit member role");
-    }
-    return await TripsRepo.edit_trip_role(member_id, trip_id, role);
-  },
-
   async edit_trip_detail(owner_id:string, trip_id:number, title?:string, start_date?:Date, end_date?:Date, trip_code?:string, trip_pass?:string, planning_status?:boolean, file?: Express.Multer.File){
     if (!owner_id || !trip_id) throw INTERNAL("OwnerID and TripID are required");
     const isOwner = await TripsRepo.check_owner(owner_id, trip_id);

@@ -9,6 +9,7 @@ import { authHandler } from "./core/middleware/authHandler";
 import { testRouter } from "./test/test.routes";
 import { pool } from "./config/db";
 import { tripsRouter} from "./features/trips/trips.routes";
+import { memberRouter } from "./features/member/member.routes";
 
 export function buildApp(){
 
@@ -21,9 +22,10 @@ export function buildApp(){
     //route without authentication
     app.use('/api/test',testRouter);
     app.use('/api/trips', tripsRouter);
+    app.use('/api/trips/members', memberRouter);
     app.use('/api/users', usersRouterPublic);
 
-    app.use(authHandler);
+    //app.use(authHandler);
 
     // route without authentication
     app.use('/api/users', usersRouter);

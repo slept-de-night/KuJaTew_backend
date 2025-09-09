@@ -122,19 +122,6 @@ export const TripsRepo = {
 		return result.rowCount;
 	},
 
-	async edit_trip_role (member_id: string, trip_id:number, role:string){
-		const sql = `
-			UPDATE trip_collaborators
-			SET 
-				role = $1
-			WHERE user_id = $2 AND trip_id = $3
-			RETURNING *
-		`;
-		const values = [role, member_id, trip_id];
-		const { rows } = await pool.query(sql, values);
-		return rows[0];
-	},
-
 	async check_owner (owner_id:string, trip_id:number){
 		const query = `
 			SELECT user_id
