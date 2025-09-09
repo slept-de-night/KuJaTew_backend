@@ -1,4 +1,4 @@
-import z, { boolean } from 'zod';
+import z from 'zod';
 
 export const TripSchema = z.object({ 
     trip_id:z.number(),
@@ -18,4 +18,13 @@ export const utSchema = z.object({
 export const mrSchema = z.object({
     member_id: z.string().trim().min(1, "user_id required"),
     role: z.string().trim().min(1, "role required"),
+});
+
+export const BodySchema = z.object({ 
+    title:z.string().optional(),
+    start_date:z.date().optional(),
+    end_date:z.date().optional(),
+    trip_code:z.string().optional(),
+    trip_pass:z.string().optional(),
+    planning_status:z.boolean().optional()
 });

@@ -1,9 +1,7 @@
 import { pool } from '../../config/db';
 import { TripSchema } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
-import z, { check } from 'zod';
-import crypto, { getRandomValues } from 'crypto';
-import { patch } from 'axios';
+import z from 'zod';
 
 export const TripsRepo = {
 	async get_user_trips(user_id:string){
@@ -38,7 +36,7 @@ export const TripsRepo = {
 		return parsed.data;
 	},
 
-	async get_specific_trip(trip_id:string){
+	async get_specific_trip(trip_id:number){
 		const query = `
 			WITH joinedP AS (
 				SELECT trip_id, COUNT(user_id)::int AS joined_people
@@ -147,4 +145,33 @@ export const TripsRepo = {
 		const parsed = await pool.query(query, value);
 		return parsed.rowCount
 	},
+
+	async edit_trip_detail(trip_id:number, title?:string, start_date?:Date, end_date?:Date, trip_code?:string, trip_pass?:string, trip_picture_url?:string, planning_status?:boolean){
+		const query = `
+			UPDATE trips
+			SET 
+				title = COALESCE($1, title),
+				start_date = COALESCE($2, start_date),
+				end_date = COALESCE($3, end_date),
+				trip_code = COALESCE($4, trip_code),
+				trip_pass = COALESCE($5, trip_pass),
+				trip_picture_url = COALESCE($6, trip_picture_url),
+				planning_status = COALESCE($7, planning_status)
+			WHERE trip_id = $8
+			RETURNING *
+		`
+		const values = [title, start_date, end_date, trip_code, trip_pass, trip_picture_url, planning_status, trip_id];
+		const result = await pool.query(query, values);
+		return result.rows[0];
+	},
+
+	async get_trip_pic(trip_id:number){
+		const query = `
+			SELECT trip_picture_url
+			FROM trips
+			WHERE trip_id = $1
+		`;
+		return await pool.query(query, [trip_id]);
+
+	}
 }

@@ -1,11 +1,8 @@
 import { TripsRepo } from "./trips.repo";
-import { UsersRepo } from "../users/users.repo";
 import { BadRequest, INTERNAL } from "../../core/errors";
 import { TripSchema } from "./trips.schema";
 import { env } from "../../config/env";
-import z, { check, string } from 'zod';
 import { supabase } from "../../config/db";
-import path from "node:path";
 
 export const TripsService = {
   async get_user_trips(user_id: string) {
@@ -14,7 +11,7 @@ export const TripsService = {
     return trips;
   },
 
-  async get_specific_trip(trip_id: string) {
+  async get_specific_trip(trip_id: number) {
     if (!trip_id) throw INTERNAL("Trip ID is required");
     const trip = await TripsRepo.get_specific_trip(trip_id);
     return trip;
@@ -32,16 +29,15 @@ export const TripsService = {
     let pictureUrl: string | null = null;
 
     if (file) {
-      const fileExt = file.originalname.split('.').pop();
-      const fileName = `${user_id}-${Date.now()}.${fileExt}`;
+      const fileName = file.originalname;
 
       const { error } = await supabase.storage
-        .from("trip-pictures")
+        .from("posters")
         .upload(fileName, file.buffer, { contentType: file.mimetype });
 
       if (error) throw new Error(error.message);
 
-      const { data } = await supabase.storage.from("trip-pictures").getPublicUrl(fileName);
+      const { data } = await supabase.storage.from("posters").getPublicUrl(fileName);
       pictureUrl = data.publicUrl;
     }
 
@@ -76,4 +72,42 @@ export const TripsService = {
     }
     return await TripsRepo.edit_trip_role(member_id, trip_id, role);
   },
+
+  async edit_trip_detail(owner_id:string, trip_id:number, title?:string, start_date?:Date, end_date?:Date, trip_code?:string, trip_pass?:string, planning_status?:boolean, file?: Express.Multer.File){
+    if (!owner_id || !trip_id) throw INTERNAL("OwnerID and TripID are required");
+    const isOwner = await TripsRepo.check_owner(owner_id, trip_id);
+    if (!isOwner){
+      throw new Error("Only Owner can edit trip detail");
+    }
+
+    const get_pic = await TripsRepo.get_trip_pic(trip_id);
+    const old_pic_url = get_pic.rows[0]?.trip_picture_url;
+    if (old_pic_url) {
+      const path = old_pic_url.split("/posters/")[1]; 
+      if (path) {
+        const { error } = await supabase.storage.from("posters").remove([path]);
+          if (error) {
+            console.error("❌ Failed to delete:", error.message);
+          }
+      }
+    }
+
+    let trip_picture_url = old_pic_url;
+    if (file) {
+      const fileName = file.originalname;
+      const { error } = await supabase.storage
+        .from("posters")
+        .upload(fileName, file.buffer, { contentType: file.mimetype });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage
+        .from("posters")
+        .getPublicUrl(fileName);
+
+      trip_picture_url = data.publicUrl;
+    }
+
+    return await TripsRepo.edit_trip_detail(trip_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_url, planning_status);
+  }
 };
