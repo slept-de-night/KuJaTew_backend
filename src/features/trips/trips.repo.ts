@@ -19,7 +19,7 @@ export const TripsRepo = {
 				jp.joined_people AS joined_people, 
 				t.start_date, 
 				t.end_date, 
-				t.trip_picture_url AS poster_image_link, 
+				t.trip_picture_path AS poster_image_link, 
 				t.planning_status
 			FROM joinedP jp
 			JOIN trips t ON jp.trip_id = t.trip_id
@@ -50,7 +50,7 @@ export const TripsRepo = {
 				jp.joined_people AS joined_people, 
 				t.start_date, 
 				t.end_date, 
-				t.trip_picture_url as poster_image_link, 
+				t.trip_picture_path as poster_image_link, 
 				t.planning_status
 			FROM joinedP jp
 			JOIN trips t ON jp.trip_id = t.trip_id
@@ -82,7 +82,7 @@ export const TripsRepo = {
 			end_date, 
 			trip_code, 
 			trip_pass, 
-			trip_picture_url,
+			trip_picture_path,
 			visibility_status, 
 			planning_status
 			)
@@ -153,7 +153,7 @@ export const TripsRepo = {
 
 	async get_trip_pic(trip_id:number){
 		const query = `
-			SELECT trip_picture_url
+			SELECT trip_picture_path
 			FROM trips
 			WHERE trip_id = $1
 		`;
