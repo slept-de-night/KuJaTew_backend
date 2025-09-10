@@ -18,9 +18,9 @@ export const ActivityRepo = {
   },
 
   async remove(pit_id: number) {
-    const sql = `DELETE FROM places_in_trip WHERE pit_id = $1`
+    const sql = `DELETE FROM places_in_trip WHERE pit_id = $1 RETURNING pit_id`
     const res = await query(sql, [pit_id])
-    return res.rowCount > 0
+    return res.rows.length > 0
   },
 }
 
@@ -163,9 +163,10 @@ export const VoteRepo = {
       INSERT INTO vote (trip_id, pit_id, user_id, time_start, event_name)
       VALUES ($1,$2,$3,NOW()::text,'')
       ON CONFLICT DO NOTHING
+      RETURNING *
     `
     const res = await query(sql, [trip_id, pit_id, user_id])
-    return res.rowCount > 0
+    return res.rows.length > 0
   },
 
   async endVotingPlaces(trip_id: number, pit_id: number, body: any) {
@@ -195,9 +196,10 @@ export const VoteRepo = {
       INSERT INTO vote (trip_id, pit_id, user_id, time_start, event_name)
       VALUES ($1,$2,$3,NOW()::text,'')
       ON CONFLICT DO NOTHING
+      RETURNING *
     `
     const res = await query(sql, [trip_id, pit_id, user_id])
-    return res.rowCount > 0
+    return res.rows.length > 0
   },
 
   async votedEvents(trip_id: number, pit_id: number, user_id: string, body: any) {
@@ -205,9 +207,10 @@ export const VoteRepo = {
       INSERT INTO vote (trip_id, pit_id, user_id, time_start, event_name)
       VALUES ($1,$2,$3,NOW()::text,$4)
       ON CONFLICT DO NOTHING
+      RETURNING *
     `
     const res = await query(sql, [trip_id, pit_id, user_id, body.event_name])
-    return res.rowCount > 0
+    return res.rows.length > 0
   },
 
   async patchVote(trip_id: number, pit_id: number, patch: any) {
@@ -222,8 +225,8 @@ export const VoteRepo = {
   },
 
   async removeVotingBlock(trip_id: number, pit_id: number) {
-    const sql = `DELETE FROM places_in_trip WHERE trip_id = $1 AND pit_id = $2`
+    const sql = `DELETE FROM places_in_trip WHERE trip_id = $1 AND pit_id = $2 RETURNING pit_id`
     const res = await query(sql, [trip_id, pit_id])
-    return res.rowCount > 0
+    return res.rows.length > 0
   },
 }
