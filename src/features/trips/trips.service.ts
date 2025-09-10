@@ -100,5 +100,23 @@ export const TripsService = {
     }
 
     return await TripsRepo.edit_trip_detail(trip_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_url, planning_status);
-  }
+  },
+
+  async leave_trip(user_id:string, trip_id:number, collab_id?:number){
+    const isOwner = await TripsRepo.check_owner(user_id, trip_id);
+    if (!isOwner){// not an owner
+      const result = await TripsRepo.leave_collab(user_id, trip_id);
+      return result;
+    } else {
+      const member_id = await TripsRepo.get_userid_by_collabid(collab_id);
+      const col = await TripsRepo.change_owner_in_collab('Owner', collab_id);
+      const tri = await TripsRepo.change_owner_in_trips(trip_id, member_id);
+      if (col && tri){// already change owner
+        const result = await TripsRepo.leave_collab(user_id, trip_id);
+        return result;
+      } else {// can't change owner
+        throw INTERNAL("Can't change owner");
+      }
+    }
+  },
 };

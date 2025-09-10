@@ -28,3 +28,7 @@ export const BodySchema = z.object({
     trip_pass:z.string().optional(),
     planning_status:z.boolean().optional()
 });
+
+export const cSchema = z.object({ 
+    collab_id:z.number().optional(),
+});

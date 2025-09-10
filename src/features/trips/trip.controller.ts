@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { TripsService } from './trips.service';
-import { mrSchema, TripSchema, utSchema, BodySchema } from './trips.schema';
+import { mrSchema, TripSchema, utSchema, BodySchema, cSchema } from './trips.schema';
 import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
+import { TripsRepo } from './trips.repo';
 
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.params.user_id || "").trim();
@@ -95,5 +96,23 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
       }
     }
   const result = await TripsService.edit_trip_detail(user_id, trip_id, title, start_date, end_date, trip_code, trip_pass, planning_status, file);
+  return res.status(200).json(result);
+});
+
+export const Leave_Trip = asyncHandler(async (req: Request, res:Response) => {
+  const parsedparams = utSchema.safeParse(req.params);
+  if (!parsedparams.success) {
+    return res.status(400).json({ error: "Fail to parsed params"});
+  }
+  const parsedbody = cSchema.safeParse(req.body);
+  if (!parsedbody.success){
+    return res.status(400).json({ error: "Fail to parsed body"});
+  }
+  
+  const {user_id, trip_id} = parsedparams.data;
+  const {collab_id} = parsedbody.data;
+  console.log(user_id, trip_id, collab_id);
+  const result = await TripsService.leave_trip(user_id, trip_id, collab_id);
+  
   return res.status(200).json(result);
 });

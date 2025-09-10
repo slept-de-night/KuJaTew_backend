@@ -2,6 +2,7 @@ import { pool } from '../../config/db';
 import { TripSchema } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
+import { Leave_Trip } from './trip.controller';
 
 export const TripsRepo = {
 	async get_user_trips(user_id:string){
@@ -30,7 +31,6 @@ export const TripsRepo = {
 		const TripsListSchema = z.array(TripSchema);
 
 		const { rows } = await pool.query(query, [user_id]);
-		console.log(rows);
 		const parsed = TripsListSchema.safeParse(rows);
 		if (!parsed.success) throw INTERNAL("Fail to parsed data");
 		return parsed.data;
@@ -60,7 +60,6 @@ export const TripsRepo = {
 		const TripListSchema = z.array(TripSchema);
 
 		const { rows } = await pool.query(query,[trip_id]);
-		console.log(rows[0]);
 		const parsed = TripListSchema.safeParse(rows);
 		if(!parsed.success) throw INTERNAL("Fail to parsed data");
 		return parsed.data;
@@ -160,5 +159,45 @@ export const TripsRepo = {
 		`;
 		return await pool.query(query, [trip_id]);
 
+	},
+
+	async change_owner_in_collab(role:string, collab_id?:number){
+		const query = `
+			UPDATE trip_collaborators
+			SET
+				role = $1
+			WHERE collab_id = $2
+			RETURNING *
+		`;
+		const result = await pool.query(query, [role, collab_id]);
+		return result.rowCount;
+	},
+
+	async change_owner_in_trips(trip_id:number, user_id:string){
+		const query = `
+			UPDATE trips
+			SET
+				user_id = $1
+			WHERE trip_id = $2
+			RETURNING *
+		`;
+		const result = await pool.query(query, [user_id, trip_id]);
+		return result.rowCount;
+	},
+
+	async leave_collab(user_id:string, trip_id:number){
+		const query = `
+			DELETE
+			FROM trip_collaborators
+			WHERE user_id = $1 AND trip_id = $2
+			RETURNING *
+		`;
+		const result = await pool.query(query, [user_id, trip_id]);
+		return result.rowCount;
+	},
+
+	async get_userid_by_collabid(collab_id?:number){
+		const result = await pool.query(`SELECT user_id FROM trip_collaborators WHERE collab_id = $1`, [collab_id]);
+		return result.rows[0].user_id;
 	}
 }
