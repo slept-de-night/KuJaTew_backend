@@ -5,7 +5,7 @@ import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
 import { TripsRepo } from './trips.repo';
-
+// sawasdee krub this is lastest version for sure
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.params.user_id || "").trim();
   const parsed = z.string().min(1).safeParse(userId);
