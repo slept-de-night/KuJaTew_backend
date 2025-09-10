@@ -21,7 +21,7 @@ export const mrSchema = z.object({
 });
 
 export const BodySchema = z.object({ 
-    title:z.string().optional(),
+    trip_name:z.string().optional(),
     start_date:z.date().optional(),
     end_date:z.date().optional(),
     trip_code:z.string().optional(),

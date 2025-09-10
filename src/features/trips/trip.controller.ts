@@ -86,7 +86,7 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
     return res.status(400).json({ error: "Fail to parsed body"});
   }
   const {user_id, trip_id} = parsedparams.data;
-  const {title, start_date, end_date, trip_code, trip_pass, planning_status} = parsedbody.data;
+  const {trip_name, start_date, end_date, trip_code, trip_pass, planning_status} = parsedbody.data;
 
   const file = req.file;
     if (file) {
@@ -95,7 +95,7 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
         return res.status(400).json({ error: "Only .jpeg, .jpg, .png files are allowed" });
       }
     }
-  const result = await TripsService.edit_trip_detail(user_id, trip_id, title, start_date, end_date, trip_code, trip_pass, planning_status, file);
+  const result = await TripsService.edit_trip_detail(user_id, trip_id, trip_name, start_date, end_date, trip_code, trip_pass, planning_status, file);
   return res.status(200).json(result);
 });
 
