@@ -33,7 +33,7 @@ export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
     const userId = parsedParams.user_id;
 
     const BodySchema = z.object({
-      title: z.string().trim().min(1),
+      trip_name: z.string().trim().min(1),
       start_date: z.coerce.date(),
       end_date: z.coerce.date(),
       trip_code: z.string().trim().min(1, "trip_code required"),
@@ -50,7 +50,7 @@ export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
 
     const trip = await TripsService.add_trip(
       userId,
-      body.title,
+      body.trip_name,
       body.start_date,
       body.end_date,
       body.trip_code,

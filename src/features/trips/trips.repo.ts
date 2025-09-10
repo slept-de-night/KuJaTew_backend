@@ -141,7 +141,7 @@ export const TripsRepo = {
 				end_date = COALESCE($3, end_date),
 				trip_code = COALESCE($4, trip_code),
 				trip_pass = COALESCE($5, trip_pass),
-				trip_picture_url = COALESCE($6, trip_picture_url),
+				trip_picture_path = COALESCE($6, trip_picture_path),
 				planning_status = COALESCE($7, planning_status)
 			WHERE trip_id = $8
 			RETURNING *
