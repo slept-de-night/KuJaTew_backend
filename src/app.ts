@@ -8,6 +8,7 @@ import { usersRouter, usersRouterPublic } from "./features/users/users.routes";
 import { authHandler } from "./core/middleware/authHandler";
 import { testRouter } from "./test/test.routes";
 import { pool } from "./config/db";
+import { activityRouter } from "./features/activity/activity.routes";
 
 export function buildApp(){
 
@@ -19,6 +20,7 @@ export function buildApp(){
 
     // route without authentication
     app.use('/api/test',testRouter);
+    app.use('/api/trips/trip_id/activities',activityRouter);
     app.use('/api/users', usersRouterPublic);
 
     app.use(authHandler);
