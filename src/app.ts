@@ -20,7 +20,7 @@ export function buildApp(){
 
     // route without authentication
     app.use('/api/test',testRouter);
-    app.use('/api/trips/trip_id/activities',activityRouter);
+    app.use('/api/trips/:trip_id/activities',activityRouter);
     app.use('/api/users', usersRouterPublic);
 
     app.use(authHandler);
