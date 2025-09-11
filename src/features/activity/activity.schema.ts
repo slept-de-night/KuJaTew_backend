@@ -3,7 +3,7 @@ import { z } from "zod"
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
 const isoTime = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "time must be HH:mm")
 
-const isoDateParam = z.string().transform((val) => {
+const isoDateParam = z.coerce.string().transform((val) => {
   if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
     return val.slice(0, 10) 
   }
@@ -14,7 +14,9 @@ export const ParamsTrip = z.object({ trip_id: z.coerce.number().int().positive()
 export const ParamsTripPit = ParamsTrip.extend({ pit_id: z.coerce.number().int().positive() })
 
 // ---------- Activities ----------
-export const GetActivitiesByDateParams = ParamsTrip.extend({ date: isoDateParam })
+export const GetActivitiesByDateParams = ParamsTrip.extend({
+  date: isoDateParam,
+})
 export const DeleteActivityParams = ParamsTripPit
 
 // ---------- Events ----------
