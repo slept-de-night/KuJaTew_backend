@@ -7,9 +7,11 @@ export const ParamsTrip = z.object({ trip_id: z.coerce.number().int().positive()
 export const ParamsTripPit = ParamsTrip.extend({ pit_id: z.coerce.number().int().positive() })
 
 // ---------- Activities ----------
+
 export const GetActivitiesByDateParams = ParamsTrip.extend({
   date: z.coerce.date(), 
 })
+
 export const DeleteActivityParams = ParamsTripPit
 
 // ---------- Events ----------
@@ -96,7 +98,7 @@ export const ActivityItem = z.object({
   pit_id: z.number(),
   place_id: z.number().nullable(),
   trip_id: z.number(),
-  date: z.string(),
+  date: z.date(),
   time_start: z.string().nullable(),
   time_end: z.string().nullable(),
   address: z.string().nullable(),
@@ -118,14 +120,14 @@ export const PlaceVotingItem = z.object({
 })
 
 export const PlacesVotingResponse = z.object({
-  date: z.string(),
+  date: z.date(),
   time_start: z.string(),
   time_end: z.string(),
   places_voting: z.array(PlaceVotingItem),
 })
 
 export const EventVotingResponse = z.object({
-  date: z.string(),
+  date: z.date(),
   time_start: z.string(),
   time_end: z.string(),
   event_voting: z.object({
