@@ -3,6 +3,7 @@ import { TripSchema } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import { Leave_Trip } from './trip.controller';
+import { StatementSync } from 'node:sqlite';
 
 export const TripsRepo = {
 	async get_user_trips(user_id:string){
@@ -65,37 +66,36 @@ export const TripsRepo = {
 		return parsed.data;
 	},
 	
-	async add_trip(
-		user_id: string, 
-		title: string,  
-		start_date: Date, 
-		end_date: Date,
-		trip_code: string,
-		trip_pass: string,
-		trip_picture_url: string | null
+	async create_trip_base(
+		user_id:string,
+		title:string,
+		start_date:Date,
+		end_date:Date,
+		trip_code:string,
+		trip_pass:string
 	) {
-		const sql = `
-			INSERT INTO trips (
-			user_id, 
-			title,
-			start_date,
-			end_date, 
-			trip_code, 
-			trip_pass, 
-			trip_picture_path,
-			visibility_status, 
-			planning_status
-			)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		const query = `
+			INSERT INTO trips (user_id, title, start_date, end_date, trip_code, trip_pass, visibility_status, planning_status)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 			RETURNING *
 		`;
-		
-		const values = [user_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_url ?? null, false, false];
-
-		const result = await pool.query(sql, values);
-		return result.rows[0]; // will be 1 if insert success, 0 if not
+		const values = [user_id, title, start_date, end_date, trip_code, trip_pass, false, false];
+		const result = await pool.query(query, values);
+		return result.rows[0];
 	},
 	
+	async update_trip_picture(trip_id:number, trip_picture_path:string){
+		const query = `
+			UPDATE trips
+			SET
+				trip_picture_path = $1
+			WHERE trip_id = $2
+			RETURNING *
+		`
+		const result = await pool.query(query, [trip_picture_path, trip_id]);
+		return result.rowCount;
+	},
+
 	async add_owner_collab(
 		trip_id: number,
 		user_id: string, 
@@ -118,6 +118,12 @@ export const TripsRepo = {
 		const query = `DELETE FROM trips WHERE user_id = $1 AND trip_id = $2`;
 		const value = [user_id, trip_id];
 		const result = await pool.query(query, value);
+		return result.rowCount;
+	},
+
+	async delete_trip_collab(trip_id:number){
+		const query =  `DELETE FROM trip_collaborators WHERE trip_id = $1`;
+		const result = await pool.query(query, [trip_id]);
 		return result.rowCount;
 	},
 
@@ -157,7 +163,8 @@ export const TripsRepo = {
 			FROM trips
 			WHERE trip_id = $1
 		`;
-		return await pool.query(query, [trip_id]);
+		const result = await pool.query(query, [trip_id]);
+		return result.rows[0];
 
 	},
 

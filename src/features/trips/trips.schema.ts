@@ -32,3 +32,11 @@ export const BodySchema = z.object({
 export const cSchema = z.object({ 
     collab_id:z.number().optional(),
 });
+
+export const addtripSchema = z.object({
+      trip_name: z.string().trim().min(1),
+      start_date: z.coerce.date(),
+      end_date: z.coerce.date(),
+      trip_code: z.string().trim().min(1, "trip_code required"),
+      trip_pass: z.string().trim().min(1, "trip_pass required"),
+});

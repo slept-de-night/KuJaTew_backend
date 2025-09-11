@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { TripsService } from './trips.service';
-import { mrSchema, TripSchema, utSchema, BodySchema, cSchema } from './trips.schema';
+import { mrSchema, TripSchema, utSchema, BodySchema, cSchema, addtripSchema } from './trips.schema';
 import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
 import { TripsRepo } from './trips.repo';
-// sawasdee krub this is lastest version for sure
+
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.params.user_id || "").trim();
   const parsed = z.string().min(1).safeParse(userId);
@@ -26,20 +26,12 @@ export const Specific_Trip = asyncHandler(async (req: Request, res: Response) =>
 
 export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
   try {
-    const ParamsSchema = z.object({
-      user_id: z.string().trim().min(1, "user_id required"),
-    });
-    const parsedParams = ParamsSchema.parse(req.params);
-    const userId = parsedParams.user_id;
+    const userId = (req.params.user_id || "").trim();
+    const parsedParams = z.string().min(1).safeParse(userId);
+    if (!parsedParams.success) throw BadRequest("Invalid Params Request");
 
-    const BodySchema = z.object({
-      trip_name: z.string().trim().min(1),
-      start_date: z.coerce.date(),
-      end_date: z.coerce.date(),
-      trip_code: z.string().trim().min(1, "trip_code required"),
-      trip_pass: z.string().trim().min(1, "trip_pass required"),
-    });
-    const body = BodySchema.parse(req.body);
+    const parsedbody = addtripSchema.safeParse(req.body);
+    if (!parsedbody.success) throw BadRequest("Invalid Body Request");
     const file = req.file;
     if (file) {
       const allowed = ["image/jpeg", "image/png", "image/jpg"];
@@ -47,7 +39,7 @@ export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
         return res.status(400).json({ error: "Only .jpeg, .jpg, .png files are allowed" });
       }
     }
-
+    const body = parsedbody.data;
     const trip = await TripsService.add_trip(
       userId,
       body.trip_name,
@@ -57,7 +49,6 @@ export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
       body.trip_pass,
       file
     );
-    await TripsService.add_owner_collab(trip.trip_id, userId);
     return res.status(201).json(trip);
     } catch (err: any) {
     if (err.code === "23503") return res.status(404).json({ error: "User not found" });
@@ -111,7 +102,6 @@ export const Leave_Trip = asyncHandler(async (req: Request, res:Response) => {
   
   const {user_id, trip_id} = parsedparams.data;
   const {collab_id} = parsedbody.data;
-  console.log(user_id, trip_id, collab_id);
   const result = await TripsService.leave_trip(user_id, trip_id, collab_id);
   
   return res.status(200).json(result);
