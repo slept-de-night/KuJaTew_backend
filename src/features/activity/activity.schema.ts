@@ -3,13 +3,12 @@ import { z } from "zod"
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
 const isoTime = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "time must be HH:mm")
 
-
-const isoDateParam = z.union([z.string(), z.date()])
-  .transform((v) => {
-    const s = v instanceof Date ? v.toISOString() : String(v)
-    return s.slice(0, 10) 
-  })
-  .refine((s) => /^\d{4}-\d{2}-\d{2}$/.test(s), "date must be YYYY-MM-DD")
+const isoDateParam = z.string().transform((val) => {
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    return val.slice(0, 10)
+  }
+  throw new Error("date must be YYYY-MM-DD")
+})
 
 export const ParamsTrip = z.object({ trip_id: z.coerce.number().int().positive() })
 export const ParamsTripPit = ParamsTrip.extend({ pit_id: z.coerce.number().int().positive() })
