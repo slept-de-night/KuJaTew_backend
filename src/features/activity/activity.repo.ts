@@ -7,7 +7,7 @@ export const ActivityRepo = {
       SELECT pit.pit_id, pit.place_id, pit.trip_id, pit.date,
              pit.time_start, pit.time_end, pit.is_vote,
              pit.event_names AS event_name, pit.is_event,
-             p.address, p.places_picture_url AS photo_url
+             p.address, p.places_picture_path AS photo_url
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
       WHERE pit.trip_id = $1 AND pit.date = $2
@@ -112,7 +112,7 @@ export const VoteRepo = {
                    'pit_id', pit.pit_id,
                    'place_id', pit.place_id,
                    'address', p.address,
-                   'place_picture_url', p.places_picture_url,
+                   'place_picture_url', p.places_picture_path,
                    'voting_count', COUNT(v.*),
                    'is_voted', BOOL_OR(v.user_id = $3),
                    'is_most_voted', (COUNT(v.*) = (SELECT max_cnt FROM max_votes))
