@@ -7,7 +7,7 @@ export const ActivityController = {
   list: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, date } = S.GetActivitiesByDateParams.parse(req.params)
-      const result = await ActivityService.list(trip_id, date) // date เป็น string แล้ว ✅
+      const result = await ActivityService.list(trip_id, date) 
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) {
