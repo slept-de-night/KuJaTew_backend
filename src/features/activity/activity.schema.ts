@@ -8,16 +8,8 @@ export const ParamsTripPit = ParamsTrip.extend({ pit_id: z.coerce.number().int()
 
 // ---------- Activities ----------
 export const GetActivitiesByDateParams = ParamsTrip.extend({
-  date: z.coerce.string().transform((val) => {
-    const s = String(val)
-    if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-      return s.slice(0, 10)
-    }
-    throw new Error("date must be YYYY-MM-DD")
-  }),
+  date: z.coerce.date(), 
 })
-
-
 export const DeleteActivityParams = ParamsTripPit
 
 // ---------- Events ----------
