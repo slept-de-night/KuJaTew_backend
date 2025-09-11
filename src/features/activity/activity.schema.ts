@@ -55,7 +55,7 @@ export const GetVotesParams = ParamsTripPit
 export const PostVoteTypeParams = ParamsTrip.extend({ type: z.enum(["places","events"]) })
 
 export const InitVotingBodyPlaces = z.object({
-  place_id: z.number().int().positive(),
+  place_id: z.literal(0),
   trip_id: z.number().int().positive(),
   date: isoDate,
   time_start: isoTime,
