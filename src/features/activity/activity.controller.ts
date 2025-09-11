@@ -3,19 +3,20 @@ import * as S from "./activity.schema"
 import { ZodError } from "zod"
 
 // -------- Activities --------
-export const ActivityController = { 
+export const ActivityController = {
   list: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, date } = S.GetActivitiesByDateParams.parse(req.params)
-      const result = await ActivityService.list(trip_id, date)
+      const result = await ActivityService.list(trip_id, date) // date เป็น string แล้ว ✅
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) 
-        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid input: " + (err.issues?.[0]?.message || "Invalid input") })
+      }
       next(err)
     }
   },
-  
+
   remove: async (req:any,res:any,next:any) => {
     try {
       const { pit_id } = S.DeleteActivityParams.parse(req.params)
