@@ -106,3 +106,11 @@ export const Leave_Trip = asyncHandler(async (req: Request, res:Response) => {
   
   return res.status(200).json(result);
 });
+
+export const Trip_Sum = asyncHandler(async (req: Request, res:Response) =>{
+  const parsed = z.string().transform(Number).safeParse((req.params.trip_id));
+  if (!parsed.success) throw BadRequest("Invalid Request");
+
+  const tripID = parsed.data;
+  const tripinfo = await TripsRepo.trip_sum(tripID);
+});

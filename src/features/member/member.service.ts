@@ -31,4 +31,10 @@ export const MemberService = {
     }
     return await MemberRepo.delete_member(collab_id, trip_id);
   },
+
+  async get_memberid(trip_id: number){
+    if (!trip_id) throw INTERNAL("UserID and TripID are required");
+    const result = await MemberRepo.get_trip_members(trip_id);
+    return result;
+  },
 };

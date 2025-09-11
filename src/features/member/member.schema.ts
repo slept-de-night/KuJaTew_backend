@@ -25,3 +25,7 @@ export const roleSchema = z.object({
     role: z.string().trim()
 });
 
+export const urSchema = z.object({
+    user_id: z.string().trim().min(1, "user_id required"),
+    role: z.string().trim()
+});

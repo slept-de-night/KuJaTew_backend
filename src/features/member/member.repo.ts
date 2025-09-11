@@ -1,5 +1,5 @@
 import { pool } from '../../config/db';
-import { MemberSchema } from './member.schema';
+import { MemberSchema, urSchema } from './member.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 
@@ -52,5 +52,21 @@ export const MemberRepo = {
 		`;
 		const result = await pool.query(query, [collab_id, trip_id]);
 		return result.rowCount;
-	}
+	},
+
+	async get_memberid (trip_id:number){
+		const query = `
+			SELECT 
+				user_id,
+				role,
+			FROM trip_collaborators
+			WHERE trip_id = $1
+		`;
+
+		const {rows} = await pool.query(query, [trip_id]);
+		const urlist = z.array(urSchema);
+		const parsed = urlist.safeParse(rows);
+		if (!parsed.success) throw INTERNAL("Fail to parsed");
+		return parsed.data;
+	},
 }

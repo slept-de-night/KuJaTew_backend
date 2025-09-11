@@ -34,9 +34,19 @@ export const cSchema = z.object({
 });
 
 export const addtripSchema = z.object({
-      trip_name: z.string().trim().min(1),
-      start_date: z.coerce.date(),
-      end_date: z.coerce.date(),
-      trip_code: z.string().trim().min(1, "trip_code required"),
-      trip_pass: z.string().trim().min(1, "trip_pass required"),
+    trip_name: z.string().trim().min(1),
+    start_date: z.coerce.date(),
+    end_date: z.coerce.date(),
+    trip_code: z.string().trim().min(1, "trip_code required"),
+    trip_pass: z.string().trim().min(1, "trip_pass required"),
+});
+
+export const tripsumschema = z.object({
+    trip_id:z.number(),
+    title:z.string(),
+    joined_people:z.number(),
+    start_date:z.date(),
+    end_date:z.date(),
+    budget:z.number(),
+    poster_image_link:z.string().nullable(),
 });

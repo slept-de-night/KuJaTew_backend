@@ -146,4 +146,28 @@ export const TripsService = {
       }
     }
   },
+
+  async trip_sum(trip_id:number){
+    if (!trip_id) throw INTERNAL("Trip ID is required");
+    const trips = await TripsRepo.trip_sum(trip_id);
+    
+    const updatedTrips = await Promise.all(
+      trips.map(async (trip) => {
+        if (!trip.poster_image_link) return trip;
+        const { data, error } = await supabase
+          .storage
+          .from("posters")
+          .createSignedUrl(trip.poster_image_link, 3600);
+        if (!error && data) {
+          trip.poster_image_link = data.signedUrl;
+        }
+        return trip;
+      })
+    );
+    return updatedTrips;
+    // maybe i should use get_file_link ของ fiat TT
+    // got trip sum
+    // need to do owner + member detail
+    // + flight detail
+  },
 };

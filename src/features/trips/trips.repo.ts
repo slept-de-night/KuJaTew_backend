@@ -1,5 +1,5 @@
 import { pool } from '../../config/db';
-import { TripSchema } from './trips.schema';
+import { TripSchema, tripsumschema } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import { Leave_Trip } from './trip.controller';
@@ -206,5 +206,33 @@ export const TripsRepo = {
 	async get_userid_by_collabid(collab_id?:number){
 		const result = await pool.query(`SELECT user_id FROM trip_collaborators WHERE collab_id = $1`, [collab_id]);
 		return result.rows[0].user_id;
-	}
+	},
+
+	async trip_sum(trip_id:number){
+		const query = `
+			WITH joinedP AS (
+				SELECT trip_id, COUNT(user_id)::int AS joined_people
+				FROM trip_collaborators tc
+				WHERE tc.accepted = TRUE
+				GROUP BY trip_id
+			)
+			SELECT
+				t.trip_id, 
+				t.title, 
+				jp.joined_people AS joined_people, 
+				t.start_date, 
+				t.end_date,
+				t.budget,
+				t.trip_picture_path as poster_image_link,
+			FROM joinedP jp
+			JOIN trips t ON jp.trip_id = t.trip_id
+			WHERE t.trip_id = $1
+		`;
+
+		const TripsListSchema = z.array(tripsumschema);
+		const {rows} = await pool.query(query, [trip_id]);
+		const parsed = TripsListSchema.safeParse(rows);
+		if (!parsed.success) throw INTERNAL("Fail to parsed data");
+		return parsed.data;
+	},
 }
