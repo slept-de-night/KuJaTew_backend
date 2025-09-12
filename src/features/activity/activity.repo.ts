@@ -1,6 +1,5 @@
 import { query } from "../../core/db"
-import { get_file_link } from "../users/users.repo" //error
-
+import { UsersRepo } from "../users/users.repo"
 
 // ---------- Activities ----------
 export const ActivityRepo = {
@@ -15,14 +14,16 @@ export const ActivityRepo = {
       WHERE pit.trip_id = $1 AND pit.date = $2
       ORDER BY pit.time_start
     `
-    const res = await query(sql, [trip_id, date]);
+    const res = await query(sql, [trip_id, date])
 
     return await Promise.all(
       res.rows.map(async (row: any) => ({
         ...row,
-        photo_url: row.photo_url ? await get_file_link(row.photo_url) : null,
+        photo_url: row.photo_url
+          ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
+          : null,
       }))
-    );
+    )
   },
 
   async remove(pit_id: number) {
@@ -102,25 +103,13 @@ export const PlaceRepo = {
 
 // ---------- Votes ----------
 export const VoteRepo = {
- async list(trip_id: number, pit_id: number, user_id: string) {
+  async list(trip_id: number, pit_id: number, user_id: string) {
     const sql = `
-      WITH vote_counts AS (
-        SELECT v.pit_id, COUNT(*) AS cnt
-        FROM vote v
-        WHERE v.trip_id = $1
-        GROUP BY v.pit_id
-      ),
-      max_votes AS (
-        SELECT MAX(cnt) AS max_cnt FROM vote_counts
-      )
       SELECT pit.date, pit.time_start, pit.time_end, pit.is_event,
-             pit.event_names,
-             pit.pit_id, pit.place_id,
-             p.address,
-             p.places_picture_path,
+             pit.event_names, pit.pit_id, pit.place_id,
+             p.address, p.places_picture_path AS photo_url,
              COUNT(v.*) AS voting_count,
-             BOOL_OR(v.user_id = $3) AS is_voted,
-             (COUNT(v.*) = (SELECT max_cnt FROM max_votes)) AS is_most_voted
+             BOOL_OR(v.user_id = $3) AS is_voted
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
       LEFT JOIN vote v ON v.trip_id = pit.trip_id AND v.pit_id = pit.pit_id
@@ -128,7 +117,6 @@ export const VoteRepo = {
       GROUP BY pit.pit_id, pit.date, pit.time_start, pit.time_end,
                pit.is_event, pit.event_names, p.address, p.places_picture_path
     `
-
     const res = await query(sql, [trip_id, pit_id, user_id])
     const row = res.rows[0]
     if (!row) return null
@@ -156,8 +144,8 @@ export const VoteRepo = {
             pit_id: row.pit_id,
             place_id: row.place_id,
             address: row.address,
-            photo_url: row.places_picture_path
-              ? await get_file_link(row.places_picture_path)
+            photo_url: row.photo_url
+              ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
               : null,
             voting_count: row.voting_count,
             is_voted: row.is_voted,
@@ -168,7 +156,7 @@ export const VoteRepo = {
     }
   },
 
-  async initVotingBlock(trip_id: number, type: "places"|"events", body: any) {
+  async initVotingBlock(trip_id: number, type: "places" | "events", body: any) {
     const sql = `
       INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
