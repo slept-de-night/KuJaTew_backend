@@ -11,11 +11,11 @@ export async function get_flight(trip_id: number) {
       f.arrive_date as arr_date, 
       f.arrive_time as arr_time,
       f.destination_country as arr_country,
-      f.destination as arr_ariport_code,
+      f.destination as arr_airport_code,
       f.airline
-    FROM flight f
+    FROM flights f
     where f.trip_id = $1
-    ORDER BY b.bookmark_id DESC
+    ORDER BY f.flight_id DESC
   `;
   const res = await query(sql, [trip_id]);
   return res.rows;

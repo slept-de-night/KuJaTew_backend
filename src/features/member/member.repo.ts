@@ -58,11 +58,10 @@ export const MemberRepo = {
 		const query = `
 			SELECT 
 				user_id,
-				role,
+				role
 			FROM trip_collaborators
 			WHERE trip_id = $1
 		`;
-
 		const {rows} = await pool.query(query, [trip_id]);
 		const urlist = z.array(urSchema);
 		const parsed = urlist.safeParse(rows);

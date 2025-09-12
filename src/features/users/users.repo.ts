@@ -42,7 +42,7 @@ export const UsersRepo = {
 
         const {data,error} = await supabase.from('users').select("*").eq("user_id",user_id);
         if (error) throw POSTGREST_ERR(error);
-        const parsed = UsersFullSchema.safeParse(data);
+        const parsed = UsersFullSchema.safeParse(data[0]);
         if(!parsed.success) throw INTERNAL("Can't Parsed data");
 
         return parsed.data;

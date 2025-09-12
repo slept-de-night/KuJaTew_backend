@@ -4,6 +4,12 @@ import { TripSchema } from "./trips.schema";
 import { env } from "../../config/env";
 import { supabase } from "../../config/db";
 import { tripsRouter } from "./trips.routes";
+import { UsersRepo } from "../users/users.repo";
+import { MemberRepo } from "../member/member.repo";
+import { UsersService } from "../users/users.service";
+import * as Flightservice from "../flights/flights.service";
+import { promise } from "zod";
+import { all } from "axios";
 
 export const TripsService = {
   async get_user_trips(user_id: string) {
@@ -12,14 +18,11 @@ export const TripsService = {
 
     const updatedTrips = await Promise.all(
       trips.map(async (trip) => {
-        if (!trip.poster_image_link) return trip;
-        const { data, error } = await supabase
-          .storage
-          .from("posters")
-          .createSignedUrl(trip.poster_image_link, 3600);
-        if (!error && data) {
-          trip.poster_image_link = data.signedUrl;
+        if (!trip.poster_image_link) {
+          return trip;
         }
+        const trip_pic = await UsersRepo.get_file_link(trip.poster_image_link, "posters", 3600);
+        trip.poster_image_link = trip_pic.signedUrl;
         return trip;
       })
     );
@@ -33,14 +36,11 @@ export const TripsService = {
     
     const updatedTrips = await Promise.all(
       trips.map(async (trip) => {
-        if (!trip.poster_image_link) return trip;
-        const { data, error } = await supabase
-          .storage
-          .from("posters")
-          .createSignedUrl(trip.poster_image_link, 3600);
-        if (!error && data) {
-          trip.poster_image_link = data.signedUrl;
+        if (!trip.poster_image_link) {
+          return trip;
         }
+        const trip_pic = await UsersRepo.get_file_link(trip.poster_image_link, "posters", 3600);
+        trip.poster_image_link = trip_pic.signedUrl;
         return trip;
       })
     );
@@ -123,7 +123,7 @@ export const TripsService = {
       trip_picture_path = fileName;
       if (old_pic_path){
         const { error } = await supabase.storage.from("posters").remove([old_pic_path]);
-        if (error) {console.error("❌ Failed to delete:", error.message);}
+        if (error) {console.error("Failed to delete:", error.message);}
       }
     }
     return await TripsRepo.edit_trip_detail(trip_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_path, planning_status);
@@ -142,7 +142,7 @@ export const TripsService = {
         const result = await TripsRepo.leave_collab(user_id, trip_id);
         return result;
       } else {// can't change owner
-        throw INTERNAL("Can't change owner");
+        throw INTERNAL("Set new owner in collab or trips fail");
       }
     }
   },
@@ -150,24 +150,52 @@ export const TripsService = {
   async trip_sum(trip_id:number){
     if (!trip_id) throw INTERNAL("Trip ID is required");
     const trips = await TripsRepo.trip_sum(trip_id);
-    
-    const updatedTrips = await Promise.all(
+    // get trip file link
+    const trip_detail = await Promise.all(
       trips.map(async (trip) => {
         if (!trip.poster_image_link) return trip;
-        const { data, error } = await supabase
-          .storage
-          .from("posters")
-          .createSignedUrl(trip.poster_image_link, 3600);
-        if (!error && data) {
-          trip.poster_image_link = data.signedUrl;
-        }
+        const trip_pic = await UsersRepo.get_file_link(trip.poster_image_link, "posters", 3600);
+        trip.poster_image_link = trip_pic.signedUrl;
         return trip;
       })
     );
-    return updatedTrips;
-    // maybe i should use get_file_link ของ fiat TT
-    // got trip sum
-    // need to do owner + member detail
+    // get owner & members detail
+    const all_members = await MemberRepo.get_memberid(trip_id);
+    const owner = all_members.find(m => m.role === "Owner")!;
+    const members = all_members.filter(m => m.role !== "Owner");
+    const owner_detail = await UsersService.get_user_details(owner?.user_id);
+    const members_detail = await Promise.all(
+      members.map(async (member) => {
+        if(!member.user_id) throw INTERNAL("Error trip.service.trip_sum");
+          return await UsersService.get_user_details(member.user_id);
+      })  
+    );
+    
+
+    const flight = await Flightservice.get_flight(trip_id);
+    const flight_detail = flight.map((f: any) => ({
+      flight_id: f.flight_id,
+      depart: {
+        dep_date: f.dep_date,
+        dep_time: f.dep_time,
+        dep_country: f.dep_country,
+        dep_airp_code: f.dep_airport_code,  // map ชื่อ field
+      },
+      arrive: {
+        arr_date: f.arr_date,
+        arr_time: f.arr_time,
+        arr_country: f.arr_country,
+        arr_airp_code: f.arr_airport_code,
+      },
+      airl_name: f.airline,
+    }));
+
+    return {
+      trip_detail,
+      owner_detail,
+      members_detail,
+      flight_detail,
+    };
     // + flight detail
   },
 };

@@ -223,12 +223,11 @@ export const TripsRepo = {
 				t.start_date, 
 				t.end_date,
 				t.budget,
-				t.trip_picture_path as poster_image_link,
+				t.trip_picture_path as poster_image_link
 			FROM joinedP jp
 			JOIN trips t ON jp.trip_id = t.trip_id
 			WHERE t.trip_id = $1
 		`;
-
 		const TripsListSchema = z.array(tripsumschema);
 		const {rows} = await pool.query(query, [trip_id]);
 		const parsed = TripsListSchema.safeParse(rows);

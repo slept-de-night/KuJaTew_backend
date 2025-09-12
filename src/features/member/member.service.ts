@@ -5,6 +5,7 @@ import { env } from "../../config/env";
 import { supabase } from "../../config/db";
 import { TripsRepo } from "../trips/trips.repo";
 import { memberRouter } from "./member.routes";
+import z from "zod";
 
 export const MemberService = {
   async get_trip_member(user_id: string, trip_id: number){

@@ -112,5 +112,7 @@ export const Trip_Sum = asyncHandler(async (req: Request, res:Response) =>{
   if (!parsed.success) throw BadRequest("Invalid Request");
 
   const tripID = parsed.data;
-  const tripinfo = await TripsRepo.trip_sum(tripID);
+  const tripinfo = await TripsService.trip_sum(tripID);
+  console.log(tripinfo);
+  return res.status(200).json(tripinfo);
 });
