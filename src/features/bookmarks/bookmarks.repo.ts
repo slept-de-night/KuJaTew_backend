@@ -21,9 +21,9 @@ export async function add_place(userId: string, placeId: number) {
   return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
 }
 
-export async function remove_place(userId: string, bookmark_id: number) {
+export async function remove_place(userId: string, placeId: string) {
   const sql = `DELETE FROM bookmark WHERE user_id = $1 AND place_id = $2`;
-  const res = await query(sql, [userId, bookmark_id]);
+  const res = await query(sql, [userId, placeId]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
 
@@ -45,7 +45,6 @@ export async function get_guide(userId: string) {
   return res.rows;
 }
 
-
 export async function add_guide(userId: string, trip_id: number) {
   const sql = `
     INSERT INTO guide_bookmark (user_id, trip_id)
@@ -58,5 +57,21 @@ export async function add_guide(userId: string, trip_id: number) {
 export async function remove_guide(userId: string, gbookmark_id: number) {
   const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND trip_id = $2`;
   const res = await query(sql, [userId, gbookmark_id]);
+  return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
+}
+
+export async function add_guide(userId: string, placeId: string) {
+  const sql = `
+    INSERT INTO guide_bookmark (user_id, trip_id)
+    VALUES ($1, $2)
+    ON CONFLICT (user_id, place_id) DO NOTHING
+  `;
+  const res = await query(sql, [userId, placeId]);
+  return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
+}
+
+export async function remove_guide(userId: string, placeId: string) {
+  const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND trip_id = $2`;
+  const res = await query(sql, [userId, placeId]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
