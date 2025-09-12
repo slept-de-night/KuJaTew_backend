@@ -17,7 +17,7 @@ export async function get_place_bookmark(req: Request, res: Response, next: Next
   }
 }
 
-export async function add_place_bookmark(req: Request, res: Response, next: NextFunction) {
+export async function post_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
     // ✅ no auth; get user_id from body (or fallback)
     const userId = (req.body?.user_id as string) || TEST_USER_ID;
@@ -32,20 +32,20 @@ export async function add_place_bookmark(req: Request, res: Response, next: Next
     return res.status(201).json({ message: "Bookmark added" });
   } catch (err) {
     if (err instanceof ZodError) {
-      // 400 for invalid input
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
     }
     next(err);
   }
 }
 
-export async function remove_place_bookmark(req: Request, res: Response, next: NextFunction) {
+export async function delete_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = (req.body?.user_id as string) || TEST_USER_ID;
 
     const { place_id } = schema.remove_place_bookmark.parse(req.body);
 
     const removed = await service.remove_place(userId, place_id);
+
     if (!removed) {
       return res.status(404).json({ message: "Bookmark not found" });
     }
@@ -69,7 +69,7 @@ export async function get_guide_bookmark(req: Request, res: Response, next: Next
   }
 }
 
-export async function add_guide_bookmark(req: Request, res: Response, next: NextFunction) {
+export async function post_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
     // ✅ no auth; get user_id from body (or fallback)
     const userId = (req.body?.user_id as string) || TEST_USER_ID;
@@ -84,14 +84,13 @@ export async function add_guide_bookmark(req: Request, res: Response, next: Next
     return res.status(201).json({ message: "Bookmark added" });
   } catch (err) {
     if (err instanceof ZodError) {
-      // 400 for invalid input
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
     }
     next(err);
   }
 }
 
-export async function remove_guide_bookmark(req: Request, res: Response, next: NextFunction) {
+export async function delete_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = (req.body?.user_id as string) || TEST_USER_ID;
 
