@@ -1,4 +1,6 @@
 import { query } from "../../core/db"
+import { get_file_link } from "../users/users.repo" //error
+
 
 // ---------- Activities ----------
 export const ActivityRepo = {
@@ -13,8 +15,14 @@ export const ActivityRepo = {
       WHERE pit.trip_id = $1 AND pit.date = $2
       ORDER BY pit.time_start
     `
-    const res = await query(sql, [trip_id, date])
-    return res.rows
+    const res = await query(sql, [trip_id, date]);
+
+    return await Promise.all(
+      res.rows.map(async (row: any) => ({
+        ...row,
+        photo_url: row.photo_url ? await get_file_link(row.photo_url) : null,
+      }))
+    );
   },
 
   async remove(pit_id: number) {
@@ -94,7 +102,7 @@ export const PlaceRepo = {
 
 // ---------- Votes ----------
 export const VoteRepo = {
-  async list(trip_id: number, pit_id: number, user_id: string) {
+ async list(trip_id: number, pit_id: number, user_id: string) {
     const sql = `
       WITH vote_counts AS (
         SELECT v.pit_id, COUNT(*) AS cnt
@@ -106,36 +114,58 @@ export const VoteRepo = {
         SELECT MAX(cnt) AS max_cnt FROM vote_counts
       )
       SELECT pit.date, pit.time_start, pit.time_end, pit.is_event,
-             CASE 
-               WHEN pit.is_event = false THEN json_agg(
-                 json_build_object(
-                   'pit_id', pit.pit_id,
-                   'place_id', pit.place_id,
-                   'address', p.address,
-                   'place_picture_url', p.places_picture_path,
-                   'voting_count', COUNT(v.*),
-                   'is_voted', BOOL_OR(v.user_id = $3),
-                   'is_most_voted', (COUNT(v.*) = (SELECT max_cnt FROM max_votes))
-                 )
-               )
-             END AS places_voting,
-             CASE 
-               WHEN pit.is_event = true THEN json_build_object(
-                 'pit_id', pit.pit_id,
-                 'event_name', pit.event_names,
-                 'voting_count', COUNT(v.*),
-                 'is_voted', BOOL_OR(v.user_id = $3),
-                 'is_most_voted', (COUNT(v.*) = (SELECT max_cnt FROM max_votes))
-               )
-             END AS event_voting
+             pit.event_names,
+             pit.pit_id, pit.place_id,
+             p.address,
+             p.places_picture_path,
+             COUNT(v.*) AS voting_count,
+             BOOL_OR(v.user_id = $3) AS is_voted,
+             (COUNT(v.*) = (SELECT max_cnt FROM max_votes)) AS is_most_voted
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
       LEFT JOIN vote v ON v.trip_id = pit.trip_id AND v.pit_id = pit.pit_id
       WHERE pit.trip_id = $1 AND pit.pit_id = $2
-      GROUP BY pit.pit_id, pit.date, pit.time_start, pit.time_end, pit.is_event, pit.event_names
+      GROUP BY pit.pit_id, pit.date, pit.time_start, pit.time_end,
+               pit.is_event, pit.event_names, p.address, p.places_picture_path
     `
+
     const res = await query(sql, [trip_id, pit_id, user_id])
-    return res.rows[0]
+    const row = res.rows[0]
+    if (!row) return null
+
+    if (row.is_event) {
+      return {
+        date: row.date,
+        time_start: row.time_start,
+        time_end: row.time_end,
+        event_voting: {
+          pit_id: row.pit_id,
+          event_name: row.event_names,
+          voting_count: row.voting_count,
+          is_voted: row.is_voted,
+          is_most_voted: row.is_most_voted,
+        },
+      }
+    } else {
+      return {
+        date: row.date,
+        time_start: row.time_start,
+        time_end: row.time_end,
+        places_voting: [
+          {
+            pit_id: row.pit_id,
+            place_id: row.place_id,
+            address: row.address,
+            photo_url: row.places_picture_path
+              ? await get_file_link(row.places_picture_path)
+              : null,
+            voting_count: row.voting_count,
+            is_voted: row.is_voted,
+            is_most_voted: row.is_most_voted,
+          },
+        ],
+      }
+    }
   },
 
   async initVotingBlock(trip_id: number, type: "places"|"events", body: any) {
