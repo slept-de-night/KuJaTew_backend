@@ -7,12 +7,13 @@ import { usersRouter, usersRouterPublic } from "./features/users/users.routes";
 import { authHandler } from "./core/middleware/authHandler";
 import { testRouter } from "./test/test.routes";
 import { pool } from "./config/db";
+import { activityRouter } from "./features/activity/activity.routes" //zennnne!!!
 import { tripsRouter} from "./features/trips/trips.routes";
 import { memberRouter } from "./features/member/member.routes";
 import { bookmarkRouter } from "./features/bookmarks/bookmarks.routes"; //e
 import { flightRouter } from "./features/flights/flights.routes"; //e
 import { inviteRouter } from "./features/invitations/invitations.routes"; //e
-import { activityRouter } from "./features/activity/activity.routes" //zennnne!!!
+
 
 export function buildApp(){
 
@@ -24,13 +25,13 @@ export function buildApp(){
 
     //route without authentication
     app.use('/api/test',testRouter);
+    app.use('/api/trips/:trip_id/activities', activityRouter);
     app.use('/api/trips', tripsRouter);
     app.use('/api/trips/members', memberRouter);
     app.use('/api/users', bookmarkRouter); //e
     app.use('/api/trips', flightRouter); //e
     app.use('/api/trips', inviteRouter); //e
     app.use('/api/users', usersRouterPublic);
-    app.use('/api/trips/:trip_id/activities', activityRouter);
     
 
     app.use(authHandler);
