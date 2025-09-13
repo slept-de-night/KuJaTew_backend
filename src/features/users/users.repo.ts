@@ -41,7 +41,11 @@ export const UsersRepo = {
     async get_user_details(user_id:string):Promise<z.infer<typeof UsersFullSchema>>{
 
         const {data,error} = await supabase.from('users').select("*").eq("user_id",user_id);
+        console.log(data)
         if (error) throw POSTGREST_ERR(error);
+
+        if (data.length != 1){console.log("user id have exist same value")}
+
         const parsed = UsersFullSchema.safeParse(data[0]);
         if(!parsed.success) throw INTERNAL("Can't Parsed data");
 
@@ -58,11 +62,9 @@ export const UsersRepo = {
         return parsed.data;
     },
     async get_file_link(path:string,bucket:string,duration:number):Promise<{signedUrl:string}>{
-      
         const {data,error} = await supabase.storage.from(bucket).createSignedUrl(path,duration);
         if (error) throw STORAGE_ERR(error);
         return data;
-
     },
     async update_user(user_data: User,user_id:string ){
         console.log(user_data);

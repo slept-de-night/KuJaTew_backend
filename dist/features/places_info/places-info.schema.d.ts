@@ -1,0 +1,75 @@
+import z from 'zod';
+export declare const AutoCompleteSchema: z.ZodObject<{
+    suggestions: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        placePrediction: z.ZodObject<{
+            placeId: z.ZodString;
+            text: z.ZodObject<{
+                text: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+export declare const GooglePlaceSchema: z.ZodObject<{
+    name: z.ZodString;
+    id: z.ZodString;
+    types: z.ZodArray<z.ZodString>;
+    formattedAddress: z.ZodString;
+    location: z.ZodObject<{
+        latitude: z.ZodNumber;
+        longitude: z.ZodNumber;
+    }, z.core.$strip>;
+    rating: z.ZodOptional<z.ZodNumber>;
+    websiteUri: z.ZodOptional<z.ZodString>;
+    userRatingCount: z.ZodOptional<z.ZodNumber>;
+    displayName: z.ZodObject<{
+        text: z.ZodString;
+        languageCode: z.ZodString;
+    }, z.core.$strip>;
+    photos: z.ZodDefault<z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        widthPx: z.ZodNumber;
+        heightPx: z.ZodNumber;
+        authorAttributions: z.ZodDefault<z.ZodArray<z.ZodObject<{
+            displayName: z.ZodString;
+            uri: z.ZodString;
+            photoUri: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>>;
+        flagContentUri: z.ZodOptional<z.ZodString>;
+        googleMapsUri: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+    googleMapsLinks: z.ZodOptional<z.ZodObject<{
+        directionsUri: z.ZodOptional<z.ZodString>;
+        placeUri: z.ZodOptional<z.ZodString>;
+        writeAReviewUri: z.ZodOptional<z.ZodString>;
+        reviewsUri: z.ZodOptional<z.ZodString>;
+        photosUri: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>;
+    generativeSummary: z.ZodOptional<z.ZodObject<{
+        overview: z.ZodObject<{
+            text: z.ZodString;
+            languageCode: z.ZodString;
+        }, z.core.$strip>;
+    }, z.core.$strip>>;
+    editorialSummary: z.ZodOptional<z.ZodObject<{
+        text: z.ZodString;
+        languageCode: z.ZodString;
+    }, z.core.$strip>>;
+}, z.core.$strict>;
+export type GooglePlaces = z.infer<typeof GooglePlaceSchema>;
+export declare const PlaceSchema: z.ZodObject<{
+    place_id: z.ZodNumber;
+    name: z.ZodString;
+    address: z.ZodString;
+    lat: z.ZodNumber;
+    lon: z.ZodNumber;
+    categories: z.ZodDefault<z.ZodString>;
+    rating: z.ZodNumber;
+    rating_count: z.ZodDefault<z.ZodNumber>;
+    places_picture_path: z.ZodDefault<z.ZodString>;
+    places_picture_url: z.ZodOptional<z.ZodDefault<z.ZodString>>;
+    website_url: z.ZodOptional<z.ZodDefault<z.ZodString>>;
+    api_id: z.ZodString;
+    overview: z.ZodString;
+}, z.core.$strip>;
+export type Places = z.infer<typeof PlaceSchema>;
+//# sourceMappingURL=places-info.schema.d.ts.map
