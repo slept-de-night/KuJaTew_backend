@@ -2,7 +2,7 @@ import { query } from "../../core/db";
 
 export async function get_place(userId: string) {
   const sql = `
-    SELECT b.bookmark_id, p.name, p.place_id, p.rating, p.rating_count, p.address, p.places_picture_url
+    SELECT b.bookmark_id, p.name, p.place_id, p.rating, p.rating_count, p.address, p.places_picture_path, p.website_url
     FROM bookmark b
     JOIN places p ON p.place_id = b.place_id
     WHERE b.user_id = $1
@@ -21,9 +21,9 @@ export async function add_place(userId: string, placeId: number) {
   return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
 }
 
-export async function remove_place(userId: string, placeId: string) {
-  const sql = `DELETE FROM bookmark WHERE user_id = $1 AND place_id = $2`;
-  const res = await query(sql, [userId, placeId]);
+export async function remove_place(userId: string, bookmark_id: number) {
+  const sql = `DELETE FROM bookmark WHERE user_id = $1 AND bookmark_id = $2`;
+  const res = await query(sql, [userId, bookmark_id]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
 
@@ -55,23 +55,7 @@ export async function add_guide(userId: string, trip_id: number) {
 }
 
 export async function remove_guide(userId: string, gbookmark_id: number) {
-  const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND trip_id = $2`;
+  const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND gbookmark_id = $2`;
   const res = await query(sql, [userId, gbookmark_id]);
-  return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
-}
-
-export async function add_guide(userId: string, placeId: string) {
-  const sql = `
-    INSERT INTO guide_bookmark (user_id, trip_id)
-    VALUES ($1, $2)
-    ON CONFLICT (user_id, place_id) DO NOTHING
-  `;
-  const res = await query(sql, [userId, placeId]);
-  return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
-}
-
-export async function remove_guide(userId: string, placeId: string) {
-  const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND trip_id = $2`;
-  const res = await query(sql, [userId, placeId]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }

@@ -3,14 +3,13 @@ import * as service from "./bookmarks.service";
 import * as schema from "./bookmarks.schema";
 import { ZodError } from "zod";
 
-// For local testing when user_id isn't provided in the body
-const TEST_USER_ID = "00000000-0000-0000-0000-000000000000";
+const TEST_USER_ID = "OSHI"; //for testing only
 
 export async function get_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = (req.body?.user_id as string) || TEST_USER_ID;
-    // no body validation needed unless you add filters/pagination
-    const bookmarks = await service.get_place(userId); // returns array of joined places
+    const userId = TEST_USER_ID; //for testing only
+
+    const bookmarks = await service.get_place(userId);
     return res.status(200).json({ bookmarks });
   } catch (err) {
     next(err);
@@ -19,11 +18,9 @@ export async function get_place_bookmark(req: Request, res: Response, next: Next
 
 export async function post_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    // ✅ no auth; get user_id from body (or fallback)
-    const userId = (req.body?.user_id as string) || TEST_USER_ID;
+    const userId = TEST_USER_ID; //for testing only
 
-    // validate only the fields you care about here
-    const { place_id } = schema.add_place_bookmark.parse(req.body);
+    const { place_id } = schema.place_id_schema.parse(req.params);
 
     const inserted = await service.add_place(userId, place_id);
     if (!inserted) {
@@ -40,12 +37,11 @@ export async function post_place_bookmark(req: Request, res: Response, next: Nex
 
 export async function delete_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = (req.body?.user_id as string) || TEST_USER_ID;
+    const userId = TEST_USER_ID; //for testing only
 
-    const { place_id } = schema.remove_place_bookmark.parse(req.body);
+    const { bookmark_id } = schema.bookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_place(userId, place_id);
-
+    const removed = await service.remove_place(userId, bookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Bookmark not found" });
     }
@@ -60,9 +56,9 @@ export async function delete_place_bookmark(req: Request, res: Response, next: N
 
 export async function get_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = (req.body?.user_id as string) || TEST_USER_ID;
-    // no body validation needed unless you add filters/pagination
-    const guide_bookmarks = await service.get_guide(userId); // returns array of joined places
+    const userId = TEST_USER_ID; //for testing only
+
+    const guide_bookmarks = await service.get_guide(userId);
     return res.status(200).json({ guide_bookmarks });
   } catch (err) {
     next(err);
@@ -71,11 +67,9 @@ export async function get_guide_bookmark(req: Request, res: Response, next: Next
 
 export async function post_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    // ✅ no auth; get user_id from body (or fallback)
-    const userId = (req.body?.user_id as string) || TEST_USER_ID;
+    const userId = TEST_USER_ID; //for testing only
 
-    // validate only the fields you care about here
-    const { trip_id } = schema.add_guide_bookmark.parse(req.body);
+    const { trip_id } = schema.trip_id_schema.parse(req.params);
 
     const inserted = await service.add_place(userId, trip_id);
     if (!inserted) {
@@ -92,11 +86,11 @@ export async function post_guide_bookmark(req: Request, res: Response, next: Nex
 
 export async function delete_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = (req.body?.user_id as string) || TEST_USER_ID;
+    const userId = TEST_USER_ID; //for testing only
 
-    const { trip_id } = schema.remove_guide_bookmark.parse(req.body);
+    const { gbookmark_id } = schema.gbookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_place(userId, trip_id);
+    const removed = await service.remove_place(userId, gbookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Bookmark not found" });
     }

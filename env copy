@@ -5,4 +5,4 @@ JWT_ACCESS_SECRET=bd982d8e7cd24c09fa1c6a00e683385154a97df012cd8fe4beec256398aedf
 JWT_REFRESH_SECRET=690f1d13b1c7fc70d3e9e080a85b5df8233d3c086729c17cc9c7c07035d0c3eb
 GOOGLE_ANDROID_CLIENT_ID=999598547228-tjvs38tp470mri4gfcdfl73qapgaeiq2.apps.googleusercontent.com
 GOOGLE_WEB_CLIENT_ID=999598547228-cgjn9gspjg2d1m2m2q3rp277ovl58qhb.apps.googleusercontent.com
-DATABASE_URL=postgresql://postgres.kfvtpdwnpkkrcsjnopax:ZYnuDdZsmYsyjCkv@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
+DATABASE_URL=DATABASE_URL=postgresql://postgres.kfvtpdwnpkkrcsjnopax:weloveoshi69@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
