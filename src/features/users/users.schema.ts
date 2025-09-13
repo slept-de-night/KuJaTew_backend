@@ -11,7 +11,7 @@ export const UsersFullSchema = z.object({
     phone:z.string(),
     email:z.string(),
     user_id:z.string(),
-    profile_picture_path:z.string()
+    profile_picture_path:z.string().nullable()
 })
 
 export const ProfileFileSchema = z.object({

@@ -25,8 +25,11 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 
 export const Users_Details= asyncHandler(async (req: Request, res: Response) => {
   const parsed = z.string().safeParse((req.params.user_id));
+  console.log(req.params.user_id)
   if(!parsed.success) throw BadRequest("Invalide Request");
-  const user_data = UsersService.get_user_details(parsed.data);
+  
+  const user_data = await UsersService.get_user_details(parsed.data);
+  console.log(user_data)
   
   res.status(201).json(user_data);
 });

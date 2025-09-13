@@ -43,9 +43,18 @@ export const UsersService = {
     async get_user_details(user_id:string):Promise<Omit<z.infer<typeof UsersFullSchema>,'profile_picture_path'> &{'profile_picture_link':string}>{
         const user_data = await UsersRepo.get_user_details(user_id);
         const {profile_picture_path,...remians} = user_data;
-        const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path,"profiles",3600);
-        return {...remians,'profile_picture_link': profile_link.signedUrl};
+        if(user_data.profile_picture_path){
+          console.log("ggg")
+          const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path,"profiles",3600);
+          return {...remians,'profile_picture_link': profile_link.signedUrl}; 
 
+        }
+        else{
+          return {...remians,'profile_picture_link': ""};
+
+        }
+        
+  
     },
     async update_user(input: User ,user_id:string, profile: ProfileFile | null | undefined) {
         await UsersRepo.update_user(input,user_id);
@@ -58,8 +67,9 @@ export const UsersService = {
     async get_user_details_byemail(email:string):Promise<Omit<z.infer<typeof UsersFullSchema>,'profile_picture_path'> &{'profile_picture_link':string}|null>{
         const user_data = await UsersRepo.get_user_details_byemail(email);
         if (!user_data) return null;
+        console.log(user_data)
         const {profile_picture_path,...remians} = user_data;
-        const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path,"profiles",3600);
+        const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path!,"profiles",3600);
         return {...remians,'profile_picture_link': profile_link.signedUrl};
 
     },
@@ -87,7 +97,6 @@ export const UsersService = {
       });
       return invited_list;
     },
-  
 }
 
 export async function downloadToProfileFile(
