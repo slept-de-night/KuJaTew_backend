@@ -19,11 +19,13 @@ export const TripParamsSchema = z.object({
 });
 export type TripParams = z.infer<typeof TripParamsSchema>;
 
-// DD/MM/YYYY
-const DateDDMMYYYY = z.string().regex(
-  /^([0-2]\d|3[01])\/(0\d|1[0-2])\/\d{4}$/,
-  "Expected DD/MM/YYYY"
-);
+// DD/MM/YYYY → convert to YYYY-MM-DD for Postgres
+const DateDDMMYYYY = z.string()
+  .regex(/^([0-2]\d|3[01])\/(0\d|1[0-2])\/\d{4}$/, "Expected DD/MM/YYYY")
+  .transform((val) => {
+    const [dd, mm, yyyy] = val.split("/");
+    return `${yyyy}-${mm}-${dd}`; // ISO format for Postgres
+  });
 
 // HH:mm 24-hour
 const TimeHHMM = z.string().regex(

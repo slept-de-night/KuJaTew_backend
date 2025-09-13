@@ -22,7 +22,7 @@ export async function add_place(userId: string, placeId: number) {
 }
 
 export async function remove_place(userId: string, bookmark_id: number) {
-  const sql = `DELETE FROM bookmark WHERE user_id = $1 AND place_id = $2`;
+  const sql = `DELETE FROM bookmark WHERE user_id = $1 AND bookmark_id = $2`;
   const res = await query(sql, [userId, bookmark_id]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
@@ -56,7 +56,7 @@ export async function add_guide(userId: string, trip_id: number) {
 }
 
 export async function remove_guide(userId: string, gbookmark_id: number) {
-  const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND trip_id = $2`;
+  const sql = `DELETE FROM guide_bookmark WHERE user_id = $1 AND gbookmark_id = $2`;
   const res = await query(sql, [userId, gbookmark_id]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
