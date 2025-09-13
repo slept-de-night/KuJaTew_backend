@@ -120,42 +120,19 @@ export const VoteController = {
     }
   },
 
-voteByCandidate: async (req:any, res:any, next:any) => {
-  try {
-    console.log("====== voteByCandidate called ======")
-    console.log("req.params:", req.params)
-    console.log("req.body:", req.body)
-
-    // test parse ทีละอัน
-    console.log("trip_id raw:", req.params.trip_id)
-    console.log("pit_id raw:", req.params.pit_id)
-    console.log("place_id raw:", req.params.place_id)
-
-    const parsed = S.PostVoteByPlaceParams.safeParse(req.params)
-    if (!parsed.success) {
-      console.error("ZodError detail:", parsed.error.format())
-      return res.status(400).json({ message: "Params validation failed", issues: parsed.error.issues })
+voteByCandidate: async (req:any,res:any,next:any) => {
+    try {
+      const { trip_id, pit_id, place_id } = S.PostVoteByPlaceParams.parse(req.params)
+      const body = req.body 
+      const result = await VoteService.voteByCandidate(trip_id, pit_id, place_id, body)
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
+      next(err)
     }
-
-    console.log("parsed params:", parsed.data)
-
-    const result = await VoteService.voteByCandidate(
-      parsed.data.trip_id,
-      parsed.data.pit_id,
-      parsed.data.place_id,
-      req.body
-    )
-    res.status(200).json(result)
-  } catch (err) {
-    console.error("voteByCandidate catch:", err)
-    if (err instanceof ZodError) {
-      return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-    }
-    next(err)
-  }
-},
-
-
+  },
 
   voteTypeEnd: async (req: any, res: any, next: any) => {
     try {
