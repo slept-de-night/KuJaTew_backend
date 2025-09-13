@@ -123,7 +123,7 @@ export const VoteController = {
   voteByCandidate: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, pit_id, place_id } = S.PostVoteByPlaceParams.parse(req.params)
-      const body = req.body // event_name จะอยู่ตรงนี้ ถ้า place_id=0
+      const body = req.body 
       const result = await VoteService.voteByCandidate(trip_id, pit_id, place_id, body)
       res.status(200).json(result)
     } catch (err) {
