@@ -28,8 +28,13 @@ export const VoteService = {
   init: (trip_id:number, type:"places"|"events", body:any) =>
     VoteRepo.initVotingBlock(trip_id, type, body),
 
-  voteByPlace: (trip_id:number, pit_id:number, place_id:number) =>
-    VoteRepo.addPlaceVote(trip_id, pit_id, place_id),
+  voteByCandidate: (
+  trip_id: number,
+  pit_id: number,
+  place_id: number,
+  body?: any
+  ) => VoteRepo.addCandidate(trip_id, pit_id, place_id, body),
+
 
   voteTypeEnd: (trip_id:number, pit_id:number, type:"places"|"events", body:any) =>
     type === "places"
