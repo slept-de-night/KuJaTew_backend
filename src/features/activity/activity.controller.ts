@@ -120,19 +120,40 @@ export const VoteController = {
     }
   },
 
-  voteByCandidate: async (req:any,res:any,next:any) => {
+  voteByCandidate: async (req: any, res: any, next: any) => {
     try {
-      const { trip_id, pit_id, place_id } = S.PostVoteByPlaceParams.parse(req.params)
-      const body = req.body 
-      const result = await VoteService.voteByCandidate(trip_id, pit_id, place_id, body)
+      console.log("====== voteByCandidate called ======")
+      console.log("raw req.params:", req.params)      // <--- เช็คว่า trip_id, pit_id, place_id ได้จริงมั้ย
+      console.log("raw req.body:", req.body)          // <--- body ส่งอะไรมาด้วยมั้ย
+
+      const parsed = S.PostVoteByPlaceParams.parse(req.params)
+      console.log("parsed params:", parsed)           // <--- ดูว่า zod แปลงเป็น number ให้รึยัง
+
+      const body = req.body
+      console.log("passing body to service:", body)
+
+      const result = await VoteService.voteByCandidate(
+        parsed.trip_id,
+        parsed.pit_id,
+        parsed.place_id,
+        body
+      )
+
+      console.log("service result:", result)
+
       res.status(200).json(result)
     } catch (err) {
+      console.error("====== Zod/Other error in voteByCandidate ======")
+      console.error(err)  // log ออกเต็ม ๆ จะเห็นว่าเป็น ZodError หรืออย่างอื่น
       if (err instanceof ZodError) {
-        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        return res.status(400).json({
+          message: err.issues?.[0]?.message || "Invalid input"
+        })
       }
       next(err)
     }
   },
+
 
   voteTypeEnd: async (req: any, res: any, next: any) => {
     try {
