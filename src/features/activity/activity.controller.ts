@@ -120,39 +120,41 @@ export const VoteController = {
     }
   },
 
-  voteByCandidate: async (req: any, res: any, next: any) => {
-    try {
-      console.log("====== voteByCandidate called ======")
-      console.log("raw req.params:", req.params)      // <--- เช็คว่า trip_id, pit_id, place_id ได้จริงมั้ย
-      console.log("raw req.body:", req.body)          // <--- body ส่งอะไรมาด้วยมั้ย
+voteByCandidate: async (req:any, res:any, next:any) => {
+  try {
+    console.log("====== voteByCandidate called ======")
+    console.log("req.params:", req.params)
+    console.log("req.body:", req.body)
 
-      const parsed = S.PostVoteByPlaceParams.parse(req.params)
-      console.log("parsed params:", parsed)           // <--- ดูว่า zod แปลงเป็น number ให้รึยัง
+    // test parse ทีละอัน
+    console.log("trip_id raw:", req.params.trip_id)
+    console.log("pit_id raw:", req.params.pit_id)
+    console.log("place_id raw:", req.params.place_id)
 
-      const body = req.body
-      console.log("passing body to service:", body)
-
-      const result = await VoteService.voteByCandidate(
-        parsed.trip_id,
-        parsed.pit_id,
-        parsed.place_id,
-        body
-      )
-
-      console.log("service result:", result)
-
-      res.status(200).json(result)
-    } catch (err) {
-      console.error("====== Zod/Other error in voteByCandidate ======")
-      console.error(err)  // log ออกเต็ม ๆ จะเห็นว่าเป็น ZodError หรืออย่างอื่น
-      if (err instanceof ZodError) {
-        return res.status(400).json({
-          message: err.issues?.[0]?.message || "Invalid input"
-        })
-      }
-      next(err)
+    const parsed = S.PostVoteByPlaceParams.safeParse(req.params)
+    if (!parsed.success) {
+      console.error("ZodError detail:", parsed.error.format())
+      return res.status(400).json({ message: "Params validation failed", issues: parsed.error.issues })
     }
-  },
+
+    console.log("parsed params:", parsed.data)
+
+    const result = await VoteService.voteByCandidate(
+      parsed.data.trip_id,
+      parsed.data.pit_id,
+      parsed.data.place_id,
+      req.body
+    )
+    res.status(200).json(result)
+  } catch (err) {
+    console.error("voteByCandidate catch:", err)
+    if (err instanceof ZodError) {
+      return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+    }
+    next(err)
+  }
+},
+
 
 
   voteTypeEnd: async (req: any, res: any, next: any) => {
