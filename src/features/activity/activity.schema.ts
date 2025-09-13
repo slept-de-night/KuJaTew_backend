@@ -62,7 +62,7 @@ export const PostVoteTypeParams = z.object({
 })
 
 export const PostVoteByPlaceParams = ParamsTripPit.extend({
-  place_id: z.number().int().nonnegative() 
+  place_id: z.coerce.number().int().nonnegative()
 })
 
 export const InitVotingBodyPlaces = z.object({
