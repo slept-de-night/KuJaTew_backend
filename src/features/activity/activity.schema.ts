@@ -65,11 +65,6 @@ export const PostVoteByPlaceParams = ParamsTripPit.extend({
   place_id: z.number().int().nonnegative() 
 })
 
-export const PostVoteByPlaceBodyEvent = z.object({
-  event_name: z.string().min(1)
-})
-
-
 export const InitVotingBodyPlaces = z.object({
   trip_id: z.number().int().positive(),
   place_id: z.literal(0), 
@@ -95,12 +90,6 @@ export const PostVoteByTypeEndParams = z.object({
   trip_id: z.coerce.number().int().positive(),
   pit_id: z.coerce.number().int().positive(),
   type: z.enum(["places","events"]),
-})
-export const PostVoteByTypeEndBodyPlaces = z.object({
-  pit_id: z.number().int().positive(), 
-})
-export const PostVoteByTypeEndBodyEvents = z.object({
-  event_name: z.string().min(1),
 })
 
 export const PostVotedTypeParams = z.object({
