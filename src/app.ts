@@ -31,6 +31,7 @@ export function buildApp(){
 
     const app=express();
     const openApiDoc = buildOpenApiDoc();
+    app.use('/api/users', bookmarkRouter); //e
     app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDoc));
     app.use(express.json({ limit: '1mb' }));
 
@@ -38,7 +39,6 @@ export function buildApp(){
     app.use('/api/test',testRouter);
     app.use('/api/trips', tripsRouter);
     app.use('/api/trips/members', memberRouter);
-    app.use('/api/users', bookmarkRouter); //e
     app.use('/api/trips', flightRouter); //e
     app.use('/api/trips', inviteRouter); //e
     app.use('/api/users', usersRouterPublic);

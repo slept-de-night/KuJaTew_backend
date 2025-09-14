@@ -71,7 +71,7 @@ export async function post_guide_bookmark(req: Request, res: Response, next: Nex
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
-    const inserted = await service.add_place(userId, trip_id);
+    const inserted = await service.add_guide(userId, trip_id);
     if (!inserted) {
       return res.status(200).json({ message: "Bookmark already exist" });
     }
@@ -90,7 +90,7 @@ export async function delete_guide_bookmark(req: Request, res: Response, next: N
 
     const { gbookmark_id } = schema.gbookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_place(userId, gbookmark_id);
+    const removed = await service.remove_guide(userId, gbookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Bookmark not found" });
     }
