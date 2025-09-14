@@ -3,7 +3,7 @@ import * as service from "./bookmarks.service";
 import * as schema from "./bookmarks.schema";
 import { ZodError } from "zod";
 
-const TEST_USER_ID = "OSHI"; //for testing only
+const TEST_USER_ID = "OSHI"; //for testing only //OSHI
 
 export async function get_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
