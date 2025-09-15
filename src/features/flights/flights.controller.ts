@@ -21,9 +21,11 @@ export async function get_flight(req: Request, res: Response, next: NextFunction
 
 export async function delete_flight(req: Request, res: Response, next: NextFunction) {
   try {
-    const { trip_id, flight_id } = schema.delete_flight_schema.parse(req.params);
+    const user_id = TEST_USER_ID
 
-    const deleted = await service.delete_flight(trip_id, flight_id);
+    const { trip_id, flight_id } = schema.trip_flight_schema.parse(req.params);
+
+    const deleted = await service.delete_flight(user_id, trip_id, flight_id);
     if (!deleted) {
       return res.status(404).json({ message: "flight not found" });
     }
@@ -38,10 +40,12 @@ export async function delete_flight(req: Request, res: Response, next: NextFunct
 
 export async function post_flight(req: Request, res: Response, next: NextFunction) {
   try {
+    const user_id = TEST_USER_ID
+
     const { trip_id } = schema.trip_id_schema.parse(req.params);
     const body = schema.CreateFlightBodySchema.parse(req.body);
 
-    const row = await service.post_flight(body, trip_id);
+    const row = await service.post_flight(user_id, body, trip_id);
     return res.status(201).json(row);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -53,10 +57,11 @@ export async function post_flight(req: Request, res: Response, next: NextFunctio
 
 export async function put_flight(req: Request, res: Response, next: NextFunction) {
   try {
-    const { trip_id } = schema.trip_id_schema.parse(req.params);
+    const user_id = TEST_USER_ID
+    const { trip_id, flight_id } = schema.trip_flight_schema.parse(req.params);
     const body = schema.CreateFlightBodySchema.parse(req.body);
 
-    const row = await service.post_flight(body, trip_id);
+    const row = await service.put_flight(user_id, body, trip_id, flight_id);
     return res.status(201).json(row);
   } catch (err) {
     if (err instanceof ZodError) {

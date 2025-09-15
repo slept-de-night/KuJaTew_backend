@@ -23,9 +23,7 @@ export const VoteService = {
   async list(trip_id:number,pit_id:number,user_id:string){
     const row = await VoteRepo.list(trip_id, pit_id, user_id)
     if (!row) return null  
-    return row.is_event
-      ? EventVotingResponse.parse(row)
-      : PlacesVotingResponse.parse(row)
+    return row
   },
   init:(trip_id:number,type:"places"|"events",body:any)=>VoteRepo.initVotingBlock(trip_id,type,body),
   voteByPlace:(trip_id:number,pit_id:number,place_id:number,user_id:string)=>VoteRepo.addPlaceVote(trip_id,pit_id,place_id,user_id),

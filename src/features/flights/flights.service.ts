@@ -4,8 +4,8 @@ export async function get_flight(trip_id: number) {
   return repo.get_flight(trip_id);
 }
 
-export async function delete_flight(trip_id: number, flight_id: number) {
-  return repo.delete_flight(trip_id, flight_id);
+export async function delete_flight(user_id: string, trip_id: number, flight_id: number) {
+  return repo.delete_flight(user_id, trip_id, flight_id);
 }
 
 export type FlightInsert = {
@@ -20,10 +20,10 @@ export type FlightInsert = {
   airl_name:string,
 };
 
-export async function post_flight(input: FlightInsert, trip_id: number) {
-  return repo.post_flight(input, trip_id);
+export async function post_flight(user_id: string, input: FlightInsert, trip_id: number) {
+  return repo.post_flight(user_id, input, trip_id);
 }
 
-export async function put_flight(input: FlightInsert, trip_id: number, flight_id: number) {
-  return repo.put_flight(input, trip_id, flight_id);
+export async function put_flight(user_id: string, input: FlightInsert, trip_id: number, flight_id: number) {
+  return repo.put_flight(user_id, input, trip_id, flight_id);
 }

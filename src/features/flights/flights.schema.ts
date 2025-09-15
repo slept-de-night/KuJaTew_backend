@@ -4,12 +4,11 @@ export const trip_id_schema = z.object({
   trip_id: z.coerce.number().min(1, "trip_id is required"),
 });
 
-
 export const flight_id_schema = z.object({
   flight_id: z.coerce.number().min(1, "trip_id is required"),
 });
 
-export const delete_flight_schema = z.object({
+export const trip_flight_schema = z.object({
   trip_id: z.coerce.number().min(1, "trip_id is required"),
   flight_id: z.coerce.number().min(1, "trip_id is required"),
 });
