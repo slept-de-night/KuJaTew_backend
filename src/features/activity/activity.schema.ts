@@ -82,7 +82,7 @@ export const InitVotingBodyPlaces = z.object({
 
 export const InitVotingBodyEvents = z.object({
   trip_id: z.coerce.number().int().positive(),   
-  place_id: z.literal(0),
+  place_id: z.coerce.number().int().positive(),
   date: z.string(),
   time_start: z.string(),
   time_end: z.string(),
