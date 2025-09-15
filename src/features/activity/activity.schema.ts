@@ -3,8 +3,13 @@ import { z } from "zod"
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
 const isoTime = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "time must be HH:mm")
 
-export const ParamsTrip = z.object({ trip_id: z.coerce.number().int().positive() })
-export const ParamsTripPit = ParamsTrip.extend({ pit_id: z.coerce.number().int().positive() })
+export const ParamsTrip = z.object({
+  trip_id: z.preprocess((v) => Number(v), z.number().int().positive())
+})
+
+export const ParamsTripPit = ParamsTrip.extend({
+  pit_id: z.preprocess((v) => Number(v), z.number().int().positive())
+})
 
 // ---------- Activities ----------
 
@@ -62,7 +67,7 @@ export const PostVoteTypeParams = z.object({
 })
 
 export const PostVoteByPlaceParams = ParamsTripPit.extend({
-  place_id: z.coerce.number().int().nonnegative()
+  place_id: z.preprocess((v) => Number(v), z.number().int().nonnegative())
 })
 
 export const InitVotingBodyPlaces = z.object({
