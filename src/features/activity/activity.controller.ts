@@ -153,11 +153,11 @@ voteByCandidate: async (req:any,res:any,next:any) => {
 
   votedType: async (req:any, res:any, next:any) => {
     try {
-      const { trip_id, pit_id, type , user_id } = S.PostVotedTypeParams.parse(req.params)
+      const { trip_id, pit_id, type } = S.PostVotedTypeParams.parse(req.params)
       const body = type === "places"
         ? S.PostVotedTypeBodyPlaces.parse(req.body)
         : S.PostVotedTypeBodyEvents.parse(req.body)
-      const result = await VoteService.votedType(trip_id, pit_id, type, user_id as string, body)
+      const result = await VoteService.votedType(trip_id, pit_id, type, body.user_id, body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })

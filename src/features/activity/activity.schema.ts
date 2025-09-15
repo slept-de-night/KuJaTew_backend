@@ -101,11 +101,11 @@ export const PostVoteByTypeEndParams = z.object({
 export const PostVotedTypeParams = z.object({
   trip_id: z.coerce.number().int().positive(),
   pit_id: z.coerce.number().int().positive(),
-  type: z.enum(["places","events"]),
-  user_id: z.string(),
+  type: z.enum(["places","events"])
 })
-export const PostVotedTypeBodyPlaces = z.object({})
+export const PostVotedTypeBodyPlaces = z.object({user_id: z.string()})
 export const PostVotedTypeBodyEvents = z.object({
+  user_id: z.string(),
   event_name: z.string().min(1),
 })
 
