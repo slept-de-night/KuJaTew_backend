@@ -88,7 +88,6 @@ export const InitVotingBodyEvents = z.object({
   time_end: z.string(),
   is_vote: z.literal(true),
   is_event: z.literal(true),
-  event_name: z.string().min(1),
 })
 
 
