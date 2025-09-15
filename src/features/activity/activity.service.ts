@@ -51,4 +51,9 @@ export const VoteService = {
 
   unvote: (trip_id:number, pit_id:number) =>
     VoteRepo.removeVotingBlock(trip_id, pit_id),
+
+  async deleteVote(trip_id: number, pit_id: number, user_id: string) {
+  return await VoteRepo.deleteVote(trip_id, pit_id, user_id)
+}
+
 }

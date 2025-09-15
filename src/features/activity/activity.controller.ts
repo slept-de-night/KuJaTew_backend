@@ -187,4 +187,17 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       next(err)
     }
   },
+
+  deleteVote: async (req: any, res: any, next: any) => {
+  try {
+    const { trip_id, pit_id } = S.DeleteVoteParamss.parse(req.params)
+    const { user_id } = req.body  // รับ user_id จาก client
+
+    const result = await VoteService.deleteVote(trip_id, pit_id, user_id)
+    res.status(200).json({ success: result })
+  } catch (err) {
+      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  }
 }

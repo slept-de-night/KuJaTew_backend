@@ -120,6 +120,16 @@ export const PatchVoteBody = z.object({
 
 export const DeleteVoteParams = PatchVoteParams
 
+export const DeleteVoteParamss = z.object({
+  trip_id: z.coerce.number(),
+  pit_id: z.coerce.number(),
+})
+
+export const DeleteVoteBody = z.object({
+  user_id: z.string().min(1),
+})
+
+
 
 // ---------- Response Schemas ----------
 export const ActivityItem = z.object({

@@ -480,4 +480,15 @@ export const VoteRepo = {
     const res = await query(sql, [trip_id, pit_id])
     return (res.rows?.length ?? 0) > 0
   },
+
+  async deleteVote(trip_id: number, pit_id: number, user_id: string) {
+  const res = await query(
+    `DELETE FROM vote
+     WHERE trip_id=$1 AND pit_id=$2 AND user_id=$3
+     RETURNING *`,
+    [trip_id, pit_id, user_id]
+  )
+  return (res.rows?.length ?? 0) > 0 
+}
+
 }
