@@ -17,10 +17,10 @@ export const gbookmark_id_schema = z.object({
 });
 
 export const user_name_schema = z.object({
-  user_name: z.string().min(1, "invited user must have name"),
+  name: z.string().min(1, "invited user must have name"),
 });
 
 export const trip_code_password_schema = z.object({
   trip_code: z.string().min(1, "invited user must have name"),
-  trip_password: z.string().min(1, "invited user must have name"),
+  trip_pass: z.string().min(1, "invited user must have name"),
 });
