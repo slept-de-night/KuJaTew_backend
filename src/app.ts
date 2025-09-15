@@ -34,6 +34,8 @@ export function buildApp(){
     app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDoc));
     app.use(express.json({ limit: '1mb' }));
 
+    app.use(authHandler);
+
     //route without authentication
     app.use('/api/test',testRouter);
     app.use('/api/trips', tripsRouter);
@@ -43,9 +45,6 @@ export function buildApp(){
     app.use('/api/trips', inviteRouter); //e
     app.use('/api/users', usersRouterPublic);
     app.use('/api/trips/:trip_id/activities', activityRouter);
-    
-
-    app.use(authHandler);
     
     // route without authentication
     app.use('/api/places',placeinfoRoute);

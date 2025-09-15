@@ -10,8 +10,7 @@ export const TripSchema = z.object({
     planning_status:z.boolean()
 });
 
-export const utSchema = z.object({
-    user_id: z.string().trim().min(1, "user_id required"),
+export const tSchema = z.object({
     trip_id: z.coerce.number().int().positive("trip_id must be a positive integer"),
 });
 
@@ -49,4 +48,8 @@ export const tripsumschema = z.object({
     end_date:z.date(),
     budget:z.number(),
     poster_image_link:z.string().nullable(),
+});
+
+export const pschema = z.object({
+    joined_people:z.number()
 });

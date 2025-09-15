@@ -1,9 +1,7 @@
 import { pool } from '../../config/db';
-import { TripSchema, tripsumschema } from './trips.schema';
+import { TripSchema, tripsumschema, pschema } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
-import { Leave_Trip } from './trip.controller';
-import { StatementSync } from 'node:sqlite';
 
 export const TripsRepo = {
 	async get_user_trips(user_id:string){
@@ -28,9 +26,7 @@ export const TripsRepo = {
 			JOIN users u ON u.user_id = tc.user_id
 			WHERE u.user_id = $1
 		`;
-		
 		const TripsListSchema = z.array(TripSchema);
-
 		const { rows } = await pool.query(query, [user_id]);
 		const parsed = TripsListSchema.safeParse(rows);
 		if (!parsed.success) throw INTERNAL("Fail to parsed data");
@@ -75,11 +71,11 @@ export const TripsRepo = {
 		trip_pass:string
 	) {
 		const query = `
-			INSERT INTO trips (user_id, title, start_date, end_date, trip_code, trip_pass, visibility_status, planning_status)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			INSERT INTO trips (user_id, title, start_date, end_date, trip_code, trip_pass, visibility_status, planning_status, budget)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9)
 			RETURNING *
 		`;
-		const values = [user_id, title, start_date, end_date, trip_code, trip_pass, false, false];
+		const values = [user_id, title, start_date, end_date, trip_code, trip_pass, false, false, 0];
 		const result = await pool.query(query, values);
 		return result.rows[0];
 	},
@@ -115,15 +111,13 @@ export const TripsRepo = {
 	},
 
 	async delete_trip( user_id:string, trip_id:number ){
-		const query = `DELETE FROM trips WHERE user_id = $1 AND trip_id = $2`;
+		const query = `
+		DELETE 
+		FROM trips 
+		WHERE user_id = $1 AND trip_id = $2
+		RETURNING *`;
 		const value = [user_id, trip_id];
 		const result = await pool.query(query, value);
-		return result.rowCount;
-	},
-
-	async delete_trip_collab(trip_id:number){
-		const query =  `DELETE FROM trip_collaborators WHERE trip_id = $1`;
-		const result = await pool.query(query, [trip_id]);
 		return result.rowCount;
 	},
 
@@ -180,7 +174,7 @@ export const TripsRepo = {
 		return result.rowCount;
 	},
 
-	async change_owner_in_trips(trip_id:number, user_id:string){
+	async change_owner_in_trips(trip_id:number, member_id:string){
 		const query = `
 			UPDATE trips
 			SET
@@ -188,7 +182,7 @@ export const TripsRepo = {
 			WHERE trip_id = $2
 			RETURNING *
 		`;
-		const result = await pool.query(query, [user_id, trip_id]);
+		const result = await pool.query(query, [member_id, trip_id]);
 		return result.rowCount;
 	},
 
@@ -203,9 +197,51 @@ export const TripsRepo = {
 		return result.rowCount;
 	},
 
-	async get_userid_by_collabid(collab_id?:number){
-		const result = await pool.query(`SELECT user_id FROM trip_collaborators WHERE collab_id = $1`, [collab_id]);
-		return result.rows[0].user_id;
+	async transferOwner(user_id: string, trip_id: number, collab_id: number) {
+		const client = await pool.connect();
+		try {
+			await client.query("BEGIN");
+
+			// delete old owner from collab table
+			const lt = await client.query(
+			`DELETE FROM trip_collaborators WHERE user_id = $1 AND trip_id = $2 RETURNING *`,
+			[user_id, trip_id]
+			);
+
+			if (lt.rowCount !== 1) throw new Error("Leave collab failed");
+
+			// set collab_id to be new owner
+			const cco = await client.query(
+			`UPDATE trip_collaborators SET role = 'Owner' WHERE collab_id = $1 RETURNING *`,
+			[collab_id]
+			);
+
+			if (cco.rowCount !== 1) throw new Error("Change owner in collaborators failed");
+
+			// set new owner in trips
+			const member_id = (await client.query(
+			`SELECT user_id FROM trip_collaborators WHERE collab_id = $1`,
+			[collab_id]
+			)).rows[0]?.user_id;
+
+			if (!member_id) throw new Error("Member not found");
+
+			const cto = await client.query(
+			`UPDATE trips SET user_id = $1 WHERE trip_id = $2 RETURNING *`,
+			[member_id, trip_id]
+			);
+
+			if (cto.rowCount !== 1) throw new Error("Change owner in trips failed");
+
+			await client.query("COMMIT");
+			return { success: true };
+
+		} catch (err) {
+			await client.query("ROLLBACK"); // undo all query
+			throw err;
+		} finally {
+			client.release();
+		}
 	},
 
 	async trip_sum(trip_id:number){
@@ -234,4 +270,17 @@ export const TripsRepo = {
 		if (!parsed.success) throw INTERNAL("Fail to parsed data");
 		return parsed.data;
 	},
+
+	async get_joinedP(trip_id:number){
+		const query = `
+			SELECT COUNT(user_id)::int AS joined_people
+			FROM trip_collaborators tc
+			WHERE tc.accepted = TRUE AND tc.trip_id = $1
+			GROUP BY trip_id
+		`;
+		const {rows} = await pool.query(query, [trip_id]);
+		const parsed = pschema.safeParse(rows[0]);
+		if (!parsed.success) throw INTERNAL("Fail to parsed");
+		return parsed.data.joined_people;
+	}
 }
