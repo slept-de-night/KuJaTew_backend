@@ -424,7 +424,7 @@ export const VoteRepo = {
     const votesRes = await query(
       `SELECT event_name, COUNT(*)::int AS cnt
        FROM vote
-       WHERE trip_id=$1 AND pit_id=$2
+       WHERE trip_id=$1 AND pit_id = ANY($2)
        GROUP BY event_name
        ORDER BY cnt DESC
        LIMIT 1`,
