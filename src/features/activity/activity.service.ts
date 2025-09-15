@@ -24,7 +24,7 @@ export const VoteService = {
     return await VoteRepo.list(trip_id, pit_id)
   },
 
-  init: (trip_id:number, type:"places"|"events", body:any) =>
+  init: (trip_id:number, type:"places"|"events" , body:any) =>
     VoteRepo.initVotingBlock(trip_id, type, body),
 
   voteByCandidate: (

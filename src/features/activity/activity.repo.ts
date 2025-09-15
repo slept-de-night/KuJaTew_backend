@@ -231,7 +231,7 @@ export const VoteRepo = {
     `
     const values = [
       trip_id,
-      0,
+      body.place_id,
       body.date,
       body.time_start,
       body.time_end,

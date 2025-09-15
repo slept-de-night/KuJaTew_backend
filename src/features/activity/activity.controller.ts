@@ -111,11 +111,11 @@ export const VoteController = {
 
   postInit: async (req:any, res:any, next:any) => {
     try {
-      const { trip_id, type } = S.PostVoteTypeParams.parse(req.params)
+      const { trip_id, type} = S.PostVoteTypeParams.parse(req.params)
       const body = type === "places"
         ? S.InitVotingBodyPlaces.parse(req.body)
         : S.InitVotingBodyEvents.parse(req.body)
-      const result = await VoteService.init(+trip_id, type, body)
+      const result = await VoteService.init(+trip_id, type , body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
