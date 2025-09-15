@@ -73,7 +73,7 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
 
   const parsedtrip = tSchema.safeParse(req.params);
   if (!parsedtrip.success) {
-    return res.status(400).json({ error: "Fail to parsed" });
+    return res.status(400).json({ error: "Fail to parsed params" });
   }
   const parsedbody = BodySchema.safeParse(req.body);
   if (!parsedbody.success) {
@@ -95,11 +95,9 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
 });
 
 export const Leave_Trip = asyncHandler(async (req: Request, res:Response) => {
-  // const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
-  // if(!parsed.success) throw BadRequest("Invalide Request");
-  // const { user_id } = parsed.data;
-
-  const user_id = 'keen1234'
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  const { user_id } = parsed.data;
 
   const parsedtrip = tSchema.safeParse(req.params);
   if (!parsedtrip.success) {

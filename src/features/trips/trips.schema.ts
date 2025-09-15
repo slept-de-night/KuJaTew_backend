@@ -1,4 +1,4 @@
-import z from 'zod';
+import z, { date, file } from 'zod';
 
 export const TripSchema = z.object({ 
     trip_id:z.number(),
@@ -52,4 +52,22 @@ export const tripsumschema = z.object({
 
 export const pschema = z.object({
     joined_people:z.number()
+});
+
+export const TripCreateSchema = z.object({
+    trip_name: z.string(),
+    start_date: z.string(),
+    end_date: z.string(),
+    trip_code: z.string(),
+    trip_pass: z.string(),
+    file: z.any(),
+});
+
+export const TripUpdateSchema = z.object({ 
+    trip_name: z.string().default(""), 
+    start_date: z.date().default(()=>new Date()),
+    end_date: z.date().default(()=>new Date()),
+    trip_code: z.string().default(""), 
+    trip_pass: z.string().default(""), 
+    trip_image: z.string().openapi({ type: "string", format: "binary" }).optional(), 
 });
