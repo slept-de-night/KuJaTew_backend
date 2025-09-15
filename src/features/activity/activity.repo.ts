@@ -125,22 +125,102 @@ function normalizeTime(val: any): string {
   }
 }
 
-export const VoteRepo = {async list(trip_id: number, pit_id: number, user_id: string) {
-    const sql = `
-      SELECT pit.date, pit.time_start, pit.time_end, pit.is_event,
-            pit.event_names, pit.pit_id, pit.place_id,
-            p.address, p.places_picture_path AS photo_url,
-            COUNT(v.*) AS voting_count,
-            BOOL_OR(v.user_id = $3) AS is_voted
-      FROM places_in_trip pit
-      LEFT JOIN places p ON pit.place_id = p.place_id
-      LEFT JOIN vote v ON v.trip_id = pit.trip_id AND v.pit_id = pit.pit_id
-      WHERE pit.trip_id = $1 AND pit.pit_id = $2
-      GROUP BY pit.pit_id, pit.date, pit.time_start, pit.time_end,
-              pit.is_event, pit.event_names, p.address, p.places_picture_path
-    `
-    const res = await query(sql, [trip_id, pit_id, user_id])
-    return res.rows[0]
+export const VoteRepo = {
+  async list(trip_id: number, pit_id: number) {
+    const blockRes = await query(
+      `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
+       FROM places_in_trip
+       WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
+      [trip_id, pit_id]
+    )
+
+    if (!blockRes.rows || blockRes.rows.length === 0) {
+      throw new Error(`Voting block ${pit_id} not found or not active`)
+    }
+
+    const { date, time_start, time_end, is_event } = blockRes.rows[0] as {
+      date: string
+      time_start: string
+      time_end: string
+      is_event: boolean
+    }
+
+    const candidatesRes = await query(
+      `SELECT pit.pit_id, pit.place_id, pit.event_names, pit.is_event,
+              p.address, p.places_picture_path AS photo_url
+       FROM places_in_trip pit
+       LEFT JOIN places p ON pit.place_id = p.place_id
+       WHERE pit.trip_id=$1
+         AND pit.date=$2
+         AND pit.time_start=$3
+         AND pit.time_end=$4
+         AND pit.is_vote=true`,
+      [trip_id, date, time_start, time_end]
+    )
+
+    const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
+    if (candidatePitIds.length === 0) {
+      throw new Error(`No candidates found for block ${pit_id}`)
+    }
+
+    const votesRes = await query(
+      `SELECT pit_id, COUNT(*)::int AS voting_count
+       FROM vote
+       WHERE trip_id=$1 AND pit_id = ANY($2)
+       GROUP BY pit_id`,
+      [trip_id, candidatePitIds]
+    )
+
+    const votesMap: Record<number, number> = {}
+    for (const row of votesRes.rows) {
+      votesMap[row.pit_id] = row.voting_count
+    }
+
+    const maxVote = Math.max(...Object.values(votesMap), 0)
+
+    if (!is_event) {
+      const places_voting = await Promise.all(
+        candidatesRes.rows.map(async (row: any) => {
+          const voting_count = votesMap[row.pit_id] || 0
+          return {
+            pit_id: row.pit_id,
+            place_id: row.place_id,
+            address: row.address,
+            place_picture_url: row.photo_url
+              ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
+              : null,
+            voting_count,
+            is_most_voted: voting_count === maxVote && maxVote > 0,
+          }
+        })
+      )
+
+      return {
+        date,
+        time_start,
+        time_end,
+        places_voting,
+      }
+    } else {
+      const eventCandidates = candidatesRes.rows.map((row: any) => ({
+        pit_id: row.pit_id,
+        event_name: row.event_names,
+        voting_count: votesMap[row.pit_id] || 0,
+      }))
+
+      const mostVotedEvent =
+        eventCandidates.find((c) => c.voting_count === maxVote)?.event_name ?? ""
+
+      return {
+        date,
+        time_start,
+        time_end,
+        event_voting: {
+          ...eventCandidates[0],
+          is_most_voted: mostVotedEvent,
+        },
+      }
+    }
   },
 
   async initVotingBlock(trip_id: number, type: "places"|"events", body: any) {

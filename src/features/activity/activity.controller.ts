@@ -94,14 +94,17 @@ export const PlaceController = {
 const getUserId = (req:any) => req.user?.id || req.headers["x-user-id"]
 
 export const VoteController = {
-  list: async (req:any, res:any, next:any) => {
+  list: async (req: any, res: any, next: any) => {
     try {
       const { trip_id, pit_id } = S.GetVotesParams.parse(req.params)
-      const user_id = getUserId(req)
-      const result = await VoteService.list(trip_id, pit_id, user_id as string)
+      const result = await VoteService.list(trip_id, pit_id)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   },
@@ -150,11 +153,10 @@ voteByCandidate: async (req:any,res:any,next:any) => {
 
   votedType: async (req:any, res:any, next:any) => {
     try {
-      const { trip_id, pit_id, type } = S.PostVotedTypeParams.parse(req.params)
+      const { trip_id, pit_id, type , user_id } = S.PostVotedTypeParams.parse(req.params)
       const body = type === "places"
         ? S.PostVotedTypeBodyPlaces.parse(req.body)
         : S.PostVotedTypeBodyEvents.parse(req.body)
-      const user_id = getUserId(req)
       const result = await VoteService.votedType(trip_id, pit_id, type, user_id as string, body)
       res.status(200).json(result)
     } catch (err) {
