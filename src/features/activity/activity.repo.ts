@@ -408,8 +408,8 @@ export const VoteRepo = {
   async endVotingEvents(trip_id: number, pit_id: number) {
     const blockRes = await query(
       `SELECT date::text AS block_date, time_start::text AS block_start, time_end::text AS block_end
-       FROM places_in_trip 
-       WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND is_event=true`,
+      FROM places_in_trip 
+      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND is_event=true`,
       [trip_id, pit_id]
     )
     if (!blockRes.rows || blockRes.rows.length === 0) {
@@ -421,28 +421,44 @@ export const VoteRepo = {
     const time_start = normalizeTime(block.block_start)
     const time_end = normalizeTime(block.block_end)
 
+    const candidatesRes = await query(
+      `SELECT pit_id, place_id, event_names
+      FROM places_in_trip
+      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND time_end=$4 AND is_event=true`,
+      [trip_id, date, time_start, time_end]
+    )
+
+    const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
+    if (candidatePitIds.length === 0) {
+      throw new Error(`No candidates found for block ${pit_id}`)
+    }
+
     const votesRes = await query(
-      `SELECT event_name, COUNT(*)::int AS cnt
-       FROM vote
-       WHERE trip_id=$1 AND pit_id = ANY($2)
-       GROUP BY event_name
-       ORDER BY cnt DESC
-       LIMIT 1`,
-      [trip_id, pit_id]
+      `SELECT pit_id, COUNT(*)::int AS cnt
+      FROM vote
+      WHERE trip_id=$1 AND pit_id = ANY($2)
+      GROUP BY pit_id
+      ORDER BY cnt DESC
+      LIMIT 1`,
+      [trip_id, candidatePitIds]
     )
     if (!votesRes.rows || votesRes.rows.length === 0) {
       throw new Error(`No votes found for block ${pit_id}`)
     }
 
-    const winnerEvent = votesRes.rows[0]?.event_name
-    if (!winnerEvent) throw new Error(`Winner event_name not found`)
+    const winnerPitId = votesRes.rows[0]?.pit_id
+    if (!winnerPitId) {
+      throw new Error(`Winner pit_id not found`)
+    }
 
     const updateRes = await query(
       `UPDATE places_in_trip
-       SET is_vote=false, event_names=$3
-       WHERE trip_id=$1 AND pit_id=$2
-       RETURNING *`,
-      [trip_id, pit_id, winnerEvent]
+      SET is_vote=false,
+          place_id=(SELECT place_id FROM places_in_trip WHERE pit_id=$3),
+          event_names=(SELECT event_names FROM places_in_trip WHERE pit_id=$3)
+      WHERE trip_id=$1 AND pit_id=$2
+      RETURNING *`,
+      [trip_id, pit_id, winnerPitId]
     )
 
     return updateRes.rows[0] || null
