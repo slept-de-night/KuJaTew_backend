@@ -249,22 +249,30 @@ export const VoteRepo = {
   place_id: number,
   body?: { event_name?: string }
 ) {
-
   const block = await query(
-    `SELECT date,time_start,time_end,is_event
+    `SELECT date, time_start, time_end, is_event
      FROM places_in_trip
      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
     [trip_id, pit_id]
   )
+
   if (!block.rows || block.rows.length === 0) {
     throw new Error(`Voting block ${pit_id} not found or not active`)
   }
 
-  const row = block.rows[0]
-  const { date, time_start, time_end } = block.rows[0] as {
+  const row = block.rows[0] as {
     date: string
     time_start: string
     time_end: string
+    is_event: boolean
+  }
+  const { date, time_start, time_end, is_event } = row
+
+  if (place_id !== 0 && is_event) {
+    throw new Error(`Cannot add place candidate to an event voting block`)
+  }
+  if (place_id === 0 && !is_event) {
+    throw new Error(`Cannot add event candidate to a place voting block`)
   }
 
   if (place_id !== 0) {
