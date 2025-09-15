@@ -5,13 +5,13 @@ export async function invite(inviter_user_id: string, trip_id: number, invited_u
   const check_sql = `
   SELECT *
   FROM trip_collaborators
-  WHERE trip_id = $1 AND user_id = $2 AND (role = 'owner' OR role = 'editor')
+  WHERE trip_id = $1 AND user_id = $2 AND (role = 'Owner' OR role = 'Editor')
   LIMIT 1
   `;
   const check_res = await query(check_sql, [trip_id, inviter_user_id]);
 
   if (check_res.rowCount === 0) {
-    throw new Error("Permission denied: inviter is not owner/editor");
+    throw new Error("Permission denied: inviter is not Owner/Editor");
   }
 
   const user_name_match = `
@@ -40,7 +40,7 @@ export async function invite(inviter_user_id: string, trip_id: number, invited_u
 export async function code_join(user_id: string, trip_code: string, trip_password: string) {
   const pass_and_code_check = `
   SELECT trip_id
-  FROM trip
+  FROM trips
   WHERE trip_code = $1 AND trip_pass = $2
   LIMIT 1
 `;
