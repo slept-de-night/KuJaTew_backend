@@ -34,6 +34,10 @@ export function buildApp(){
     app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDoc));
     app.use(express.json({ limit: '1mb' }));
 
+    app.use('/api/users', bookmarkRouter); //e
+    app.use('/api/trips', flightRouter); //e
+    app.use('/api/trips', inviteRouter); //e
+
     app.use('/api/users', usersRouterPublic);
     
     app.use(authHandler);

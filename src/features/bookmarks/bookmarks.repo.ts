@@ -16,6 +16,7 @@ export async function add_place(userId: string, placeId: number) {
   const sql = `
     INSERT INTO bookmark (user_id, place_id)
     VALUES ($1, $2)
+    ON CONFLICT(user_id, place_id) DO NOTHING
   `;
   const res = await query(sql, [userId, placeId]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
@@ -50,6 +51,7 @@ export async function add_guide(userId: string, trip_id: number) {
   const sql = `
     INSERT INTO guide_bookmark (user_id, trip_id)
     VALUES ($1, $2)
+    ON CONFLICT (user_id, trip_id) DO NOTHING
   `;
   const res = await query(sql, [userId, trip_id]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0

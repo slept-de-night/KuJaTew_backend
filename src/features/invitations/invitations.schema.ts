@@ -24,3 +24,19 @@ export const trip_code_password_schema = z.object({
   trip_code: z.string().min(1, "invited user must have name"),
   trip_pass: z.string().min(1, "invited user must have name"),
 });
+
+export const TripIdParamSchema = z.object({
+  trip_id: z.number().int().openapi({
+    param: { name: "trip_id", in: "path", required: true },
+    example: 2,
+  }),
+});
+
+export const UserNameBodySchema = z.object({
+  name: z.string().min(1).openapi({ example: "Keen" }),
+});
+
+export const TripCodePasswordBodySchema = z.object({
+  trip_code: z.string().min(1).openapi({ example: "OSHI_ENCODING" }),
+  trip_pass: z.string().min(1).openapi({ example: "OSHI_GOLD_PASS" }),
+});

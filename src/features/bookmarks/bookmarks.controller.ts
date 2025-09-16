@@ -24,7 +24,7 @@ export async function post_place_bookmark(req: Request, res: Response, next: Nex
 
     const inserted = await service.add_place(userId, place_id);
     if (!inserted) {
-      return res.status(200).json({ message: "Bookmark already exist" });
+      return res.status(409).json({ message: "Place already bookmarked by user" });
     }
     return res.status(201).json({ message: "Bookmark added" });
   } catch (err) {
@@ -43,9 +43,9 @@ export async function delete_place_bookmark(req: Request, res: Response, next: N
 
     const removed = await service.remove_place(userId, bookmark_id);
     if (!removed) {
-      return res.status(404).json({ message: "Bookmark not found" });
+      return res.status(404).json({ message: "Place doesn't exist in user's bookmark" });
     }
-    return res.status(200).json({ message: "Bookmark removed" });
+    return res.status(200).json({ message: "Place from user's bookmark removed" });
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
@@ -92,9 +92,9 @@ export async function delete_guide_bookmark(req: Request, res: Response, next: N
 
     const removed = await service.remove_guide(userId, gbookmark_id);
     if (!removed) {
-      return res.status(404).json({ message: "Bookmark not found" });
+      return res.status(404).json({ message: "Guide doesn't exist inside user's bookmark" });
     }
-    return res.status(200).json({ message: "Bookmark removed" });
+    return res.status(200).json({ message: "Removed Guide from user's bookmark" });
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });

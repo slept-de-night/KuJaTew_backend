@@ -5,7 +5,7 @@ import { ZodError } from "zod";
 
 const TEST_USER_ID = "OSHI"; //for testing only
 const TEST_ACCEPT_USER_ID = "keen1234"
-const TEST_REJECT_USER_ID = "zenne"
+const TEST_REJECT_USER_ID = "keen1234"
 const TEST_JOIN_USER_ID = "nutty"
 
 export async function invite(req: Request, res: Response, next: NextFunction) {
