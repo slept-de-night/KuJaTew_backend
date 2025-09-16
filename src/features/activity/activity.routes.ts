@@ -4,6 +4,7 @@ import { ActivityController, EventController, PlaceController, VoteController } 
 export const activityRouter = express.Router({ mergeParams:true })
 
 // Activities
+activityRouter.get("/AllDate", ActivityController.listAll)
 activityRouter.get("/:date", ActivityController.list)
 activityRouter.delete("/:pit_id", ActivityController.remove)
 

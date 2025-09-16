@@ -3,6 +3,29 @@ import { UsersRepo } from "../users/users.repo"
 
 // ---------- Activities ----------
 export const ActivityRepo = {
+  async listAll(trip_id: number) {
+    const sql = `
+      SELECT pit.pit_id, pit.place_id, pit.trip_id, pit.date,
+            pit.time_start, pit.time_end, pit.is_vote,
+            pit.event_names AS event_name, pit.is_event,
+            p.address, p.places_picture_path AS photo_url
+      FROM places_in_trip pit
+      LEFT JOIN places p ON pit.place_id = p.place_id
+      WHERE pit.trip_id = $1
+      ORDER BY pit.date, pit.time_start
+    `
+    const res = await query(sql, [trip_id])
+
+    return await Promise.all(
+      res.rows.map(async (row: any) => ({
+        ...row,
+        photo_url: row.photo_url
+          ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
+          : null,
+      }))
+    )
+  },
+  
   async listByDate(trip_id: number, date: string) {
     const sql = `
       SELECT pit.pit_id, pit.place_id, pit.trip_id, pit.date,

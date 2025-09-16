@@ -2,10 +2,16 @@ import { ActivityRepo, EventRepo, PlaceRepo, VoteRepo } from "./activity.repo"
 import { ActivitiesResponse, PlacesVotingResponse, EventVotingResponse } from "./activity.schema"
 
 export const ActivityService = {
+  async listAll(trip_id: number) {
+    const rows = await ActivityRepo.listAll(trip_id)
+    return ActivitiesResponse.parse({ activities: rows })
+  },
+
   async list(trip_id:number,date:string){
     const rows = await ActivityRepo.listByDate(trip_id,date)
     return ActivitiesResponse.parse({ activities: rows })
   },
+  
   remove:(pit_id:number)=>ActivityRepo.remove(pit_id),
 }
 

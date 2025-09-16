@@ -4,6 +4,19 @@ import { ZodError } from "zod"
 
 // -------- Activities --------
 export const ActivityController = { 
+  listAll: async (req:any,res:any,next:any) => {
+    try {
+      const { trip_id } = S.ParamsTrip.parse(req.params)
+      const result = await ActivityService.listAll(trip_id)
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
+      next(err)
+    }
+  },
+
   list: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, date } = S.GetActivitiesByDateParams.parse(req.params)
