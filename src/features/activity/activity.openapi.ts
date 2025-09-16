@@ -1,6 +1,8 @@
 // activity.openapi.ts
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as schema from "./activity.schema";
+import {z} from "zod";
+
 
 export function registerActivity(registry: OpenAPIRegistry) {
   // Register all schemas
