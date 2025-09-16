@@ -37,7 +37,6 @@ export function registerBookmarks(registry: OpenAPIRegistry) {
     },
   });
 
-  // DELETE place
   registry.registerPath({
     method: "delete",
     path: "/api/users/bookmarks/places/{bookmark_id}",
