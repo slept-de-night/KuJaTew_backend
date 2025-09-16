@@ -9,7 +9,7 @@ export function registerFlights(registry: OpenAPIRegistry) {
     summary: "Get all flights inside a trip",
     tags: ["Flights"],
     request: {
-      params: schema.TripIdParamSchema, // ✅ Swagger-ready
+      params: schema.TripIdParamSchema,
     },
     responses: {
       200: {
@@ -26,7 +26,7 @@ export function registerFlights(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "post",
-    path: "/api/trips/{trip_id}/flights", // ✅ curly braces
+    path: "/api/trips/{trip_id}/flights",
     operationId: "PostTripFlights",
     summary: "Add flight to a trip",
     tags: ["Flights"],
@@ -50,12 +50,12 @@ export function registerFlights(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "delete",
-    path: "/api/trips/{trip_id}/flights/{flight_id}", // ✅ curly braces
+    path: "/api/trips/{trip_id}/flights/{flight_id}",
     operationId: "DeleteTripFlights",
     summary: "remove flight from a trip",
     tags: ["Flights"],
     request: {
-      params: schema.TripFlightParamSchema, // ✅ Swagger-ready
+      params: schema.TripFlightParamSchema,
     },
     responses: {
       200: { description: "Flight removed" },
@@ -67,12 +67,12 @@ export function registerFlights(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "put",
-    path: "/api/trips/{trip_id}/flights/{flight_id}", // ✅ curly braces
+    path: "/api/trips/{trip_id}/flights/{flight_id}",
     operationId: "PutTripFlights",
     summary: "Update flight inside a trip",
     tags: ["Flights"],
     request: {
-      params: schema.TripFlightParamSchema, // ✅ Swagger-ready
+      params: schema.TripFlightParamSchema,
       body: {
         content: {
           "application/json": {

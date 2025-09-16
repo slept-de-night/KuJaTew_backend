@@ -2,7 +2,6 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as schema from "./bookmarks.schema";
 
 export function registerBookmarks(registry: OpenAPIRegistry) {
-  // GET places
   registry.registerPath({
     method: "get",
     path: "/api/users/bookmarks/places",
@@ -22,15 +21,14 @@ export function registerBookmarks(registry: OpenAPIRegistry) {
     },
   });
 
-  // POST place
   registry.registerPath({
     method: "post",
-    path: "/api/users/bookmarks/places/{place_id}", // ✅ curly braces
+    path: "/api/users/bookmarks/places/{place_id}",
     operationId: "PostUserBookmarkPlace",
     summary: "Add place into user's bookmark",
     tags: ["Bookmarks"],
     request: {
-      params: schema.PlaceIdParamSchema, // ✅ Swagger-ready
+      params: schema.PlaceIdParamSchema,
     },
     responses: {
       201: { description: "Place added to user's bookmark" },
@@ -42,7 +40,7 @@ export function registerBookmarks(registry: OpenAPIRegistry) {
   // DELETE place
   registry.registerPath({
     method: "delete",
-    path: "/api/users/bookmarks/places/{bookmark_id}", // ✅ curly braces
+    path: "/api/users/bookmarks/places/{bookmark_id}",
     operationId: "DeleteUserBookmarkPlace",
     summary: "Remove place from user's bookmark",
     tags: ["Bookmarks"],
@@ -56,7 +54,6 @@ export function registerBookmarks(registry: OpenAPIRegistry) {
     },
   });
 
-  // GET guides
   registry.registerPath({
     method: "get",
     path: "/api/users/bookmarks/guides",
@@ -79,7 +76,7 @@ export function registerBookmarks(registry: OpenAPIRegistry) {
   // POST guide
   registry.registerPath({
     method: "post",
-    path: "/api/users/bookmarks/guides/{trip_id}", // ✅ curly braces
+    path: "/api/users/bookmarks/guides/{trip_id}",
     operationId: "PostUserBookmarkGuide",
     summary: "Add guide into user's bookmark",
     tags: ["Bookmarks"],
@@ -93,10 +90,9 @@ export function registerBookmarks(registry: OpenAPIRegistry) {
     },
   });
 
-  // DELETE guide
   registry.registerPath({
     method: "delete",
-    path: "/api/users/bookmarks/guides/{gbookmark_id}", // ✅ curly braces
+    path: "/api/users/bookmarks/guides/{gbookmark_id}",
     operationId: "DeleteUserBookmarkGuide",
     summary: "Remove guide from user's bookmark",
     tags: ["Bookmarks"],
