@@ -71,7 +71,7 @@ export function registerTrips(registry: OpenAPIRegistry) {
               trip_image: z.string().openapi({
                 type: "string",
                 format: "binary",
-              }),
+              }).optional(),
             }),
           },
         },
@@ -145,6 +145,14 @@ export function registerTrips(registry: OpenAPIRegistry) {
     summary: "Leave trip",
     request: {
       params: schema.tSchema,
+      body: {
+        description: "Adding collab_id (for change owner/optional)",
+        content: {
+          "application/json": {
+            schema: schema.cSchema,
+          },
+        },
+      },
     },
     responses: {
       204: {

@@ -56,11 +56,10 @@ export const pschema = z.object({
 
 export const TripCreateSchema = z.object({
     trip_name: z.string(),
-    start_date: z.string(),
-    end_date: z.string(),
+    start_date: z.date(),
+    end_date: z.date(),
     trip_code: z.string(),
     trip_pass: z.string(),
-    file: z.any(),
 });
 
 export const TripUpdateSchema = z.object({ 

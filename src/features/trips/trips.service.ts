@@ -134,9 +134,7 @@ export const TripsService = {
 
   async leave_trip(user_id:string, trip_id:number, collab_id?:number){
     const isOwner = await TripsRepo.check_owner(user_id, trip_id);
-    console.log(isOwner);
     const joinedP = await TripsRepo.get_joinedP(trip_id);
-    console.log(joinedP);
     if (!isOwner){// not an owner
       const result = await TripsRepo.leave_collab(user_id, trip_id);
       return result;
