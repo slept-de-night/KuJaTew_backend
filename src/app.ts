@@ -24,6 +24,7 @@ import { bookmarkRouter } from "./features/bookmarks/bookmarks.routes"; //e
 import { flightRouter } from "./features/flights/flights.routes"; //e
 import { inviteRouter } from "./features/invitations/invitations.routes"; //e
 import { activityRouter } from "./features/activity/activity.routes" //zennnne!!!
+import { notesRouter } from "./features/notes/notes.route";
 
 
 export function buildApp(){
@@ -36,11 +37,12 @@ export function buildApp(){
 
     app.use('/api/users', usersRouterPublic);
     
-    app.use(authHandler);
+    //app.use(authHandler);
 
     //route without authentication
     app.use('/api/test',testRouter);
     app.use('/api/trips', tripsRouter);
+    app.use('/api/trips', notesRouter);
     app.use('/api/trips/members', memberRouter);
     app.use('/api/users', bookmarkRouter); //e
     app.use('/api/trips', flightRouter); //e

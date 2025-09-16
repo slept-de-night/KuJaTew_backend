@@ -5,7 +5,6 @@ import { ProfileFileSchema } from '../users/users.schema';
 import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
-import { TripsRepo } from './trips.repo';
 
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
