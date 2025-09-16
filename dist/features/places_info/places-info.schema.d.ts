@@ -1,4 +1,9 @@
-import z from 'zod';
+import { z } from '../../common/z';
+export declare const PlacesType: z.ZodUnion<readonly [z.ZodString, z.ZodString]>;
+export declare const InputPlaceDetailsSchema: z.ZodObject<{
+    type: z.ZodUnion<readonly [z.ZodString, z.ZodString]>;
+    id: z.ZodString;
+}, z.core.$strip>;
 export declare const AutoCompleteSchema: z.ZodObject<{
     suggestions: z.ZodOptional<z.ZodArray<z.ZodObject<{
         placePrediction: z.ZodObject<{
@@ -70,6 +75,9 @@ export declare const PlaceSchema: z.ZodObject<{
     website_url: z.ZodOptional<z.ZodDefault<z.ZodString>>;
     api_id: z.ZodString;
     overview: z.ZodString;
+}, z.core.$strip>;
+export declare const AutocompletePathParams: z.ZodObject<{
+    input: z.ZodString;
 }, z.core.$strip>;
 export type Places = z.infer<typeof PlaceSchema>;
 //# sourceMappingURL=places-info.schema.d.ts.map

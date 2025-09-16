@@ -8,7 +8,7 @@ function errorHandler(err, _req, res, _next) {
         error: e.code ?? 'INTERNAL_ERROR',
         message: e.message ?? 'Something went wrong',
         details: e.details ?? '',
-        hint: e.details ?? '',
+        hint: e.hint ?? '',
         error_id: e.error_id ?? '',
     };
     res.status(status).json(body);

@@ -9,7 +9,10 @@ const errors_1 = require("../core/errors");
 const node_path_1 = __importDefault(require("node:path"));
 exports.etcService = {
     async get_file_link(path, bucket, duration) {
+        console.log(path, bucket);
         const { data, error } = await db_1.supabase.storage.from(bucket).createSignedUrl(path, duration);
+        console.log("GET File");
+        console.log(data);
         if (error)
             throw (0, errors_1.STORAGE_ERR)(error);
         return data;

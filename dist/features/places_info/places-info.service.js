@@ -67,7 +67,7 @@ exports.PlacesInfoService = {
             headers: {
                 "Content-Type": "application/json",
                 "X-Goog-Api-Key": apiKey,
-                "X-Goog-FieldMask": "id,name,photos,googleMapsLinks,rating,generativeSummary,websiteUri,userRatingCount,location,formattedAddress,displayName,types"
+                "X-Goog-FieldMask": "id,name,photos,googleMapsLinks,rating,generativeSummary,websiteUri,userRatingCount,location,formattedAddress,displayName,types,editorialSummary"
             }
         });
         console.log(data);
@@ -83,7 +83,7 @@ exports.PlacesInfoService = {
                 return null;
             }
             if (data.places_picture_path) {
-                data.places_picture_url = (await etc_service_1.etcService.get_file_link(data.places_picture_path, "places_picture", 600)).signedUrl;
+                data.places_picture_url = (await etc_service_1.etcService.get_file_link(data.places_picture_path, "places", 3600)).signedUrl;
             }
             return data;
         }
@@ -91,10 +91,10 @@ exports.PlacesInfoService = {
             const my_id = Number(id);
             const data = await places_info_repo_1.PlacesInfoRepo.places_details(my_id);
             if (data == null) {
-                return null;
+                throw (0, errors_1.NotFound)(`place_id[${my_id}] don't exist in DB`);
             }
             if (data.places_picture_path) {
-                data.places_picture_url = (await etc_service_1.etcService.get_file_link(data.places_picture_path, "places_picture", 600)).signedUrl;
+                data.places_picture_url = (await etc_service_1.etcService.get_file_link(data.places_picture_path, "places", 3600)).signedUrl;
             }
             return data;
         }

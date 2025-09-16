@@ -39,7 +39,8 @@ const errors_1 = require("../../core/errors");
 const schema = __importStar(require("./places-info.schema"));
 exports.PlacesInfoRepo = {
     async places_details(place_id) {
-        const { data, error } = await db_1.supabase.from('places').select("place_id,name,address,lat,lon,categories,overview,rating,rating_count,places_picture_path").eq("place_id", place_id);
+        const { data, error } = await db_1.supabase.from('places').select("place_id,name,address,lat,lon,categories,overview,rating,rating_count,places_picture_path,api_id,website_url").eq("place_id", place_id);
+        console.log(data);
         if (error)
             throw (0, errors_1.POSTGREST_ERR)(error);
         if (data && data.length > 0) {
@@ -53,7 +54,7 @@ exports.PlacesInfoRepo = {
         }
     },
     async places_details_api(api_id) {
-        const { data, error } = await db_1.supabase.from('places').select("place_id,name,address,lat,lon,categories,overview,rating,rating_count,places_picture_path").eq("api_id", api_id);
+        const { data, error } = await db_1.supabase.from('places').select("place_id,name,address,lat,lon,categories,overview,rating,rating_count,places_picture_path,api_id,website_url").eq("api_id", api_id);
         console.log(data);
         if (error)
             throw (0, errors_1.POSTGREST_ERR)(error);

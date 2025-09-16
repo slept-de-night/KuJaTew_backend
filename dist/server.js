@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("./common/z");
 const app_1 = require("./app");
 const env_1 = require("./config/env");
 const PORT = env_1.env.PORT;

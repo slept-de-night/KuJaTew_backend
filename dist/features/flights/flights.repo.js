@@ -1,0 +1,128 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.get_flight = get_flight;
+exports.delete_flight = delete_flight;
+exports.post_flight = post_flight;
+exports.put_flight = put_flight;
+const db_1 = require("../../core/db");
+async function get_flight(trip_id) {
+    const sql = `
+    SELECT 
+      f.flight_id, 
+      TO_CHAR(f.depart_date, 'DD/MM/YYYY') AS dep_date,
+      TO_CHAR(f.depart_time, 'HH24:MI') AS dep_time, 
+      f.origin_country AS dep_country,
+      f.origin AS dep_airport_code,
+      TO_CHAR(f.arrive_date, 'DD/MM/YYYY') AS arr_date, 
+      TO_CHAR(f.arrive_time, 'HH24:MI') AS arr_time,
+      f.destination_country AS arr_country,
+      f.destination AS arr_airport_code,
+      f.airline
+    FROM flights f
+    WHERE f.trip_id = $1
+    ORDER BY f.flight_id DESC
+  `;
+    const res = await (0, db_1.query)(sql, [trip_id]);
+    return res.rows;
+}
+async function delete_flight(user_id, trip_id, flight_id) {
+    const check_sql = `
+  SELECT *
+  FROM trip_collaborators
+  WHERE trip_id = $1 AND user_id = $2 AND (role = 'Owner' OR role = 'Editor')
+  LIMIT 1
+  `;
+    const check_res = await (0, db_1.query)(check_sql, [trip_id, user_id]);
+    if (check_res.rowCount === 0) {
+        throw new Error("Permission denied: inviter is not owner/editor");
+    }
+    const sql = `DELETE FROM flights WHERE trip_id = $1 AND flight_id = $2`;
+    const res = await (0, db_1.query)(sql, [trip_id, flight_id]);
+    return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
+}
+async function post_flight(user_id, input, trip_id) {
+    const check_sql = `
+  SELECT *
+  FROM trip_collaborators
+  WHERE trip_id = $1 AND user_id = $2 AND (role = 'Owner' OR role = 'Editor')
+  LIMIT 1
+  `;
+    const check_res = await (0, db_1.query)(check_sql, [trip_id, user_id]);
+    if (check_res.rowCount === 0) {
+        const role = "viewer";
+        throw new Error("Permission denied: inviter is not owner/editor (role: ${role})");
+    }
+    const sql = `
+    INSERT INTO flights (
+      trip_id, 
+      depart_date, 
+      depart_time,
+      origin_country,
+      origin,
+      arrive_date,
+      arrive_time,
+      destination_country,
+      destination,
+      airline
+    )
+    VALUES ($1,TO_DATE($2, 'DD/MM/YYYY'),$3,$4,$5,TO_DATE($6, 'DD/MM/YYYY'),$7,$8,$9,$10)
+    RETURNING *;
+  `;
+    const params = [
+        trip_id,
+        input.dep_date,
+        input.dep_time,
+        input.dep_country,
+        input.dep_airp_code,
+        input.arr_date,
+        input.arr_time,
+        input.arr_country,
+        input.arr_airp_code,
+        input.airl_name,
+    ];
+    const { rows } = await (0, db_1.query)(sql, params);
+    return rows[0];
+}
+async function put_flight(user_id, input, trip_id, flight_id) {
+    const check_sql = `
+  SELECT *
+  FROM trip_collaborators
+  WHERE trip_id = $1 AND user_id = $2 AND (role = 'Owner' OR role = 'Editor')
+  LIMIT 1
+  `;
+    const check_res = await (0, db_1.query)(check_sql, [trip_id, user_id]);
+    if (check_res.rowCount === 0) {
+        throw new Error("Permission denied: inviter is not owner/editor");
+    }
+    const sql = `
+    UPDATE flights
+    SET
+      depart_date = TO_DATE($1, 'DD/MM/YYYY'), 
+      depart_time = $2,
+      origin_country = $3,
+      origin = $4,
+      arrive_date = TO_DATE($5, 'DD/MM/YYYY'),
+      arrive_time = $6,
+      destination_country = $7,
+      destination = $8,
+      airline = $9
+    WHERE trip_id = $10 AND flight_id = $11
+    RETURNING *;
+  `;
+    const params = [
+        input.dep_date,
+        input.dep_time,
+        input.dep_country,
+        input.dep_airp_code,
+        input.arr_date,
+        input.arr_time,
+        input.arr_country,
+        input.arr_airp_code,
+        input.airl_name,
+        trip_id,
+        flight_id
+    ];
+    const { rows } = await (0, db_1.query)(sql, params);
+    return rows[0];
+}
+//# sourceMappingURL=flights.repo.js.map
