@@ -20,19 +20,7 @@ export const UsersRepo = {
         
         return user_data;
     },
-    async upload_profile(profile: ProfileFile, uuid: string): Promise<Profile> {
-        console.log(profile);
-        const contentType = profile.mimetype || 'application/octet-stream';
-        const path = uuid + '_profile';
-        console.log(path)
-        const { data, error } = await supabase.storage.from('profiles').upload(path, profile.buffer, {
-            contentType,
-            cacheControl: '3600',
-            upsert: true,
-        });
-        if (error) throw STORAGE_ERR(error);
-        return data;
-    },
+
     async update_profile_path(path:string,user_id:string):Promise<string>{
         const {error} = await supabase.from('users').update({'profile_picture_path':path}).eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
@@ -87,11 +75,12 @@ export const UsersRepo = {
     },
     async get_invited(user_id:string):Promise<z.infer<typeof InvitedSchema>>{
         const query = "WITH invited_trip AS (SELECT a.trip_id FROM trip_collaborators a WHERE a.user_id = $1 AND a.accepted = False)\
-            SELECT b.trip_id,b.title,b.start_date,b.end_date,c.name AS owner_name,b.trip_path FROM invited_trip a JOIN trips b \
+            SELECT b.trip_id,b.title,b.start_date,b.end_date,c.name AS owner_name,b.trip_picture_path FROM invited_trip a JOIN trips b \
             ON a.trip_id = b.trip_id JOIN users c ON b.user_id = c.user_id";
         
         const result = await pool.query(query,[user_id]);
         const data = InvitedSchema.safeParse(result.rows);
+        
         if(!data.success) throw INTERNAL("Fail to parsed data");
         return data.data;
     }

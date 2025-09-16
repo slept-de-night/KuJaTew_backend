@@ -6,18 +6,23 @@ import { BadRequest, INTERNAL } from '../../core/errors';
 import axios from 'axios';
 import z from 'zod';
 import { parentPort } from 'node:worker_threads';
+import { ImageFileSchema } from '../../etc/etc.schema';
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+ 
 
   let upload_profile = {}; 
   const body_parsed = UserSchema.safeParse(req.body);
   if(!body_parsed.success) throw BadRequest("Request Structure is not invalide!")
 
+  
+
   if(!req.file)console.log("Profile File not exist");
   
-  const file_parsed = ProfileFileSchema.safeParse(req.file) ;
+  const file_parsed = ImageFileSchema.safeParse(req.file) ;
   if(!file_parsed.success) throw BadRequest("Request File is not invalide!")
- 
+  
+  
   await UsersService.update_user({...body_parsed.data},(req as any).user.user_id,file_parsed.data ??null);
   res.status(200).json({mes:"updated user success!"});
 });
@@ -35,7 +40,7 @@ export const Users_Details= asyncHandler(async (req: Request, res: Response) => 
 });
 
 export const getTokenRefresh= asyncHandler(async (req: Request, res: Response) => {
-  console.log("hello")
+  console.log("get refresh token")
   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
   if(!parsed.success) throw BadRequest("Invalide Request");
   const token = await UsersService.gen_jwt(parsed.data.user_id);
@@ -43,8 +48,10 @@ export const getTokenRefresh= asyncHandler(async (req: Request, res: Response) =
 });
 
 export const getinviteds= asyncHandler(async (req: Request, res: Response) => {
+  
   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
   if(!parsed.success) throw BadRequest("Invalide Request");
+  console.log("get invited")
   const invited_list = await UsersService.get_invited(parsed.data.user_id);
   res.status(200).json({invited:invited_list});
 });
@@ -69,7 +76,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const profile = await downloadToProfileFile(parsed_payload.data.picture);
     console.log(profile)
 
-    const profile_parsed = ProfileFileSchema.safeParse(profile) ;
+    const profile_parsed = ImageFileSchema.safeParse(profile) ;
     if(!profile_parsed.success) console.log("Fail to retrive profile picture");
     console.log(profile_parsed.data);
     const unique_name = await UsersService.gen_name(parsed_payload.data.name);
