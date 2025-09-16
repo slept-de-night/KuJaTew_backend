@@ -97,8 +97,11 @@ export const TripsService = {
 
   async delete_trip(user_id:string, trip_id:number){
     if (!user_id || !trip_id) throw INTERNAL("User ID AND Trip ID are required");
+
+    const isOwner = await TripsRepo.check_owner(user_id, trip_id);
+    if (!isOwner) throw new Error("Only trip owner can delete trip");
+
     const trips = await TripsRepo.delete_trip(user_id, trip_id);
-    await TripsRepo.delete_trip_collab(trip_id);
     return trips;
   },
 
@@ -131,19 +134,21 @@ export const TripsService = {
 
   async leave_trip(user_id:string, trip_id:number, collab_id?:number){
     const isOwner = await TripsRepo.check_owner(user_id, trip_id);
+    const joinedP = await TripsRepo.get_joinedP(trip_id);
     if (!isOwner){// not an owner
       const result = await TripsRepo.leave_collab(user_id, trip_id);
       return result;
-    } else {
-      const member_id = await TripsRepo.get_userid_by_collabid(collab_id);
-      const col = await TripsRepo.change_owner_in_collab('Owner', collab_id);
-      const tri = await TripsRepo.change_owner_in_trips(trip_id, member_id);
-      if (col && tri){// already change owner
-        const result = await TripsRepo.leave_collab(user_id, trip_id);
-        return result;
-      } else {// can't change owner
-        throw INTERNAL("Set new owner in collab or trips fail");
-      }
+    }
+    if (isOwner && (joinedP == 1)) {// leave and delete trip
+      const result = await TripsRepo.delete_trip(user_id, trip_id);
+      return result;
+    }
+    if (!collab_id) {
+      throw new Error("collab_id required when owner leaves with other members");
+    }
+    else {
+      const result = await TripsRepo.transferOwner(user_id, trip_id, collab_id);
+      return result;
     }
   },
 
@@ -196,6 +201,5 @@ export const TripsService = {
       members_detail,
       flight_detail,
     };
-    // + flight detail
   },
 };
