@@ -7,26 +7,27 @@ import { gen_jwt_token } from "../../core/jwt,generator";
 import z from 'zod';
 import { supabase } from "../../config/db";
 import path from "node:path";
-
+import { ImageFile } from "../../etc/etc.schema";
+import {etcService} from "../../etc/etc.service"
 export const UsersService = {
-    async create_user(input: User& {"email":string}, profile: ProfileFile | null | undefined): Promise<User & { user_id: string,profile_picture_link:string }> {
+    async create_user(input: User& {"email":string}, profile: ImageFile | null | undefined): Promise<User & { user_id: string,profile_picture_link:string }> {
         
         const created_user = await UsersRepo.create_user(input);
         if (profile) {
-            const upload_profile = await UsersRepo.upload_profile(profile, created_user.user_id);
-            console.log(upload_profile.fullPath)
-            await UsersRepo.update_profile_path(upload_profile.path, created_user.user_id);
-            created_user.profile_picture_path = upload_profile.path;
-            const profile_link = await UsersRepo.get_file_link(upload_profile.path,"profiles",3600);
+            const upload_profile = await etcService.upload_img_storage(profile, created_user.user_id+"_profile","profiles");
+            
+            await UsersRepo.update_profile_path(upload_profile, created_user.user_id);
+            created_user.profile_picture_path = upload_profile;
+            const profile_link = await UsersRepo.get_file_link(upload_profile,"profiles",3600);
             return { ...created_user ,profile_picture_link:profile_link.signedUrl};
         }
         return { ...created_user ,profile_picture_link:""}; 
     },
     async google_verify(idToken: string) {
-        const googleClient = new OAuth2Client("999598547228-cgjn9gspjg2d1m2m2q3rp277ovl58qhb.apps.googleusercontent.com");
+        const googleClient = new OAuth2Client(env.GOOGLE_WEB_CLIENT_ID);
         const ticket = await googleClient.verifyIdToken({
             idToken,
-            audience: ["999598547228-cgjn9gspjg2d1m2m2q3rp277ovl58qhb.apps.googleusercontent.com"], // include all that your app uses
+            audience: [env.GOOGLE_WEB_CLIENT_ID], // include all that your app uses
         });
         const payload = ticket.getPayload(); 
 
@@ -56,11 +57,11 @@ export const UsersService = {
         
   
     },
-    async update_user(input: User ,user_id:string, profile: ProfileFile | null | undefined) {
+    async update_user(input: User ,user_id:string, profile: ImageFile | null | undefined) {
         await UsersRepo.update_user(input,user_id);
         if (profile) {
-            const upload_profile = await UsersRepo.upload_profile(profile, user_id);
-            await UsersRepo.update_profile_path(upload_profile.fullPath, user_id);
+            const upload_profile = await etcService.upload_img_storage(profile, user_id+"_profile","profiles");
+            await UsersRepo.update_profile_path(upload_profile, user_id);
         }
         
     },
@@ -86,6 +87,7 @@ export const UsersService = {
       return check_name;
     },
     async get_invited(user_id:string):Promise<z.infer<typeof InvitedSchema>>{
+    
       const invited_list = await UsersRepo.get_invited(user_id);
       await invited_list.forEach(async element => {
         if(element.trip_path){

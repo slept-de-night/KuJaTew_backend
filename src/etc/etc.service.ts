@@ -12,10 +12,10 @@ export const etcService = {
         if (error) throw STORAGE_ERR(error);
         return data;
     },
-    async upload_img_storage(file: ImageFile, pid:string,bucket:string): Promise<string> {
+    async upload_img_storage(file: ImageFile, file_name:string,bucket:string): Promise<string> {
             console.log("Try upload_img place to storage")
             const contentType = file.mimetype || 'application/octet-stream';
-            const path =pid+'.'+file.mimetype.split('/')[1];
+            const path =file_name+'.'+file.mimetype.split('/')[1];
             console.log(path)
             console.log(file)
             const { data, error } = await supabase.storage.from(bucket).upload(path, file.buffer, {

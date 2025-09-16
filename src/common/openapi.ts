@@ -1,6 +1,7 @@
 
 import { OpenAPIRegistry, OpenApiGeneratorV31 } from "@asteasolutions/zod-to-openapi";
 import { registerPlaceInfo } from "../features/places_info/places-info.openapi";
+import { registerUsers } from "../features/users/users.openapi";
 
 export function buildOpenApiDoc() {
   const registry = new OpenAPIRegistry();
@@ -14,7 +15,8 @@ export function buildOpenApiDoc() {
 
   // Register all features
   registerPlaceInfo(registry);
-  // registerUser(registry);
+  registerUsers(registry);
+
 
   const generator = new OpenApiGeneratorV31(registry.definitions);
   const doc = generator.generateDocument({
