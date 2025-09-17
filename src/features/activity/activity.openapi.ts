@@ -136,16 +136,6 @@ export function registerActivity(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "post",
-    path: "/api/trips/{trip_id}/activities/{pit_id}/votes/{type}/end",
-    operationId: "endVoting",
-    summary: "End voting and select winner",
-    request: { params: schema.PostVoteByTypeEndParams },
-    responses: { 200: { description: "Winner selected" }, 400: { description: "Validation error" } },
-    tags: ["Voting"],
-  });
-
-  registry.registerPath({
-    method: "post",
     path: "/api/trips/{trip_id}/activities/{pit_id}/voted/{type}",
     operationId: "castVote",
     summary: "Cast user vote for place or event",

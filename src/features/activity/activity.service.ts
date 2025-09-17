@@ -41,12 +41,6 @@ export const VoteService = {
   ) => VoteRepo.addCandidate(trip_id, pit_id, place_id, body),
 
 
-  voteTypeEnd: (trip_id:number, pit_id:number, type:"places"|"events") =>
-    type === "places"
-      ? VoteRepo.endVotingPlaces(trip_id, pit_id)
-      : VoteRepo.endVotingEvents(trip_id, pit_id),
-
-
   votedType: (trip_id:number, pit_id:number, type:"places"|"events", user_id:string, body:any) =>
     type === "places"
       ? VoteRepo.votedPlaces(trip_id, pit_id, user_id)
@@ -60,6 +54,11 @@ export const VoteService = {
 
   async deleteVote(trip_id: number, pit_id: number, user_id: string) {
   return await VoteRepo.deleteVote(trip_id, pit_id, user_id)
-}
+},
+
+  getWinners: (trip_id:number, pit_id:number, type:"places"|"events") =>
+  type === "places"
+    ? VoteRepo.getTopPlaces(trip_id, pit_id)
+    : VoteRepo.getTopEvents(trip_id, pit_id),
 
 }

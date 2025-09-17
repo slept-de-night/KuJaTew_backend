@@ -378,117 +378,6 @@ export const VoteRepo = {
     return (res.rows?.length ?? 0) > 0
   },
 
-  async endVotingPlaces(trip_id: number, pit_id: number) {
-    const blockRes = await query(
-      `SELECT date::text AS block_date, time_start::text AS block_start, time_end::text AS block_end
-       FROM places_in_trip 
-       WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND is_event=false`,
-      [trip_id, pit_id]
-    )
-    if (!blockRes.rows || blockRes.rows.length === 0) {
-      throw new Error(`Voting block ${pit_id} not found or inactive`)
-    }
-
-    const block = blockRes.rows[0] as any
-    const date = normalizeDate(block.block_date)
-    const time_start = normalizeTime(block.block_start)
-    const time_end = normalizeTime(block.block_end)
-    const candidatesRes = await query(
-      `SELECT pit_id, place_id
-       FROM places_in_trip
-       WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND time_end=$4 AND is_event=false`,
-      [trip_id, date, time_start, time_end]
-    )
-    const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
-    if (candidatePitIds.length === 0) throw new Error(`No candidates found for block ${pit_id}`)
-
-    const votesRes = await query(
-      `SELECT pit_id, COUNT(*)::int AS cnt
-       FROM vote
-       WHERE trip_id=$1 AND pit_id = ANY($2)
-       GROUP BY pit_id
-       ORDER BY cnt DESC
-       LIMIT 1`,
-      [trip_id, candidatePitIds]
-    )
-    if (!votesRes.rows || votesRes.rows.length === 0) {
-      throw new Error(`No votes found for block ${pit_id}`)
-    }
-
-    const winnerPitId = votesRes.rows[0]?.pit_id
-    if (!winnerPitId) throw new Error(`Winner pit_id not found`)
-
-    const updateRes = await query(
-      `UPDATE places_in_trip
-       SET is_vote=false, place_id=(SELECT place_id FROM places_in_trip WHERE pit_id=$3)
-       WHERE trip_id=$1 AND pit_id=$2
-       RETURNING *`,
-      [trip_id, pit_id, winnerPitId]
-    )
-
-    return updateRes.rows[0] || null
-  },
-
-
-  async endVotingEvents(trip_id: number, pit_id: number) {
-    const blockRes = await query(
-      `SELECT date::text AS block_date, time_start::text AS block_start, time_end::text AS block_end
-      FROM places_in_trip 
-      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND is_event=true`,
-      [trip_id, pit_id]
-    )
-    if (!blockRes.rows || blockRes.rows.length === 0) {
-      throw new Error(`Voting block ${pit_id} not found or inactive`)
-    }
-
-    const block = blockRes.rows[0] as any
-    const date = normalizeDate(block.block_date)
-    const time_start = normalizeTime(block.block_start)
-    const time_end = normalizeTime(block.block_end)
-
-    const candidatesRes = await query(
-      `SELECT pit_id, place_id, event_names
-      FROM places_in_trip
-      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND time_end=$4 AND is_event=true`,
-      [trip_id, date, time_start, time_end]
-    )
-
-    const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
-    if (candidatePitIds.length === 0) {
-      throw new Error(`No candidates found for block ${pit_id}`)
-    }
-
-    const votesRes = await query(
-      `SELECT pit_id, COUNT(*)::int AS cnt
-      FROM vote
-      WHERE trip_id=$1 AND pit_id = ANY($2)
-      GROUP BY pit_id
-      ORDER BY cnt DESC
-      LIMIT 1`,
-      [trip_id, candidatePitIds]
-    )
-    if (!votesRes.rows || votesRes.rows.length === 0) {
-      throw new Error(`No votes found for block ${pit_id}`)
-    }
-
-    const winnerPitId = votesRes.rows[0]?.pit_id
-    if (!winnerPitId) {
-      throw new Error(`Winner pit_id not found`)
-    }
-
-    const updateRes = await query(
-      `UPDATE places_in_trip
-      SET is_vote=false,
-          place_id=(SELECT place_id FROM places_in_trip WHERE pit_id=$3),
-          event_names=(SELECT event_names FROM places_in_trip WHERE pit_id=$3)
-      WHERE trip_id=$1 AND pit_id=$2
-      RETURNING *`,
-      [trip_id, pit_id, winnerPitId]
-    )
-
-    return updateRes.rows[0] || null
-  },
-
   async patchVote(trip_id: number, pit_id: number, patch: any) {
     const sql = `
       UPDATE places_in_trip
@@ -500,11 +389,44 @@ export const VoteRepo = {
     return res.rows[0]
   },
 
-  async removeVotingBlock(trip_id: number, pit_id: number) {
-    const sql = `DELETE FROM places_in_trip WHERE trip_id=$1 AND pit_id=$2 RETURNING pit_id`
-    const res = await query(sql, [trip_id, pit_id])
+async removeVotingBlock(trip_id: number, pit_id: number) {
+    const blockRes = await query(
+      `SELECT date::text AS date, time_start::text AS time_start
+      FROM places_in_trip
+      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
+      [trip_id, pit_id]
+    )
+
+    if (!blockRes.rows || blockRes.rows.length === 0) {
+      throw new Error(`Voting block ${pit_id} not found or inactive`)
+    }
+
+    const row = blockRes.rows[0] as {
+      date: string
+      time_start: string
+    }
+
+    await query(
+      `DELETE FROM vote
+      WHERE trip_id=$1
+        AND pit_id IN (
+          SELECT pit_id
+          FROM places_in_trip
+          WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
+        )`,
+      [trip_id, row.date, row.time_start]
+    )
+
+    const res = await query(
+      `DELETE FROM places_in_trip
+      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
+      RETURNING pit_id`,
+      [trip_id, row.date, row.time_start]
+    )
+
     return (res.rows?.length ?? 0) > 0
   },
+
 
   async deleteVote(trip_id: number, pit_id: number, user_id: string) {
   const res = await query(
@@ -514,6 +436,115 @@ export const VoteRepo = {
     [trip_id, pit_id, user_id]
   )
   return (res.rows?.length ?? 0) > 0 
+},
+
+  async getTopPlaces(trip_id: number, pit_id: number) {
+  const blockRes = await query(
+    `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
+     FROM places_in_trip 
+     WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND is_event=false`,
+    [trip_id, pit_id]
+  )
+
+  if (!blockRes.rows || blockRes.rows.length === 0) {
+    throw new Error(`Voting block ${pit_id} not found or inactive`)
+  }
+
+  const row = blockRes.rows[0] as {
+    date: string
+    time_start: string
+    time_end: string
+    is_event: boolean
+  }
+
+  const date = normalizeDate(row.date)
+  const time_start = normalizeTime(row.time_start)
+  const time_end = normalizeTime(row.time_end)
+
+  const candidatesRes = await query(
+    `SELECT pit_id, place_id
+     FROM places_in_trip
+     WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND time_end=$4 AND is_event=false`,
+    [trip_id, date, time_start, time_end]
+  )
+
+  const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
+  if (candidatePitIds.length === 0) {
+    throw new Error(`No candidates found for block ${pit_id}`)
+  }
+
+  const votesRes = await query(
+    `SELECT pit_id, COUNT(*)::int AS cnt
+     FROM vote
+     WHERE trip_id=$1 AND pit_id = ANY($2)
+     GROUP BY pit_id
+     HAVING COUNT(*) = (
+       SELECT MAX(vcount) FROM (
+         SELECT COUNT(*) AS vcount
+         FROM vote
+         WHERE trip_id=$1 AND pit_id = ANY($2)
+         GROUP BY pit_id
+       ) sub
+     )`,
+    [trip_id, candidatePitIds]
+  )
+
+  return votesRes.rows
+} ,
+
+async getTopEvents(trip_id: number, pit_id: number) {
+  const blockRes = await query(
+    `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
+     FROM places_in_trip 
+     WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND is_event=true`,
+    [trip_id, pit_id]
+  )
+
+  if (!blockRes.rows || blockRes.rows.length === 0) {
+    throw new Error(`Voting block ${pit_id} not found or inactive`)
+  }
+
+  const row = blockRes.rows[0] as {
+    date: string
+    time_start: string
+    time_end: string
+    is_event: boolean
+  }
+
+  const date = normalizeDate(row.date)
+  const time_start = normalizeTime(row.time_start)
+  const time_end = normalizeTime(row.time_end)
+
+  const candidatesRes = await query(
+    `SELECT pit_id, event_names
+     FROM places_in_trip
+     WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND time_end=$4 AND is_event=true`,
+    [trip_id, date, time_start, time_end]
+  )
+
+  const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
+  if (candidatePitIds.length === 0) {
+    throw new Error(`No candidates found for block ${pit_id}`)
+  }
+
+  const votesRes = await query(
+    `SELECT pit_id, COUNT(*)::int AS cnt
+     FROM vote
+     WHERE trip_id=$1 AND pit_id = ANY($2)
+     GROUP BY pit_id
+     HAVING COUNT(*) = (
+       SELECT MAX(vcount) FROM (
+         SELECT COUNT(*) AS vcount
+         FROM vote
+         WHERE trip_id=$1 AND pit_id = ANY($2)
+         GROUP BY pit_id
+       ) sub
+     )`,
+    [trip_id, candidatePitIds]
+  )
+
+  return votesRes.rows
 }
+
 
 }

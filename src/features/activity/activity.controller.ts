@@ -150,20 +150,6 @@ voteByCandidate: async (req:any,res:any,next:any) => {
     }
   },
 
-  voteTypeEnd: async (req: any, res: any, next: any) => {
-    try {
-      const { trip_id, pit_id, type } = S.PostVoteByTypeEndParams.parse(req.params)
-      // ไม่ต้อง parse body/ไม่ต้องส่ง body ให้ service แล้ว
-      const result = await VoteService.voteTypeEnd(trip_id, pit_id, type)
-      res.status(200).json(result)
-    } catch (err) {
-      if (err instanceof ZodError) {
-        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      }
-      next(err)
-    }
-  },
-
   votedType: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id, type } = S.PostVotedTypeParams.parse(req.params)
@@ -196,7 +182,9 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       await VoteService.unvote(trip_id, pit_id)
       res.status(204).send()
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   },
@@ -210,6 +198,19 @@ voteByCandidate: async (req:any,res:any,next:any) => {
     res.status(200).json({ success: result })
   } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  }, 
+
+  getWinners: async (req:any, res:any, next:any) => {
+  try {
+    const { trip_id, pit_id, type } = S.PostVoteByTypeEndParams.parse(req.params)
+    const result = await VoteService.getWinners(trip_id, pit_id, type)
+    res.status(200).json(result)
+  } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   }
