@@ -192,7 +192,7 @@ voteByCandidate: async (req:any,res:any,next:any) => {
   deleteVote: async (req: any, res: any, next: any) => {
   try {
     const { trip_id, pit_id } = S.DeleteVoteParamss.parse(req.params)
-    const { user_id } = req.body  // รับ user_id จาก client
+    const { user_id } = req.body  
 
     const result = await VoteService.deleteVote(trip_id, pit_id, user_id)
     res.status(200).json({ success: result })
