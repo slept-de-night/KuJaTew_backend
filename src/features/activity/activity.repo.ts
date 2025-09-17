@@ -225,23 +225,25 @@ export const VoteRepo = {
         places_voting,
       }
     } else {
-      const eventCandidates = candidatesRes.rows.map((row: any) => ({
-        pit_id: row.pit_id,
-        event_name: row.event_names,
-        voting_count: votesMap[row.pit_id] || 0,
-      }))
-
-      const mostVotedEvent =
-        eventCandidates.find((c) => c.voting_count === maxVote)?.event_name ?? ""
+      const event_voting = await Promise.all(
+        candidatesRes.rows.map(async (row: any) => {
+          const voting_count = votesMap[row.pit_id] || 0
+          return {
+            pit_id: row.pit_id,
+            place_id: row.place_id,
+            address: row.address,
+            event_names: row.event_names,
+            voting_count,
+            is_most_voted: voting_count === maxVote && maxVote > 0,
+          }
+        })
+      )
 
       return {
         date,
         time_start,
         time_end,
-        event_voting: {
-          ...eventCandidates[0],
-          is_most_voted: mostVotedEvent,
-        },
+        event_voting,
       }
     }
   },
