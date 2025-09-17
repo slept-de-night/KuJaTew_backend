@@ -4,6 +4,22 @@ import { IdTokenSchema } from "./users.schema";
 
 export function registerUsers(registry: OpenAPIRegistry) {
   registry.register("AutocompletePathParams", schema.UsersFullOutSchema);
+
+
+  registry.registerPath({
+    method: "get",
+    path: "/api/users",
+    operationId: "get user details for specific user_id ",
+    summary: "Returns user information for the given user_id",
+    responses: {
+      200: {
+        description: "User Information",
+        content: { "application/json": { schema: schema.UsersFullOutSchema } },
+      },
+      400: { description: "Validation error" },
+    },
+    tags: ["Users"],
+  });
   
 
   registry.registerPath({
@@ -58,7 +74,7 @@ export function registerUsers(registry: OpenAPIRegistry) {
   });
 
   registry.registerPath({
-    method: "post",
+    method: "get",
     path: "/api/users/refresh-token",
     operationId: "get new access token and refresh token ",
     summary: "return new access token and refresh token for specific user id",

@@ -22,7 +22,7 @@ export const authHandler = asyncHandler(async (req: Request, res: Response, next
         const decode = jwt.verify(token,env.JWT_ACCESS_SECRET);
         const parsed = PlayloadSchema.parse(decode);
         (req as any).user = parsed;
-        console.log(decode,"Hello");
+        console.log("Got Req From",parsed.user_id);
         return next();
     }catch (err) {
     if (err instanceof TokenExpiredError) throw Unauthorized("Token expired");

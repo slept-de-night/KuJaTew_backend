@@ -38,6 +38,16 @@ export const Users_Details= asyncHandler(async (req: Request, res: Response) => 
   
   res.status(201).json(user_data);
 });
+export const Users_Details_self= asyncHandler(async (req: Request, res: Response) => {
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  
+  const user_data = await UsersService.get_user_details(parsed.data.user_id);
+  console.log(user_data)
+  
+  res.status(201).json(user_data);
+});
+
 
 export const getTokenRefresh= asyncHandler(async (req: Request, res: Response) => {
   console.log("get refresh token")
