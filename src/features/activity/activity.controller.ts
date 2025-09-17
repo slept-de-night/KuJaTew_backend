@@ -58,9 +58,14 @@ export const EventController = {
       const result = await EventService.create(+trip_id, body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 
   update: async (req:any,res:any,next:any) => {
@@ -97,9 +102,14 @@ export const PlaceController = {
       const result = await PlaceService.update(+pit_id, body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 }
 
@@ -131,9 +141,14 @@ export const VoteController = {
       const result = await VoteService.init(+trip_id, type , body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 
 voteByCandidate: async (req:any,res:any,next:any) => {
@@ -171,9 +186,14 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       const result = await VoteService.patchVote(trip_id, pit_id, patch)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 
   unvote: async (req:any, res:any, next:any) => {
@@ -213,5 +233,29 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       }
       next(err)
     }
-  }
+  },
+  getUserVoted: async (req:any, res:any, next:any) => {
+    try {
+      const { trip_id, pit_id } = S.GetUserVotedParams.parse(req.params)
+      const user_id = req.user?.id || req.headers["x-user-id"]
+      if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+
+      const result = await VoteService.checkUserVoted(trip_id, pit_id, String(user_id))
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  },
+  endOwner: async (req:any, res:any, next:any) => {
+    try {
+      const { trip_id, pit_id, type } = S.PostVoteEndOwnerParams.parse(req.params)
+      const result = await VoteService.endOwner(trip_id, pit_id, type)
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  },
+
 }

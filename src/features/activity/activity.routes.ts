@@ -25,3 +25,6 @@ activityRouter.patch("/:pit_id/votes", VoteController.patchVote)
 activityRouter.delete("/:pit_id/votes", VoteController.unvote)
 activityRouter.delete("/:pit_id/voted", VoteController.deleteVote)
 activityRouter.get("/:pit_id/votes/:type/end", VoteController.getWinners)
+activityRouter.get("/:pit_id/voted", VoteController.getUserVoted)
+activityRouter.post("/:pit_id/votes/:type/endOwner", VoteController.endOwner)
+

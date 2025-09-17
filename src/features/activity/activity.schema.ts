@@ -129,6 +129,16 @@ export const DeleteVoteBody = z.object({
   user_id: z.string().min(1),
 })
 
+export const GetUserVotedParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  pit_id: z.coerce.number().int().positive(),
+})
+
+export const PostVoteEndOwnerParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  pit_id: z.coerce.number().int().positive(),
+  type: z.enum(["places","events"]),
+})
 
 
 // ---------- Response Schemas ----------
@@ -175,4 +185,10 @@ export const EventVotingResponse = z.object({
     is_voted: z.boolean(),
     is_most_voted: z.string(),
   }),
+})
+
+export const GetUserVotedResponse = z.object({
+  voted: z.boolean(),
+  pit_id: z.number().optional(),
+  event_name: z.string().optional(),
 })

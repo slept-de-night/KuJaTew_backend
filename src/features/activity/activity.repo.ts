@@ -1,6 +1,7 @@
 import { query } from "../../core/db"
 import { UsersRepo } from "../users/users.repo"
 
+
 // ---------- Activities ----------
 export const ActivityRepo = {
   async listAll(trip_id: number) {
@@ -54,6 +55,7 @@ export const ActivityRepo = {
     const res = await query(sql, [pit_id])
     return res.rows.length > 0
   },
+  
 }
 
 // ---------- Events ----------
@@ -379,15 +381,57 @@ export const VoteRepo = {
   },
 
   async patchVote(trip_id: number, pit_id: number, patch: any) {
-    const sql = `
-      UPDATE places_in_trip
+    const oldBlockRes = await query(
+      `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end
+      FROM places_in_trip
+      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
+      [trip_id, pit_id]
+    )
+
+    if (!oldBlockRes.rows || oldBlockRes.rows.length === 0) {
+      throw new Error(`Voting block ${pit_id} not found`)
+    }
+
+    const oldRow = oldBlockRes.rows[0] as {
+      date: string
+      time_start: string
+      time_end: string
+    }
+
+    const updateBlock = await query(
+      `UPDATE places_in_trip
       SET date=$3, time_start=$4, time_end=$5
       WHERE trip_id=$1 AND pit_id=$2
-      RETURNING *
-    `
-    const res = await query(sql, [trip_id, pit_id, patch.date, patch.start_time, patch.end_time])
-    return res.rows[0]
+      RETURNING *`,
+      [trip_id, pit_id, patch.date, patch.start_time, patch.end_time]
+    )
+
+    await query(
+      `UPDATE places_in_trip
+      SET date=$4, time_start=$5, time_end=$6
+      WHERE trip_id=$1
+        AND date=$2
+        AND time_start=$3
+        AND is_vote=true
+        AND pit_id<>$7`,
+      [trip_id, oldRow.date, oldRow.time_start, patch.date, patch.start_time, patch.end_time, pit_id]
+    )
+
+    await query(
+      `UPDATE vote
+      SET time_start=$4
+      WHERE trip_id=$1
+        AND pit_id IN (
+          SELECT pit_id
+          FROM places_in_trip
+          WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
+        )`,
+      [trip_id, oldRow.date, oldRow.time_start, patch.date, patch.start_time]
+    )
+
+    return updateBlock.rows[0]
   },
+
 
 async removeVotingBlock(trip_id: number, pit_id: number) {
     const blockRes = await query(
@@ -544,6 +588,99 @@ async getTopEvents(trip_id: number, pit_id: number) {
   )
 
   return votesRes.rows
+},
+
+async checkTimeOverlap(
+  trip_id: number,
+  pit_id: number | null,
+  date: string,
+  time_start: string,
+  time_end: string
+) {
+  const res = await query(
+    `
+    SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
+    FROM places_in_trip
+    WHERE trip_id = $1
+      AND date = $2
+      AND NOT (
+        (place_id > 0 AND is_vote = true AND is_event = false) OR
+        (place_id = 0 AND is_vote = true AND is_event = true)
+      )
+      ${pit_id ? "AND pit_id <> $5" : ""}
+      AND ($3 < time_end AND $4 > time_start)
+    `,
+    pit_id ? [trip_id, date, time_start, time_end, pit_id] : [trip_id, date, time_start, time_end]
+  )
+
+  return res.rows
+},
+
+async checkUserVoted(trip_id: number, pit_id: number, user_id: string) {
+  const res = await query(
+    `SELECT pit_id, event_name
+     FROM vote
+     WHERE trip_id=$1 AND pit_id=$2 AND user_id=$3`,
+    [trip_id, pit_id, user_id]
+  )
+  if (!res.rows || res.rows.length === 0) {
+    return { voted: false }
+  }
+
+  const row = res.rows[0] as { pit_id: number; event_name: string | null }
+  return {
+    voted: true,
+    pit_id: row.pit_id,
+    event_name: row.event_name ?? null,
+  }
+},  
+
+async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
+  const candidateRes = await query(
+    `SELECT pit_id, date::text AS date, time_start::text AS time_start, time_end::text AS time_end, place_id, event_names
+     FROM places_in_trip
+     WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND ${
+       type==="places" ? "is_event=false AND place_id>0" : "is_event=true AND place_id>0"
+     }`,
+    [trip_id, pit_id]
+  )
+  if (!candidateRes.rows || candidateRes.rows.length === 0) {
+    throw new Error(`Pit ${pit_id} is not a candidate of type ${type}`)
+  }
+
+  const cand = candidateRes.rows[0] as {
+    pit_id: number
+    date: string
+    time_start: string
+    time_end: string
+    place_id: number
+    event_names: string | null
+  }
+
+  const blockRes = await query(
+    `SELECT pit_id
+     FROM places_in_trip
+     WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND time_end=$4
+       AND is_vote=true AND is_event=$5 `,
+    [trip_id, cand.date, cand.time_start, cand.time_end, type==="events"]
+  )
+
+  if (!blockRes.rows || blockRes.rows.length === 0) {
+    throw new Error(`Vote block not found for candidate ${pit_id}`)
+  }
+
+  const block = blockRes.rows[0] as { pit_id: number }
+  const blockPitId = block.pit_id
+
+  const updateRes = await query(
+    `UPDATE places_in_trip
+     SET place_id=$3, event_names=$4, is_vote=false
+     WHERE trip_id=$1 AND pit_id=$2
+     RETURNING *`,
+    [trip_id, blockPitId, cand.place_id, cand.event_names]
+  )
+
+  return updateRes.rows[0]
 }
 
 
