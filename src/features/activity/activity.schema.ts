@@ -3,8 +3,13 @@ import { z } from "zod"
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
 const isoTime = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "time must be HH:mm")
 
-export const ParamsTrip = z.object({ trip_id: z.coerce.number().int().positive() })
-export const ParamsTripPit = ParamsTrip.extend({ pit_id: z.coerce.number().int().positive() })
+export const ParamsTrip = z.object({
+  trip_id: z.preprocess((v) => Number(v), z.number().int().positive())
+})
+
+export const ParamsTripPit = ParamsTrip.extend({
+  pit_id: z.preprocess((v) => Number(v), z.number().int().positive())
+})
 
 // ---------- Activities ----------
 
@@ -51,47 +56,80 @@ export const UpdatePlaceBody = z.object({
 })
 
 // ---------- Voting ----------
-export const GetVotesParams = ParamsTripPit
-export const PostVoteTypeParams = ParamsTrip.extend({ type: z.enum(["places","events"]) })
+export const GetVotesParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  pit_id: z.coerce.number().int().positive(),
+})
+
+export const PostVoteTypeParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  type: z.enum(["places","events"]),
+})
+
+export const PostVoteByPlaceParams = ParamsTripPit.extend({
+  place_id: z.preprocess((v) => Number(v), z.number().int().nonnegative())
+})
 
 export const InitVotingBodyPlaces = z.object({
-  place_id: z.literal(0),
-  trip_id: z.number().int().positive(),
-  date: isoDate,
-  time_start: isoTime,
-  time_end: isoTime,
+  trip_id: z.coerce.number().int().positive(),   
+  place_id: z.literal(0), 
+  date: z.string(),
+  time_start: z.string(),
+  time_end: z.string(),
   is_vote: z.literal(true),
   is_event: z.literal(false),
 })
 
 export const InitVotingBodyEvents = z.object({
-  place_id: z.literal(0),
-  trip_id: z.number().int().positive(),
-  date: isoDate,
-  time_start: isoTime,
-  time_end: isoTime,
+  trip_id: z.coerce.number().int().positive(),   
+  place_id: z.coerce.number().int().positive(),
+  date: z.string(),
+  time_start: z.string(),
+  time_end: z.string(),
   is_vote: z.literal(true),
   is_event: z.literal(true),
 })
 
-export const PostVoteByPlaceParams = ParamsTripPit.extend({ place_id: z.number().int().positive() })
 
-export const PostVoteByTypeEndParams = ParamsTripPit.extend({ type: z.enum(["places","events"]) })
-export const PostVoteByTypeEndBodyPlaces = z.object({ pit_id: z.number().int().positive() })
-export const PostVoteByTypeEndBodyEvents = z.object({ event_name: z.string().min(1) })
-
-export const PostVotedTypeParams = ParamsTripPit.extend({ type: z.enum(["places","events"]) })
-export const PostVotedTypeBodyEvents = z.object({ event_name: z.string().min(1) })
-export const PostVotedTypeBodyPlaces = z.object({})
-
-export const PatchVoteParams = ParamsTripPit
-export const PatchVoteBody = z.object({
-  date: isoDate,
-  start_time: isoTime,
-  end_time: isoTime,
+export const PostVoteByTypeEndParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  pit_id: z.coerce.number().int().positive(),
+  type: z.enum(["places","events"]),
 })
 
-export const DeleteVoteParams = ParamsTripPit
+export const PostVotedTypeParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  pit_id: z.coerce.number().int().positive(),
+  type: z.enum(["places","events"])
+})
+export const PostVotedTypeBodyPlaces = z.object({user_id: z.string()})
+export const PostVotedTypeBodyEvents = z.object({
+  user_id: z.string(),
+  event_name: z.string().min(1),
+})
+
+export const PatchVoteParams = z.object({
+  trip_id: z.coerce.number().int().positive(),
+  pit_id: z.coerce.number().int().positive(),
+})
+export const PatchVoteBody = z.object({
+  date: z.string(),
+  start_time: z.string(),
+  end_time: z.string(),
+})
+
+export const DeleteVoteParams = PatchVoteParams
+
+export const DeleteVoteParamss = z.object({
+  trip_id: z.coerce.number(),
+  pit_id: z.coerce.number(),
+})
+
+export const DeleteVoteBody = z.object({
+  user_id: z.string().min(1),
+})
+
+
 
 // ---------- Response Schemas ----------
 export const ActivityItem = z.object({

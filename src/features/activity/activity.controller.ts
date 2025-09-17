@@ -4,6 +4,19 @@ import { ZodError } from "zod"
 
 // -------- Activities --------
 export const ActivityController = { 
+  listAll: async (req:any,res:any,next:any) => {
+    try {
+      const { trip_id } = S.ParamsTrip.parse(req.params)
+      const result = await ActivityService.listAll(trip_id)
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
+      next(err)
+    }
+  },
+
   list: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, date } = S.GetActivitiesByDateParams.parse(req.params)
@@ -94,25 +107,28 @@ export const PlaceController = {
 const getUserId = (req:any) => req.user?.id || req.headers["x-user-id"]
 
 export const VoteController = {
-  list: async (req:any,res:any,next:any) => {
+  list: async (req: any, res: any, next: any) => {
     try {
       const { trip_id, pit_id } = S.GetVotesParams.parse(req.params)
-      const user_id = getUserId(req)
-      const result = await VoteService.list(trip_id, pit_id, user_id) 
+      const result = await VoteService.list(trip_id, pit_id)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res
+          .status(400)
+          .json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   },
 
-  postInit: async (req:any,res:any,next:any) => {
+  postInit: async (req:any, res:any, next:any) => {
     try {
-      const { trip_id, type } = S.PostVoteTypeParams.parse(req.params)
+      const { trip_id, type} = S.PostVoteTypeParams.parse(req.params)
       const body = type === "places"
         ? S.InitVotingBodyPlaces.parse(req.body)
         : S.InitVotingBodyEvents.parse(req.body)
-      const result = await VoteService.init(+trip_id, type, body)
+      const result = await VoteService.init(+trip_id, type , body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
@@ -120,40 +136,41 @@ export const VoteController = {
     }
   },
 
-  voteByPlace: async (req:any,res:any,next:any) => {
+voteByCandidate: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, pit_id, place_id } = S.PostVoteByPlaceParams.parse(req.params)
-      const user_id = getUserId(req)
-      const result = await VoteService.voteByPlace(trip_id, pit_id, place_id, user_id) 
+      const body = req.body 
+      const result = await VoteService.voteByCandidate(trip_id, pit_id, place_id, body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   },
 
-  voteTypeEnd: async (req:any,res:any,next:any) => {
+  voteTypeEnd: async (req: any, res: any, next: any) => {
     try {
       const { trip_id, pit_id, type } = S.PostVoteByTypeEndParams.parse(req.params)
-      const body = type === "places"
-        ? S.PostVoteByTypeEndBodyPlaces.parse(req.body)
-        : S.PostVoteByTypeEndBodyEvents.parse(req.body)
-      const result = await VoteService.voteTypeEnd(trip_id, pit_id, type, body)
+      // ไม่ต้อง parse body/ไม่ต้องส่ง body ให้ service แล้ว
+      const result = await VoteService.voteTypeEnd(trip_id, pit_id, type)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   },
 
-  votedType: async (req:any,res:any,next:any) => {
+  votedType: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id, type } = S.PostVotedTypeParams.parse(req.params)
       const body = type === "places"
         ? S.PostVotedTypeBodyPlaces.parse(req.body)
         : S.PostVotedTypeBodyEvents.parse(req.body)
-      const user_id = getUserId(req)
-      const result = await VoteService.votedType(trip_id, pit_id, type, user_id, body) 
+      const result = await VoteService.votedType(trip_id, pit_id, type, body.user_id, body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
@@ -161,7 +178,7 @@ export const VoteController = {
     }
   },
 
-  patchVote: async (req:any,res:any,next:any) => {
+  patchVote: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id } = S.PatchVoteParams.parse(req.params)
       const patch = S.PatchVoteBody.parse(req.body)
@@ -173,7 +190,7 @@ export const VoteController = {
     }
   },
 
-  unvote: async (req:any,res:any,next:any) => {
+  unvote: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id } = S.DeleteVoteParams.parse(req.params)
       await VoteService.unvote(trip_id, pit_id)
@@ -183,4 +200,17 @@ export const VoteController = {
       next(err)
     }
   },
+
+  deleteVote: async (req: any, res: any, next: any) => {
+  try {
+    const { trip_id, pit_id } = S.DeleteVoteParamss.parse(req.params)
+    const { user_id } = req.body  // รับ user_id จาก client
+
+    const result = await VoteService.deleteVote(trip_id, pit_id, user_id)
+    res.status(200).json({ success: result })
+  } catch (err) {
+      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  }
 }

@@ -4,6 +4,7 @@ import { ActivityController, EventController, PlaceController, VoteController } 
 export const activityRouter = express.Router({ mergeParams:true })
 
 // Activities
+activityRouter.get("/AllDate", ActivityController.listAll)
 activityRouter.get("/:date", ActivityController.list)
 activityRouter.delete("/:pit_id", ActivityController.remove)
 
@@ -18,8 +19,9 @@ activityRouter.patch("/:pit_id/places", PlaceController.update)
 // Voting
 activityRouter.get("/:pit_id/votes", VoteController.list)
 activityRouter.post("/votes/:type", VoteController.postInit)
-activityRouter.post("/:pit_id/votes/:place_id", VoteController.voteByPlace)
+activityRouter.post("/:pit_id/votes/:place_id", VoteController.voteByCandidate)
 activityRouter.post("/:pit_id/votes/:type/end", VoteController.voteTypeEnd)
 activityRouter.post("/:pit_id/voted/:type", VoteController.votedType)
 activityRouter.patch("/:pit_id/votes", VoteController.patchVote)
 activityRouter.delete("/:pit_id/votes", VoteController.unvote)
+activityRouter.delete("/:pit_id/voted", VoteController.deleteVote)

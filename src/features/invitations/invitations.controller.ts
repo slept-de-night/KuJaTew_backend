@@ -4,6 +4,9 @@ import * as schema from "./invitations.schema";
 import { ZodError } from "zod";
 
 const TEST_USER_ID = "OSHI"; //for testing only
+const TEST_ACCEPT_USER_ID = "keen1234"
+const TEST_REJECT_USER_ID = "zenne"
+const TEST_JOIN_USER_ID = "nutty"
 
 export async function invite(req: Request, res: Response, next: NextFunction) {
   try {
@@ -11,9 +14,9 @@ export async function invite(req: Request, res: Response, next: NextFunction) {
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
-    const {user_name } = schema.user_name_schema.parse(req.body);
+    const { name } = schema.user_name_schema.parse(req.body);
 
-    const invited = await service.invite(user_id, trip_id, user_name);
+    const invited = await service.invite(user_id, trip_id, name);
     if (!invited) {
       return res.status(200).json({ message: "user already invited" });
     }
@@ -28,11 +31,11 @@ export async function invite(req: Request, res: Response, next: NextFunction) {
 
 export async function code_join(req: Request, res: Response, next: NextFunction) {
   try {
-    const user_id = TEST_USER_ID; //for testing only
+    const user_id = TEST_JOIN_USER_ID; //for testing only
 
-    const { trip_code, trip_password } = schema.trip_code_password_schema.parse(req.body);
+    const { trip_code, trip_pass } = schema.trip_code_password_schema.parse(req.body);
 
-    const joined = await service.code_join(user_id, trip_code, trip_password);
+    const joined = await service.code_join(user_id, trip_code, trip_pass);
     if (!joined) {
       return res.status(200).json({ message: "user already joined" });
     }
@@ -47,7 +50,7 @@ export async function code_join(req: Request, res: Response, next: NextFunction)
 
 export async function accept_invite(req: Request, res: Response, next: NextFunction) {
   try {
-    const user_id = TEST_USER_ID; //for testing only
+    const user_id = TEST_ACCEPT_USER_ID; //for testing only
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
@@ -66,7 +69,7 @@ export async function accept_invite(req: Request, res: Response, next: NextFunct
 
 export async function reject_invite(req: Request, res: Response, next: NextFunction) {
   try {
-    const user_id = TEST_USER_ID; //for testing only
+    const user_id = TEST_REJECT_USER_ID; //for testing only
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
@@ -74,7 +77,7 @@ export async function reject_invite(req: Request, res: Response, next: NextFunct
     if (!rejected) {
       return res.status(200).json({ message: "user already reject invite" });
     }
-    return res.status(201).json({ message: "rejected invite successfully" });
+    return res.status(201).json({ message: "reject invite successfully" });
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });

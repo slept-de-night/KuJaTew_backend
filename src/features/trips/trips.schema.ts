@@ -1,4 +1,4 @@
-import z from 'zod';
+import z, { date, file } from 'zod';
 
 export const TripSchema = z.object({ 
     trip_id:z.number(),
@@ -10,8 +10,7 @@ export const TripSchema = z.object({
     planning_status:z.boolean()
 });
 
-export const utSchema = z.object({
-    user_id: z.string().trim().min(1, "user_id required"),
+export const tSchema = z.object({
     trip_id: z.coerce.number().int().positive("trip_id must be a positive integer"),
 });
 
@@ -49,4 +48,25 @@ export const tripsumschema = z.object({
     end_date:z.date(),
     budget:z.number(),
     poster_image_link:z.string().nullable(),
+});
+
+export const pschema = z.object({
+    joined_people:z.number()
+});
+
+export const TripCreateSchema = z.object({
+    trip_name: z.string(),
+    start_date: z.date(),
+    end_date: z.date(),
+    trip_code: z.string(),
+    trip_pass: z.string(),
+});
+
+export const TripUpdateSchema = z.object({ 
+    trip_name: z.string().default(""), 
+    start_date: z.date().default(()=>new Date()),
+    end_date: z.date().default(()=>new Date()),
+    trip_code: z.string().default(""), 
+    trip_pass: z.string().default(""), 
+    trip_image: z.string().openapi({ type: "string", format: "binary" }).optional(), 
 });
