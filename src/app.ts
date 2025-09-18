@@ -28,7 +28,7 @@ export function buildApp() {
 
     const app = express();
     const openApiDoc = buildOpenApiDoc();
-    app.use(cors);
+    app.use(cors());
     app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDoc));
     app.use(express.json({ limit: '1mb' }));
 

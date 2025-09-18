@@ -31,7 +31,7 @@ const TimeHHMM = z.string().regex(
 );
 
 const IATA = z.string().length(3, "3-letter IATA code");
-const CountryFull = z.string().min(2).max(56); // full name like "Thailand"
+const CountryFull = z.string().min(2).max(56);
 
 export const CreateFlightBodySchema = z.object({
   dep_date: DateDDMMYYYY,
@@ -44,6 +44,49 @@ export const CreateFlightBodySchema = z.object({
   arr_country: CountryFull,
   arr_airp_code: IATA,
 
-  airl_name: z.string().min(2).max(64), // airline name
+  airl_name: z.string().min(2).max(64),
 });
 export type CreateFlightBody = z.infer<typeof CreateFlightBodySchema>;
+
+//swagger
+export const FlightItemSchema = z.object({
+  flight_id: z.number().int().openapi({ example: 123 }),
+  dep_date: z.string().openapi({ example: "01/09/2025" }),
+  dep_time: z.string().openapi({ example: "08:45" }),
+  dep_country: z.string().openapi({ example: "Thailand" }),
+  dep_airport_code: z.string().openapi({ example: "BKK" }),
+
+  arr_date: z.string().openapi({ example: "02/09/2025" }),
+  arr_time: z.string().openapi({ example: "12:30" }),
+  arr_country: z.string().openapi({ example: "Japan" }),
+  arr_airport_code: z.string().openapi({ example: "HND" }),
+
+  airline: z.string().openapi({ example: "Thai Airways" }),
+});
+
+export const FlightListResponseSchema = z.object({
+  flights: z.array(FlightItemSchema),
+});
+
+export const TripIdParamSchema = z.object({
+  trip_id: z.number().int().openapi({
+    param: {
+      name: "trip_id",
+      in: "path",
+      required: true,
+    },
+    example: 2,
+  }),
+});
+
+export const FlightIdParamSchema = z.object({
+  flight_id: z.number().int().openapi({
+    param: {
+      name: "flight_id",
+      in: "path",
+      required: true,
+    },
+  }),
+});
+
+export const TripFlightParamSchema = TripIdParamSchema.merge(FlightIdParamSchema);
