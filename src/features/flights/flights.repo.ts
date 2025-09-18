@@ -80,6 +80,7 @@ export async function post_flight(user_id: string, input: FlightInsert, trip_id:
       airline
     )
     VALUES ($1,TO_DATE($2, 'DD/MM/YYYY'),$3,$4,$5,TO_DATE($6, 'DD/MM/YYYY'),$7,$8,$9,$10)
+    ON CONFLICT (trip_id, airline, origin, depart_date, depart_time, destination) DO NOTHING
     RETURNING *;
   `;
 
@@ -96,8 +97,8 @@ export async function post_flight(user_id: string, input: FlightInsert, trip_id:
     input.airl_name,
   ];
 
-  const { rows } = await query(sql, params);
-  return rows[0];
+  const res = await query(sql, params);
+  return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
 
 export async function put_flight(user_id: string, input: FlightInsert, trip_id: number, flight_id: number) {
@@ -143,6 +144,6 @@ export async function put_flight(user_id: string, input: FlightInsert, trip_id: 
     flight_id
   ];
 
-  const { rows } = await query(sql, params);
-  return rows[0];
+  const res = await query(sql, params);
+  return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
