@@ -198,10 +198,10 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       } 
   },
 
-  unvote: async (req:any, res:any, next:any) => {
+  cleanVote: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id } = S.DeleteVoteParams.parse(req.params)
-      await VoteService.unvote(trip_id, pit_id)
+      await VoteService.cleanVote(trip_id, pit_id)
       res.status(204).send()
     } catch (err) {
       if (err instanceof ZodError) {

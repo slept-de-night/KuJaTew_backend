@@ -96,8 +96,8 @@ export const VoteService = {
     return VoteRepo.patchVote(trip_id, pit_id, patch)
   },
 
-  unvote: (trip_id:number, pit_id:number) =>
-    VoteRepo.removeVotingBlock(trip_id, pit_id),
+  cleanVote: (trip_id:number, pit_id:number) =>
+    VoteRepo.cleanVotingBlock(trip_id, pit_id),
 
   async deleteVote(trip_id: number, pit_id: number, user_id: string) {
   return await VoteRepo.deleteVote(trip_id, pit_id, user_id)

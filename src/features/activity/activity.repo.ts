@@ -452,16 +452,16 @@ export const VoteRepo = {
   },
 
 
-async removeVotingBlock(trip_id: number, pit_id: number) {
+async cleanVotingBlock(trip_id: number, pit_id: number) {
     const blockRes = await query(
       `SELECT date::text AS date, time_start::text AS time_start
       FROM places_in_trip
-      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
+      WHERE trip_id=$1 AND pit_id=$2`,
       [trip_id, pit_id]
     )
 
     if (!blockRes.rows || blockRes.rows.length === 0) {
-      throw new Error(`Voting block ${pit_id} not found or inactive`)
+      throw new Error(`${pit_id} not found or inactive`)
     }
 
     const row = blockRes.rows[0] as {
@@ -482,9 +482,9 @@ async removeVotingBlock(trip_id: number, pit_id: number) {
 
     const res = await query(
       `DELETE FROM places_in_trip
-      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
+      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true AND AND pit_id<>$4
       RETURNING pit_id`,
-      [trip_id, row.date, row.time_start]
+      [trip_id, row.date, row.time_start , pit_id]
     )
 
     return (res.rows?.length ?? 0) > 0

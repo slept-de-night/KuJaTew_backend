@@ -3,6 +3,7 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as schema from "./activity.schema";
 
 export function registerActivity(registry: OpenAPIRegistry) {
+  
   // Register all schemas
   registry.register("ActivityItem", schema.ActivityItem);
   registry.register("ActivitiesResponse", schema.ActivitiesResponse);
