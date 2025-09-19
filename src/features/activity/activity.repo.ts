@@ -659,7 +659,7 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
     `SELECT pit_id, date::text AS date, time_start::text AS time_start, time_end::text AS time_end, place_id, event_names
      FROM places_in_trip
      WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true AND ${
-       type==="places" ? "is_event=false AND place_id>0" : "is_event=true AND place_id>0"
+       type==="places" ? "is_event=false AND place_id>0" : "is_event=true AND place_id=0"
      }`,
     [trip_id, pit_id]
   )
