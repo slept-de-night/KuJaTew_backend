@@ -236,8 +236,8 @@ voteByCandidate: async (req:any,res:any,next:any) => {
   },
   getUserVoted: async (req:any, res:any, next:any) => {
     try {
-      const { trip_id, pit_id } = S.GetUserVotedParams.parse(req.params)
-      const user_id = req.user?.id || req.headers["x-user-id"]
+      const { trip_id, pit_id, } = S.GetUserVotedParams.parse(req.params)
+      const user_id = req.user?.id || req.headers["user_id"]
       if (!user_id) return res.status(400).json({ message: "Missing user_id" })
 
       const result = await VoteService.checkUserVoted(trip_id, pit_id, String(user_id))
