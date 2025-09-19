@@ -102,10 +102,9 @@ export const PostVotedTypeParams = z.object({
   pit_id: z.coerce.number().int().positive(),
   type: z.enum(["places","events"])
 })
-export const PostVotedTypeBodyPlaces = z.object({user_id: z.string()})
+export const PostVotedTypeBodyPlaces = z.object({})
 export const PostVotedTypeBodyEvents = z.object({
-  user_id: z.string(),
-  event_name: z.string().min(1),
+  event_name: z.string().min(1)
 })
 
 export const PatchVoteParams = z.object({
@@ -126,7 +125,6 @@ export const DeleteVoteParamss = z.object({
 })
 
 export const DeleteVoteBody = z.object({
-  user_id: z.string().min(1),
 })
 
 export const GetUserVotedParams = z.object({

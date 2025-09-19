@@ -114,7 +114,7 @@ export const PlaceController = {
 }
 
 // -------- Voting --------
-const getUserId = (req:any) => req.user?.id || req.headers["x-user-id"]
+const getUserId = (req:any) => req.user?.id || req.headers["user_id"]
 
 export const VoteController = {
   list: async (req: any, res: any, next: any) => {
@@ -171,7 +171,9 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       const body = type === "places"
         ? S.PostVotedTypeBodyPlaces.parse(req.body)
         : S.PostVotedTypeBodyEvents.parse(req.body)
-      const result = await VoteService.votedType(trip_id, pit_id, type, body.user_id, body)
+      const user_id = req.user?.id || req.headers["user_id"]
+      if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+      const result = await VoteService.votedType(trip_id, pit_id, type, String(user_id), body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
@@ -212,9 +214,9 @@ voteByCandidate: async (req:any,res:any,next:any) => {
   deleteVote: async (req: any, res: any, next: any) => {
   try {
     const { trip_id, pit_id } = S.DeleteVoteParamss.parse(req.params)
-    const { user_id } = req.body  
-
-    const result = await VoteService.deleteVote(trip_id, pit_id, user_id)
+    const user_id = req.user?.id || req.headers["user_id"]
+    if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+    const result = await VoteService.deleteVote(trip_id, pit_id, String(user_id))
     res.status(200).json({ success: result })
   } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })

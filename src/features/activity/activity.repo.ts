@@ -438,14 +438,14 @@ export const VoteRepo = {
 
     await query(
       `UPDATE vote
-      SET time_start=$4
+      SET date=$5, time_start=$4
       WHERE trip_id=$1
         AND pit_id IN (
           SELECT pit_id
           FROM places_in_trip
           WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
         )`,
-      [trip_id, oldRow.date, oldRow.time_start, patch.date, patch.start_time]
+      [trip_id, oldRow.date, oldRow.time_start, patch.start_time, patch.date]
     )
 
     return updateBlock.rows[0]

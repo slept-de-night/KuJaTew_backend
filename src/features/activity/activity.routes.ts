@@ -8,7 +8,7 @@ import { requireRole } from "./activity.service"
 function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
   return async (req:any, res:any, next:any) => {
     try {
-      const user_id = req.user?.id || req.headers["x-user-id"]
+      const user_id = req.user?.id || req.headers["user_id"]
       if (!user_id) return res.status(401).json({ message: "Missing user" })
       const { trip_id } = req.params
       await requireRole(Number(trip_id), String(user_id), minRole)
