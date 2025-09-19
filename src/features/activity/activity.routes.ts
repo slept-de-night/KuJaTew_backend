@@ -3,28 +3,44 @@ import { ActivityController, EventController, PlaceController, VoteController } 
 
 export const activityRouter = express.Router({ mergeParams:true })
 
+import { requireRole } from "./activity.service"
+
+function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
+  return async (req:any, res:any, next:any) => {
+    try {
+      const user_id = req.user?.id || req.headers["x-user-id"]
+      if (!user_id) return res.status(401).json({ message: "Missing user" })
+      const { trip_id } = req.params
+      await requireRole(Number(trip_id), String(user_id), minRole)
+      return handler(req,res,next)
+    } catch (err:any) {
+      return res.status(403).json({ message: err.message || "Forbidden" })
+    }
+  }
+}
+
 // Activities
-activityRouter.get("/AllDate", ActivityController.listAll)
-activityRouter.get("/:date", ActivityController.list)
-activityRouter.delete("/:pit_id", ActivityController.remove)
+activityRouter.get("/AllDate", withRole("Viewer", ActivityController.listAll))
+activityRouter.get("/:date", withRole("Viewer", ActivityController.list))
+activityRouter.delete("/:pit_id", withRole("Editor", ActivityController.remove))
 
 // Events
-activityRouter.post("/events", EventController.create)
-activityRouter.patch("/:pit_id/events", EventController.update)
+activityRouter.post("/events", withRole("Editor", EventController.create))
+activityRouter.patch("/:pit_id/events", withRole("Editor", EventController.update))
 
 // Places
-activityRouter.post("/places", PlaceController.add)
-activityRouter.patch("/:pit_id/places", PlaceController.update)
+activityRouter.post("/places", withRole("Editor", PlaceController.add))
+activityRouter.patch("/:pit_id/places", withRole("Editor", PlaceController.update))
 
 // Voting
-activityRouter.get("/:pit_id/votes", VoteController.list)
-activityRouter.post("/votes/:type", VoteController.postInit)
-activityRouter.post("/:pit_id/votes/:place_id", VoteController.voteByCandidate)
-activityRouter.post("/:pit_id/voted/:type", VoteController.votedType)
-activityRouter.patch("/:pit_id/votes", VoteController.patchVote)
-activityRouter.delete("/:pit_id/votes", VoteController.unvote)
-activityRouter.delete("/:pit_id/voted", VoteController.deleteVote)
-activityRouter.get("/:pit_id/votes/:type/end", VoteController.getWinners)
-activityRouter.get("/:pit_id/voted", VoteController.getUserVoted)
-activityRouter.post("/:pit_id/votes/:type/endOwner", VoteController.endOwner)
+activityRouter.get("/:pit_id/votes", withRole("Viewer", VoteController.list))
+activityRouter.post("/votes/:type", withRole("Owner", VoteController.postInit))
+activityRouter.post("/:pit_id/votes/:place_id", withRole("Editor", VoteController.voteByCandidate))
+activityRouter.post("/:pit_id/voted/:type", withRole("Viewer", VoteController.votedType))
+activityRouter.patch("/:pit_id/votes", withRole("Editor", VoteController.patchVote))
+activityRouter.delete("/:pit_id/votes", withRole("Owner", VoteController.unvote))
+activityRouter.delete("/:pit_id/voted", withRole("Viewer", VoteController.deleteVote))
+activityRouter.get("/:pit_id/votes/:type/end", withRole("Viewer", VoteController.getWinners))
+activityRouter.get("/:pit_id/voted", withRole("Viewer", VoteController.getUserVoted))
+activityRouter.post("/:pit_id/votes/:type/endOwner", withRole("Owner", VoteController.endOwner))
 

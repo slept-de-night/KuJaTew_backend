@@ -1,9 +1,28 @@
 import { query } from "../../core/db"
+import { pool } from '../../config/db';
 import { UsersRepo } from "../users/users.repo"
 
 
 // ---------- Activities ----------
 export const ActivityRepo = {
+  async check_user_role(trip_id: number, user_id: string): Promise<"NoUser" | "Viewer" | "Editor" | "Owner"> {
+    const query = `
+      SELECT role
+      FROM trip_collaborators
+      WHERE trip_id = $1 AND user_id = $2 AND accepted = TRUE
+    `;
+    const values = [trip_id, user_id];
+    const result = await pool.query(query, values);
+
+    if (result.rowCount === 0) return "NoUser";
+
+    const role = result.rows[0].role;
+    if (role === "Owner") return "Owner";
+    if (role === "Editor") return "Editor";
+    if (role === "Viewer") return "Viewer";
+    return "NoUser";
+  },
+
   async listAll(trip_id: number) {
     const sql = `
       SELECT pit.pit_id, pit.place_id, pit.trip_id, pit.date,
@@ -685,3 +704,4 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
 
 
 }
+

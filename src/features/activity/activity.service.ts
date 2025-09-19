@@ -1,6 +1,16 @@
 import { ActivityRepo, EventRepo, PlaceRepo, VoteRepo } from "./activity.repo"
 import { ActivitiesResponse, PlacesVotingResponse, EventVotingResponse } from "./activity.schema"
 
+const roleLevel = { "NoUser": 0, "Viewer": 1, "Editor": 2, "Owner": 3 }
+
+export async function requireRole(trip_id: number, user_id: string, minRole:"Viewer"|"Editor"|"Owner") {
+  const role = await ActivityRepo.check_user_role(trip_id, user_id)
+  if (roleLevel[role] < roleLevel[minRole]) {
+    throw new Error(`Forbidden: need at least ${minRole}`)
+  }
+  return role
+}
+
 export const ActivityService = {
   async listAll(trip_id: number) {
     const rows = await ActivityRepo.listAll(trip_id)
@@ -103,6 +113,4 @@ export const VoteService = {
 
   endOwner: (trip_id:number, pit_id:number, type:"places"|"events") =>
   VoteRepo.endOwner(trip_id, pit_id, type),
-
-
 }
