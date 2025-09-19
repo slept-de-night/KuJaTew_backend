@@ -6,3 +6,5 @@ JWT_REFRESH_SECRET=690f1d13b1c7fc70d3e9e080a85b5df8233d3c086729c17cc9c7c07035d0c
 GOOGLE_ANDROID_CLIENT_ID=999598547228-tjvs38tp470mri4gfcdfl73qapgaeiq2.apps.googleusercontent.com
 GOOGLE_WEB_CLIENT_ID=999598547228-cgjn9gspjg2d1m2m2q3rp277ovl58qhb.apps.googleusercontent.com
 DATABASE_URL=DATABASE_URL=postgresql://postgres.kfvtpdwnpkkrcsjnopax:weloveoshi69@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
+
+GOOGLE_PLACE_API_KEY=dummy

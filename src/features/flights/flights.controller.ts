@@ -45,8 +45,11 @@ export async function post_flight(req: Request, res: Response, next: NextFunctio
     const { trip_id } = schema.trip_id_schema.parse(req.params);
     const body = schema.CreateFlightBodySchema.parse(req.body);
 
-    const row = await service.post_flight(user_id, body, trip_id);
-    return res.status(201).json(row);
+    const added = await service.post_flight(user_id, body, trip_id);
+    if (!added) {
+      return res.status(200).json({ message: "flight already exist in trip" });
+    }
+    return res.status(201).json({ message: "flight added" });
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
@@ -61,8 +64,11 @@ export async function put_flight(req: Request, res: Response, next: NextFunction
     const { trip_id, flight_id } = schema.trip_flight_schema.parse(req.params);
     const body = schema.CreateFlightBodySchema.parse(req.body);
 
-    const row = await service.put_flight(user_id, body, trip_id, flight_id);
-    return res.status(201).json(row);
+    const updated = await service.put_flight(user_id, body, trip_id, flight_id);
+    if(!updated) {
+      return res.status(404).json( { message: "Flight Not found"} );
+    }
+    return res.status(201).json( { message: "Flight updated"} );
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
