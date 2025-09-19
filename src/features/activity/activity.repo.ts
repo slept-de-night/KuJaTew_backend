@@ -464,15 +464,19 @@ async cleanVotingBlock(trip_id: number, pit_id: number) {
           SELECT pit_id
           FROM places_in_trip
           WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
-        )`,
+        )`, 
       [trip_id, row.date, row.time_start]
     )
 
     const res = await query(
       `DELETE FROM places_in_trip
-      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true AND pit_id<>$4
+      WHERE trip_id=$1
+        AND date=$2
+        AND time_start=$3
+        AND is_vote=true
+        AND pit_id<>$4
       RETURNING pit_id`,
-      [trip_id, row.date, row.time_start , pit_id]
+      [trip_id, row.date, row.time_start, pit_id]
     )
 
     return (res.rows?.length ?? 0) > 0
@@ -679,15 +683,26 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
   const block = blockRes.rows[0] as { pit_id: number }
   const blockPitId = block.pit_id
 
+  if (type === "places") {
+    const updateRes = await query(
+      `UPDATE places_in_trip
+      SET place_id=$3, event_names=$4, is_vote=false
+      WHERE trip_id=$1 AND pit_id=$2 AND place_id = 0
+      RETURNING *`,
+      [trip_id, blockPitId, cand.place_id, cand.event_names]
+    )
+    return updateRes.rows[0]
+  }
+  
   const updateRes = await query(
     `UPDATE places_in_trip
-     SET place_id=$3, event_names=$4, is_vote=false
-     WHERE trip_id=$1 AND pit_id=$2
-     RETURNING *`,
+    SET place_id=$3, event_names=$4, is_vote=false
+    WHERE trip_id=$1 AND pit_id=$2 AND place_id > 0
+    RETURNING *`,
     [trip_id, blockPitId, cand.place_id, cand.event_names]
   )
-
   return updateRes.rows[0]
+
 }
 
 
