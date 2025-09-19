@@ -463,8 +463,11 @@ async cleanVotingBlock(trip_id: number, pit_id: number) {
         AND pit_id IN (
           SELECT pit_id
           FROM places_in_trip
-          WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true
-        )`, 
+          WHERE trip_id=$1
+            AND date=$2
+            AND time_start=$3
+            AND is_vote=true
+        )`,   
       [trip_id, row.date, row.time_start]
     )
 
