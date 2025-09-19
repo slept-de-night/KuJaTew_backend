@@ -704,7 +704,5 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
   return updateRes.rows[0]
 
 }
-
-
 }
 
