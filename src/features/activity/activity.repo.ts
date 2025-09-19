@@ -435,7 +435,7 @@ export const VoteRepo = {
         AND pit_id<>$7`,
       [trip_id, oldRow.date, oldRow.time_start, patch.date, patch.start_time, patch.end_time, pit_id]
     )
-    
+
     return updateBlock.rows[0]
   },
 
@@ -470,7 +470,7 @@ async cleanVotingBlock(trip_id: number, pit_id: number) {
 
     const res = await query(
       `DELETE FROM places_in_trip
-      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true AND AND pit_id<>$4
+      WHERE trip_id=$1 AND date=$2 AND time_start=$3 AND is_vote=true AND pit_id<>$4
       RETURNING pit_id`,
       [trip_id, row.date, row.time_start , pit_id]
     )
