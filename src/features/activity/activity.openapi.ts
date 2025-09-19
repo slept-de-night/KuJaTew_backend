@@ -1,14 +1,13 @@
-// activity.openapi.ts
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as schema from "./activity.schema";
 
 export function registerActivity(registry: OpenAPIRegistry) {
-  
   // Register all schemas
   registry.register("ActivityItem", schema.ActivityItem);
   registry.register("ActivitiesResponse", schema.ActivitiesResponse);
   registry.register("PlacesVotingResponse", schema.PlacesVotingResponse);
   registry.register("EventVotingResponse", schema.EventVotingResponse);
+  registry.register("GetUserVotedResponse", schema.GetUserVotedResponse);
 
   // ---------- Activities ----------
   registry.registerPath({
@@ -18,7 +17,10 @@ export function registerActivity(registry: OpenAPIRegistry) {
     summary: "List all activities across all dates in a trip",
     request: { params: schema.ParamsTrip },
     responses: {
-      200: { description: "All activities", content: { "application/json": { schema: schema.ActivitiesResponse } } },
+      200: {
+        description: "All activities",
+        content: { "application/json": { schema: schema.ActivitiesResponse } },
+      },
       400: { description: "Validation error" },
     },
     tags: ["Activities"],
@@ -31,7 +33,10 @@ export function registerActivity(registry: OpenAPIRegistry) {
     summary: "List activities by date",
     request: { params: schema.GetActivitiesByDateParams },
     responses: {
-      200: { description: "Activities of given date", content: { "application/json": { schema: schema.ActivitiesResponse } } },
+      200: {
+        description: "Activities of given date",
+        content: { "application/json": { schema: schema.ActivitiesResponse } },
+      },
       400: { description: "Validation error" },
     },
     tags: ["Activities"],
@@ -43,7 +48,10 @@ export function registerActivity(registry: OpenAPIRegistry) {
     operationId: "deleteActivity",
     summary: "Delete activity by pit_id",
     request: { params: schema.DeleteActivityParams },
-    responses: { 204: { description: "Deleted successfully" }, 400: { description: "Validation error" } },
+    responses: {
+      204: { description: "Deleted successfully" },
+      400: { description: "Validation error" },
+    },
     tags: ["Activities"],
   });
 
@@ -53,8 +61,15 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/events",
     operationId: "createEvent",
     summary: "Create a new event",
-    request: { body: { content: { "application/json": { schema: schema.CreateEventBody } } } },
-    responses: { 200: { description: "Created event" }, 400: { description: "Validation error" } },
+    request: {
+      body: {
+        content: { "application/json": { schema: schema.CreateEventBody } },
+      },
+    },
+    responses: {
+      200: { description: "Created event" },
+      400: { description: "Validation error" },
+    },
     tags: ["Events"],
   });
 
@@ -63,8 +78,15 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/{pit_id}/events",
     operationId: "updateEvent",
     summary: "Update event by pit_id",
-    request: { body: { content: { "application/json": { schema: schema.UpdateEventBody } } } },
-    responses: { 200: { description: "Updated event" }, 400: { description: "Validation error" } },
+    request: {
+      body: {
+        content: { "application/json": { schema: schema.UpdateEventBody } },
+      },
+    },
+    responses: {
+      200: { description: "Updated event" },
+      400: { description: "Validation error" },
+    },
     tags: ["Events"],
   });
 
@@ -74,8 +96,15 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/places",
     operationId: "addPlace",
     summary: "Add place to trip",
-    request: { body: { content: { "application/json": { schema: schema.AddPlaceBody } } } },
-    responses: { 200: { description: "Added place" }, 400: { description: "Validation error" } },
+    request: {
+      body: {
+        content: { "application/json": { schema: schema.AddPlaceBody } },
+      },
+    },
+    responses: {
+      200: { description: "Added place" },
+      400: { description: "Validation error" },
+    },
     tags: ["Places"],
   });
 
@@ -84,8 +113,15 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/{pit_id}/places",
     operationId: "updatePlace",
     summary: "Update place by pit_id",
-    request: { body: { content: { "application/json": { schema: schema.UpdatePlaceBody } } } },
-    responses: { 200: { description: "Updated place" }, 400: { description: "Validation error" } },
+    request: {
+      body: {
+        content: { "application/json": { schema: schema.UpdatePlaceBody } },
+      },
+    },
+    responses: {
+      200: { description: "Updated place" },
+      400: { description: "Validation error" },
+    },
     tags: ["Places"],
   });
 
@@ -99,7 +135,9 @@ export function registerActivity(registry: OpenAPIRegistry) {
     responses: {
       200: {
         description: "Voting results",
-        content: { "application/json": { schema: schema.PlacesVotingResponse } },
+        content: {
+          "application/json": { schema: schema.PlacesVotingResponse },
+        },
       },
       400: { description: "Validation error" },
     },
@@ -116,12 +154,17 @@ export function registerActivity(registry: OpenAPIRegistry) {
       body: {
         content: {
           "application/json": {
-            schema: schema.InitVotingBodyPlaces.or(schema.InitVotingBodyEvents),
+            schema: schema.InitVotingBodyPlaces.or(
+              schema.InitVotingBodyEvents
+            ),
           },
         },
       },
     },
-    responses: { 200: { description: "Voting block initialized" }, 400: { description: "Validation error" } },
+    responses: {
+      200: { description: "Voting block initialized" },
+      400: { description: "Validation error" },
+    },
     tags: ["Voting"],
   });
 
@@ -131,7 +174,10 @@ export function registerActivity(registry: OpenAPIRegistry) {
     operationId: "voteByCandidate",
     summary: "Vote by candidate place",
     request: { params: schema.PostVoteByPlaceParams },
-    responses: { 200: { description: "Vote cast" }, 400: { description: "Validation error" } },
+    responses: {
+      200: { description: "Vote cast" },
+      400: { description: "Validation error" },
+    },
     tags: ["Voting"],
   });
 
@@ -145,12 +191,17 @@ export function registerActivity(registry: OpenAPIRegistry) {
       body: {
         content: {
           "application/json": {
-            schema: schema.PostVotedTypeBodyPlaces.or(schema.PostVotedTypeBodyEvents),
+            schema: schema.PostVotedTypeBodyPlaces.or(
+              schema.PostVotedTypeBodyEvents
+            ),
           },
         },
       },
     },
-    responses: { 200: { description: "Vote recorded" }, 400: { description: "Validation error" } },
+    responses: {
+      200: { description: "Vote recorded" },
+      400: { description: "Validation error" },
+    },
     tags: ["Voting"],
   });
 
@@ -159,18 +210,29 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/{pit_id}/votes",
     operationId: "patchVote",
     summary: "Update vote timing",
-    request: { body: { content: { "application/json": { schema: schema.PatchVoteBody } } } },
-    responses: { 200: { description: "Vote updated" }, 400: { description: "Validation error" } },
+    request: {
+      params: schema.PatchVoteParams,
+      body: {
+        content: { "application/json": { schema: schema.PatchVoteBody } },
+      },
+    },
+    responses: {
+      200: { description: "Vote updated" },
+      400: { description: "Validation error" },
+    },
     tags: ["Voting"],
   });
 
   registry.registerPath({
     method: "delete",
     path: "/api/trips/{trip_id}/activities/{pit_id}/votes",
-    operationId: "unvote",
-    summary: "Remove voting block",
+    operationId: "cleanVote",
+    summary: "Clean voting block",
     request: { params: schema.DeleteVoteParams },
-    responses: { 204: { description: "Voting block removed" }, 400: { description: "Validation error" } },
+    responses: {
+      204: { description: "Voting block removed" },
+      400: { description: "Validation error" },
+    },
     tags: ["Voting"],
   });
 
@@ -179,11 +241,53 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/{pit_id}/voted",
     operationId: "deleteVote",
     summary: "Delete user's vote",
-    request: {
-      params: schema.DeleteVoteParamss,
-      body: { content: { "application/json": { schema: schema.DeleteVoteBody } } },
+    request: { params: schema.DeleteVoteParamss },
+    responses: {
+      200: { description: "Vote deleted" },
+      400: { description: "Validation error" },
     },
-    responses: { 200: { description: "Vote deleted" }, 400: { description: "Validation error" } },
+    tags: ["Voting"],
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/api/trips/{trip_id}/activities/{pit_id}/votes/{type}/end",
+    operationId: "getWinners",
+    summary: "Get winners for a voting block (places or events)",
+    request: { params: schema.PostVoteByTypeEndParams },
+    responses: {
+      200: { description: "Winners list" },
+      400: { description: "Validation error" },
+    },
+    tags: ["Voting"],
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/api/trips/{trip_id}/activities/{pit_id}/voted",
+    operationId: "getUserVoted",
+    summary: "Check if current user has voted",
+    request: { params: schema.GetUserVotedParams },
+    responses: {
+      200: {
+        description: "User voting status",
+        content: { "application/json": { schema: schema.GetUserVotedResponse } },
+      },
+      400: { description: "Validation error" },
+    },
+    tags: ["Voting"],
+  });
+
+  registry.registerPath({
+    method: "post",
+    path: "/api/trips/{trip_id}/activities/{pit_id}/votes/{type}/endOwner",
+    operationId: "endOwner",
+    summary: "Close voting block and set winner (owner only)",
+    request: { params: schema.PostVoteEndOwnerParams },
+    responses: {
+      200: { description: "Voting block closed with winner" },
+      400: { description: "Validation error" },
+    },
     tags: ["Voting"],
   });
 }
