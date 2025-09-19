@@ -1,8 +1,18 @@
+// activity.openapi.ts
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as schema from "./activity.schema";
+import {z} from "zod";
+
+//place_id > 0 , is_vote = False , is_event = False : place ใน trip 
+//place_id = 0 , is_vote = False , is_event = True : event ใน trip 
+//place_id = 0 , is_vote = True , is_event = False : Block Vote ของ place
+//place_id > 0 , is_vote = True , is_event = True : Block Vote ของ event
+//place_id > 0 , is_vote = True , is_event = False : candidate ของ place
+//place_id = 0 , is_vote = True , is_event = True  : candidate ของ event
+
 
 export function registerActivity(registry: OpenAPIRegistry) {
-  // Register all schemas
+// Register all schemas
   registry.register("ActivityItem", schema.ActivityItem);
   registry.register("ActivitiesResponse", schema.ActivitiesResponse);
   registry.register("PlacesVotingResponse", schema.PlacesVotingResponse);
