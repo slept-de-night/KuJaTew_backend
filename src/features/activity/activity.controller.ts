@@ -58,9 +58,14 @@ export const EventController = {
       const result = await EventService.create(+trip_id, body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 
   update: async (req:any,res:any,next:any) => {
@@ -97,14 +102,19 @@ export const PlaceController = {
       const result = await PlaceService.update(+pit_id, body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 }
 
 // -------- Voting --------
-const getUserId = (req:any) => req.user?.id || req.headers["x-user-id"]
+const getUserId = (req:any) => req.user?.id || req.headers["user_id"]
 
 export const VoteController = {
   list: async (req: any, res: any, next: any) => {
@@ -131,9 +141,14 @@ export const VoteController = {
       const result = await VoteService.init(+trip_id, type , body)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 
 voteByCandidate: async (req:any,res:any,next:any) => {
@@ -150,27 +165,15 @@ voteByCandidate: async (req:any,res:any,next:any) => {
     }
   },
 
-  voteTypeEnd: async (req: any, res: any, next: any) => {
-    try {
-      const { trip_id, pit_id, type } = S.PostVoteByTypeEndParams.parse(req.params)
-      // ไม่ต้อง parse body/ไม่ต้องส่ง body ให้ service แล้ว
-      const result = await VoteService.voteTypeEnd(trip_id, pit_id, type)
-      res.status(200).json(result)
-    } catch (err) {
-      if (err instanceof ZodError) {
-        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      }
-      next(err)
-    }
-  },
-
   votedType: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id, type } = S.PostVotedTypeParams.parse(req.params)
       const body = type === "places"
         ? S.PostVotedTypeBodyPlaces.parse(req.body)
         : S.PostVotedTypeBodyEvents.parse(req.body)
-      const result = await VoteService.votedType(trip_id, pit_id, type, body.user_id, body)
+      const user_id = req.user?.id || req.headers["user_id"]
+      if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+      const result = await VoteService.votedType(trip_id, pit_id, type, String(user_id), body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
@@ -185,18 +188,25 @@ voteByCandidate: async (req:any,res:any,next:any) => {
       const result = await VoteService.patchVote(trip_id, pit_id, patch)
       res.status(200).json(result)
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
+        if (err instanceof ZodError) {
+          return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+        }
+        if (err instanceof Error && err.message.includes("Time overlap")) {
+          return res.status(400).json({ message: err.message })
+        }
+        next(err)
+      } 
   },
 
-  unvote: async (req:any, res:any, next:any) => {
+  cleanVote: async (req:any, res:any, next:any) => {
     try {
       const { trip_id, pit_id } = S.DeleteVoteParams.parse(req.params)
-      await VoteService.unvote(trip_id, pit_id)
+      await VoteService.cleanVote(trip_id, pit_id)
       res.status(204).send()
     } catch (err) {
-      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
       next(err)
     }
   },
@@ -204,13 +214,50 @@ voteByCandidate: async (req:any,res:any,next:any) => {
   deleteVote: async (req: any, res: any, next: any) => {
   try {
     const { trip_id, pit_id } = S.DeleteVoteParamss.parse(req.params)
-    const { user_id } = req.body  // รับ user_id จาก client
-
-    const result = await VoteService.deleteVote(trip_id, pit_id, user_id)
+    const user_id = req.user?.id || req.headers["user_id"]
+    if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+    const result = await VoteService.deleteVote(trip_id, pit_id, String(user_id))
     res.status(200).json({ success: result })
   } catch (err) {
       if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
       next(err)
     }
-  }
+  }, 
+
+  getWinners: async (req:any, res:any, next:any) => {
+  try {
+    const { trip_id, pit_id, type } = S.PostVoteByTypeEndParams.parse(req.params)
+    const result = await VoteService.getWinners(trip_id, pit_id, type)
+    res.status(200).json(result)
+  } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
+      next(err)
+    }
+  },
+  getUserVoted: async (req:any, res:any, next:any) => {
+    try {
+      const { trip_id, pit_id, } = S.GetUserVotedParams.parse(req.params)
+      const user_id = req.user?.id || req.headers["user_id"]
+      if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+
+      const result = await VoteService.checkUserVoted(trip_id, pit_id, String(user_id))
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  },
+  endOwner: async (req:any, res:any, next:any) => {
+    try {
+      const { trip_id, pit_id, type } = S.PostVoteEndOwnerParams.parse(req.params)
+      const result = await VoteService.endOwner(trip_id, pit_id, type)
+      res.status(200).json(result)
+    } catch (err) {
+      if (err instanceof ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      next(err)
+    }
+  },
+
 }

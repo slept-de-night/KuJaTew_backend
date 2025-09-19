@@ -1,6 +1,16 @@
 import { ActivityRepo, EventRepo, PlaceRepo, VoteRepo } from "./activity.repo"
 import { ActivitiesResponse, PlacesVotingResponse, EventVotingResponse } from "./activity.schema"
 
+const roleLevel = { "NoUser": 0, "Viewer": 1, "Editor": 2, "Owner": 3 }
+
+export async function requireRole(trip_id: number, user_id: string, minRole:"Viewer"|"Editor"|"Owner") {
+  const role = await ActivityRepo.check_user_role(trip_id, user_id)
+  if (roleLevel[role] < roleLevel[minRole]) {
+    throw new Error(`Forbidden: need at least ${minRole}`)
+  }
+  return role
+}
+
 export const ActivityService = {
   async listAll(trip_id: number) {
     const rows = await ActivityRepo.listAll(trip_id)
@@ -16,22 +26,52 @@ export const ActivityService = {
 }
 
 export const EventService = {
-  create:(trip_id:number,dto:any)=>EventRepo.create(trip_id,dto),
-  update:(pit_id:number,dto:any)=>EventRepo.update(pit_id,dto),
+  create: async (trip_id:number, dto:any) => {
+    const overlaps = await VoteRepo.checkTimeOverlap(
+      trip_id, null, dto.date, dto.time_start, dto.time_end
+    )
+    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    return EventRepo.create(trip_id, dto)
+  },
+  update: async (pit_id:number, dto:any) => {
+    const overlaps = await VoteRepo.checkTimeOverlap(
+      dto.trip_id, pit_id, dto.date, dto.time_start, dto.time_end
+    )
+    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    return EventRepo.update(pit_id, dto)
+  },
 }
 
 export const PlaceService = {
-  add:(trip_id:number,dto:any)=>PlaceRepo.add(trip_id,dto),
-  update:(pit_id:number,dto:any)=>PlaceRepo.update(pit_id,dto),
+  add: async (trip_id:number, dto:any) => {
+    const overlaps = await VoteRepo.checkTimeOverlap(
+      trip_id, null, dto.date, dto.time_start, dto.time_end
+    )
+    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    return PlaceRepo.add(trip_id, dto)
+  },
+  update: async (pit_id:number, dto:any) => {
+    const overlaps = await VoteRepo.checkTimeOverlap(
+      dto.trip_id, pit_id, dto.date, dto.time_start, dto.time_end
+    )
+    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    return PlaceRepo.update(pit_id, dto)
+  },
 }
+
 
 export const VoteService = {
   async list(trip_id: number, pit_id: number) {
     return await VoteRepo.list(trip_id, pit_id)
   },
 
-  init: (trip_id:number, type:"places"|"events" , body:any) =>
-    VoteRepo.initVotingBlock(trip_id, type, body),
+  init: async (trip_id:number, type:"places"|"events", body:any) => {
+    const overlaps = await VoteRepo.checkTimeOverlap(
+      trip_id, null, body.date, body.time_start, body.time_end
+    )
+    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    return VoteRepo.initVotingBlock(trip_id, type, body)
+  },
 
   voteByCandidate: (
     trip_id: number,
@@ -41,25 +81,36 @@ export const VoteService = {
   ) => VoteRepo.addCandidate(trip_id, pit_id, place_id, body),
 
 
-  voteTypeEnd: (trip_id:number, pit_id:number, type:"places"|"events") =>
-    type === "places"
-      ? VoteRepo.endVotingPlaces(trip_id, pit_id)
-      : VoteRepo.endVotingEvents(trip_id, pit_id),
-
-
   votedType: (trip_id:number, pit_id:number, type:"places"|"events", user_id:string, body:any) =>
     type === "places"
       ? VoteRepo.votedPlaces(trip_id, pit_id, user_id)
       : VoteRepo.votedEvents(trip_id, pit_id, user_id, body),
 
-  patchVote: (trip_id:number, pit_id:number, patch:any) =>
-    VoteRepo.patchVote(trip_id, pit_id, patch),
+  patchVote: async (trip_id:number, pit_id:number, patch:any) => {
+    const overlaps = await VoteRepo.checkTimeOverlap(
+      trip_id, pit_id, patch.date, patch.start_time, patch.end_time
+    )
+    if (overlaps.length > 0) {
+      throw new Error("Time overlap detected")
+    }
+    return VoteRepo.patchVote(trip_id, pit_id, patch)
+  },
 
-  unvote: (trip_id:number, pit_id:number) =>
-    VoteRepo.removeVotingBlock(trip_id, pit_id),
+  cleanVote: (trip_id:number, pit_id:number) =>
+    VoteRepo.cleanVotingBlock(trip_id, pit_id),
 
   async deleteVote(trip_id: number, pit_id: number, user_id: string) {
   return await VoteRepo.deleteVote(trip_id, pit_id, user_id)
-}
+  },
 
+  getWinners: (trip_id:number, pit_id:number, type:"places"|"events") =>
+  type === "places"
+    ? VoteRepo.getTopPlaces(trip_id, pit_id)
+    : VoteRepo.getTopEvents(trip_id, pit_id),
+
+  checkUserVoted: (trip_id:number, pit_id:number, user_id:string) =>
+  VoteRepo.checkUserVoted(trip_id, pit_id, user_id),
+
+  endOwner: (trip_id:number, pit_id:number, type:"places"|"events") =>
+  VoteRepo.endOwner(trip_id, pit_id, type),
 }
