@@ -17,8 +17,11 @@ export const MemberRepo = {
 			JOIN trip_collaborators tc ON u.user_id = tc.user_id
 			WHERE tc.trip_id = $1
 		`;
-		const result = await pool.query(query, [trip_id]);
-		return result.rows;
+		const mls = z.array(MemberSchema);
+		const {rows} = await pool.query(query, [trip_id]);
+		const parsed = mls.safeParse(rows);
+		if(!parsed.success) throw INTERNAL("Fail to parsed query");
+		return parsed.data;
 	},
 
 	async is_in_trip( user_id: string, trip_id: number ){

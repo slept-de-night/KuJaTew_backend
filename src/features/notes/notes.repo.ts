@@ -1,12 +1,30 @@
-import { noteintripschema } from "./notes.schema";
+import { noteintripschema, noteactivityschema } from "./notes.schema";
 import { pool } from "../../config/db";
 import { date, z } from "zod";
 import { INTERNAL, POSTGREST_ERR } from "../../core/errors";
+import { error } from "node:console";
+import multer from "multer";
+import th from "zod/v4/locales/th.js";
 
 export const NotesRepo = {
-    async get_note_in_trip(trip_id:number, user_id:string){
+// intersection part
+    async get_collabID(user_id:string, trip_id:number){
+        const query1 = `
+            SELECT collab_id
+            FROM trip_collaborators
+            WHERE user_id = $1 AND trip_id = $2
+        `;
+        const {rows} = await pool.query(query1, [user_id, trip_id]);
+        const parsed = z.object({collab_id:z.coerce.number()}).safeParse(rows[0]);
+        if (!parsed.success) throw INTERNAL("Fail to parsed collab_id");
+        return parsed.data;
+    },
+
+// overview part
+    async get_overview_notes(trip_id:number, user_id:string){
         const query = `
             SELECT
+                nt.nit_id as nit_id,
                 nt.note AS note,
                 u.name AS name,
                 u.profile_picture_path AS profile_picture_path,
@@ -18,7 +36,6 @@ export const NotesRepo = {
         `;
         const listscheme = z.array(noteintripschema);
         const {rows} = await pool.query(query, [user_id, trip_id]);
-        console.log(rows);
         const parsed = listscheme.safeParse(rows);
         if(!parsed.success) throw INTERNAL("Fail to parsed query");
         return parsed.data;
@@ -36,4 +53,70 @@ export const NotesRepo = {
         const {rows} = await pool.query(query, [note, new Date(), nit_id]);
         return rows[0];
     },
+
+    async check_nit(collab_id:number, trip_id:number){
+        const query = `
+            SELECT COUNT(*)::int as total_note
+            FROM note_in_trip
+            WHERE trip_id = $1 AND collab_id = $2
+        `;
+        const {rows} = await pool.query(query, [trip_id, collab_id]);
+        const parsed1 = z.object({total_note:z.coerce.number()}).safeParse(rows[0]);
+        if (!parsed1.success) throw INTERNAL("Fail to parsed collab_id");
+        return parsed1.data;
+    },
+
+    async add_overview_note(collab_id:number, trip_id:number, note:string){
+        const query = `
+            INSERT INTO note_in_trip(trip_id, collab_id, note, note_time)
+            VALUES ($1,$2,$3,$4)
+            RETURNING *
+        `
+        const {rows} = await pool.query(query, [trip_id, collab_id, note, new Date()]);
+        return rows;
+    },
+
+    async delete_overview_note(collab_id:number, nit_id:number){
+        const del = `
+            DELETE
+            FROM note_in_trip
+            WHERE nit_id = $1 AND collab_id = $2
+            RETURNING *
+        `;
+        const {rows} = await pool.query(del,[nit_id, collab_id]);
+        return rows;
+    },
+
+// activity note part
+    async get_activity_notes(trip_id:number, user_id:string){
+        const query = `
+            SELECT
+                n.pnote_id as pnote_id,
+                nt.note AS note,
+                u.name AS name,
+                u.profile_picture_path AS profile_picture_path,
+                CASE WHEN u.user_id = $1 THEN 1 ELSE 0 END AS is_editable
+            FROM note n
+            JOIN trip_collaborators tc ON n.collab_id = tc.collab_id
+            JOIN users u ON tc.user_id = u.user_id
+            WHERE n.trip_id = $2
+        `;
+        const listscheme = z.array(noteactivityschema);
+        const {rows} = await pool.query(query, [user_id, trip_id]);
+        const parsed = listscheme.safeParse(rows);
+        if(!parsed.success) throw INTERNAL("Fail to parsed query");
+        return parsed.data;
+    }, 
+
+    async add_activity_note(collab_id:number, trip_id:number, pit_id:number){
+        const query = `
+            INSERT INTO note(trip_id, collab_id, pit_id, note, note_time)
+            VALUES ($1,$2,$3,$4,$5)
+            RETURNING *
+        `;
+
+        const {rows} = await pool.query(query, [trip_id, collab_id, pit_id, "", new Date()]);
+        return rows;
+    },
+
 }

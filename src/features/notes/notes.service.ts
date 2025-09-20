@@ -4,10 +4,12 @@ import { UsersRepo } from "../users/users.repo";
 import { MemberRepo } from "../member/member.repo";
 
 export const NoteService = {
-    async get_note_in_trip(user_id:string, trip_id:number){
+    async get_overview_notes(user_id:string, trip_id:number){
         if (!user_id || !trip_id) throw INTERNAL("UserID and TripID required");
-        const notes = await NotesRepo.get_note_in_trip(trip_id, user_id);
+        const iit = await MemberRepo.is_in_trip(user_id, trip_id);
+        if (!iit) throw Error("User not in trip");
 
+        const notes = await NotesRepo.get_overview_notes(trip_id, user_id);
         const updatednotes = await Promise.all(
               notes.map(async (note) => {
                 if (!note.profile_picture_path) {
@@ -21,11 +23,34 @@ export const NoteService = {
         return updatednotes;
     },
 
-    async edit_trip_note(user_id:string, trip_id:number, nit_id:number, note:string){
+    async edit_overview_note(user_id:string, trip_id:number, nit_id:number, note:string){
         if (!user_id || !trip_id || !nit_id || !note) throw INTERNAL("trip note detail required");
         const iit = await MemberRepo.is_in_trip(user_id, trip_id);
-        if (!iit) throw Error("You not in trip");
+        if (!iit) throw Error("User not in trip");
         const result = await NotesRepo.edit_trip_note(nit_id, note);
         return result;
+    },
+ 
+    async add_overview_note(user_id:string, trip_id:number, note:string){
+      if (!user_id || !trip_id) throw INTERNAL("UserID and TripID are required");
+      const iit = await MemberRepo.is_in_trip(user_id, trip_id);
+        if (!iit) throw Error("User not in trip");
+      const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
+      const total_note = await NotesRepo.check_nit(collab_id, trip_id);
+      console.log(user_id, trip_id, note, collab_id, total_note);
+      if (total_note.total_note){ //total_note == 1 --> can't add more
+        throw new Error("User already add overview note");
+      }
+      const result = await NotesRepo.add_overview_note(collab_id, trip_id, note);
+      return result;
+    },
+
+    async delete_overview_note(user_id:string, trip_id:number, nit_id:number){
+      if (!user_id || !trip_id || !nit_id) throw INTERNAL("UserID, TripID and nitID are required");
+      const iit = await MemberRepo.is_in_trip(user_id, trip_id);
+        if (!iit) throw Error("User not in trip");
+      const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
+      const result = await NotesRepo.delete_overview_note(collab_id,nit_id);
+      return result;
     },
 }
