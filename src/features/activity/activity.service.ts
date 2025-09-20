@@ -1,7 +1,7 @@
 import { ActivityRepo, EventRepo, PlaceRepo, VoteRepo } from "./activity.repo"
 import { ActivitiesResponse, PlacesVotingResponse, EventVotingResponse } from "./activity.schema"
 
-const roleLevel = { "NoUser": 0, "Viewer": 1, "Editor": 2, "Owner": 3 }
+const roleLevel = { "NoUser": 0, "Viewer": 0, "Editor": 1, "Owner": 2}
 
 export async function requireRole(trip_id: number, user_id: string, minRole:"Viewer"|"Editor"|"Owner") {
   const role = await ActivityRepo.check_user_role(trip_id, user_id)
