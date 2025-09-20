@@ -79,7 +79,7 @@ export const UsersService = {
       const max = 10000;
       let check_name = name;
 
-      while (UsersRepo.is_name_exist(check_name)){
+      while (await UsersRepo.is_name_exist(check_name)){
         const randomIntInRange = Math.floor(Math.random() * (max - min + 1)) + min;
         check_name = name+randomIntInRange.toString()
       }
@@ -103,7 +103,7 @@ export const UsersService = {
 
 export async function downloadToProfileFile(
   rawUrl: string
-): Promise<ProfileFile> {
+): Promise<ImageFile> {
   const url = rawUrl;
 
   const resp = await fetch(url, { redirect: "follow" });
@@ -139,11 +139,11 @@ export async function downloadToProfileFile(
 
   const originalname = base.includes(".") ? base : `${base}${ext}`;
 
-  const file: ProfileFile = {
-    fieldname: "profile",
+  const file: ImageFile = {
+    fieldname: "image",
     originalname,
     encoding: "7bit",     
-    mimetype: mimetype.toLowerCase() as ProfileFile["mimetype"],
+    mimetype: mimetype.toLowerCase() as ImageFile["mimetype"],
     buffer,
     size: buffer.length,
   };

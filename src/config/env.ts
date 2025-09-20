@@ -10,7 +10,8 @@ const EnvSchema = z.object({
   GOOGLE_ANDROID_CLIENT_ID:z.string(),
   GOOGLE_WEB_CLIENT_ID:z.string(),
   DATABASE_URL:z.string(),
-  GOOGLE_PLACE_API_KEY:z.string()
+  GOOGLE_PLACE_API_KEY:z.string(),
+  HOST:z.string()
 
 });
 

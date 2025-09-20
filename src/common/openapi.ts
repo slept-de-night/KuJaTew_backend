@@ -34,7 +34,7 @@ export function buildOpenApiDoc() {
       version: "1.0.0",
       description: "Auto-generated from Zod schemas ).",
     },
-    servers: [{ url: "http://localhost:3000" }],
+    servers: [{ url: "/" }],
     security: [{ bearerAuth: [] }], // if you use JWT
   });
 
