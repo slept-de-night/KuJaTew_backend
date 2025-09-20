@@ -89,9 +89,12 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const profile_parsed = ImageFileSchema.safeParse(profile) ;
     if(!profile_parsed.success) console.log("Fail to retrive profile picture");
     console.log(profile_parsed.data);
+    
     const unique_name = await UsersService.gen_name(parsed_payload.data.name);
+   
     const user = await UsersService.create_user({email:parsed_payload.data.email,phone:"",
       name:unique_name},profile_parsed.data ?? null);
+    
     const token = await UsersService.gen_jwt(user.user_id);
     res.status(201).json({...user,...token});
   }

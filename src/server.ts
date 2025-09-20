@@ -1,10 +1,11 @@
 import "./common/z"; 
 import { buildApp } from "./app";
 import {env} from "./config/env"
-const PORT = env.PORT;
+const PORT = parseInt(env.PORT);
+const HOST = env.HOST;
 const app = buildApp();
 
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT,HOST, () => {
+  console.log(`Server running on ${HOST}:${PORT}`);
 });
