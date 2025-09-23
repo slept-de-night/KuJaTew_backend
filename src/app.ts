@@ -22,6 +22,9 @@ import { bookmarkRouter } from "./features/bookmarks/bookmarks.routes"; //e
 import { flightRouter } from "./features/flights/flights.routes"; //e
 import { inviteRouter } from "./features/invitations/invitations.routes"; //e
 import { activityRouter } from "./features/activity/activity.routes" //zennnne!!!
+import { notesRouter } from "./features/notes/notes.route";
+import { copyRouter } from "./features/copy/copy.route";
+import { docsRouter } from "./features/documents/docs.route";
 
 export function buildApp() {
 
@@ -34,16 +37,20 @@ export function buildApp() {
 
     app.use('/api/users', usersRouterPublic);
     
-    app.use(authHandler);
+    //app.use(authHandler);
 
     //route without authentication
     app.use('/api/test', testRouter);
     app.use('/api/trips', tripsRouter);
     app.use('/api/trips/members', memberRouter);
+    app.use('/api/trips', notesRouter);
+    app.use('/api/trips', copyRouter);
+    app.use('/api/trips', docsRouter);
     app.use('/api/users', bookmarkRouter); //e
     app.use('/api/trips', flightRouter); //e
     app.use('/api/trips', inviteRouter); //e
     app.use('/api/trips/:trip_id/activities', activityRouter);
+
 
     // route without authentication
     app.use('/api/places', placeinfoRoute);
