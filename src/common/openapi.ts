@@ -8,6 +8,7 @@ import { registerActivity } from "../features/activity/activity.openapi";
 import { registerBookmarks } from "../features/bookmarks/bookmarks.openapi";
 import { registerFlights } from "../features/flights/flights.openapi";
 import { registerInvitations } from "../features/invitations/invitations.openapi";
+import { registerNotifications } from "../features/notifications/notifications.openapi";
 
 export function buildOpenApiDoc() {
   const registry = new OpenAPIRegistry();
@@ -29,6 +30,7 @@ export function buildOpenApiDoc() {
   registerBookmarks(registry);
   registerFlights(registry);
   registerInvitations(registry);
+  registerNotifications(registry);
   // registerUser(registry);
 
   const generator = new OpenApiGeneratorV31(registry.definitions);

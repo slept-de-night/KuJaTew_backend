@@ -1,0 +1,9 @@
+import * as repo from "./notifications.repo";
+
+export async function get_noti(trip_id: number, limit: number) {
+  return repo.get_noti(trip_id, limit);
+}
+
+export async function post_noti(trip_id: number, noti_text: string, noti_time: string) {
+  return repo.post_noti(trip_id, noti_text, noti_time);
+}
