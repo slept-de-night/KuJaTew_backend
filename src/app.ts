@@ -37,7 +37,7 @@ export function buildApp() {
 
     app.use('/api/users', usersRouterPublic);
     
-    //app.use(authHandler);
+    app.use(authHandler);
 
     //route without authentication
     app.use('/api/test', testRouter);
