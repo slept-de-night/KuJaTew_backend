@@ -9,23 +9,20 @@ export const MemberSchema = z.object({
     role:z.string()
 });
 
-export const utSchema = z.object({
+export const tSchema = z.object({
     trip_id: z.coerce.number().int().positive("trip_id must be a positive integer"),
-    user_id: z.string().trim().min(1, "user_id required"),
 });
 
-export const utcSchema = z.object({
+export const tcSchema = z.object({
     trip_id: z.coerce.number().int().positive("trip_id must be a positive integer"),
-    user_id: z.string().trim().min(1, "user_id required"),
     collab_id: z.coerce.number().int().positive("trip_id must be a positive integer"),
 });
 
 export const roleSchema = z.object({
-    collab_id: z.number().int(),
+    collab_id: z.coerce.number().int(),
     role: z.string().trim()
 });
 
-export const urSchema = z.object({
-    user_id: z.string().trim().min(1, "user_id required"),
+export const rSchema = z.object({
     role: z.string().trim()
 });
