@@ -100,7 +100,12 @@ export const TripsService = {
 
     const isOwner = await TripsRepo.check_owner(user_id, trip_id);
     if (!isOwner) throw new Error("Only trip owner can delete trip");
-
+    const pic = await TripsRepo.get_specific_trip(trip_id);
+    const old_pic_path = pic[0]?.poster_image_link;
+    if (old_pic_path){
+      const { error } = await supabase.storage.from("posters").remove([old_pic_path]);
+      if (error) {console.error("Failed to delete:", error.message);}
+    }
     const trips = await TripsRepo.delete_trip(user_id, trip_id);
     return trips;
   },
