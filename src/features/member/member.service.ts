@@ -22,6 +22,9 @@ export const MemberService = {
     if (!isOwner) {
       throw new Error("Only trip owner can do this");
     }
+    if (role === 'Owner') throw new Error("Only 1 Owner is allows");
+    if (!['Editor', 'Viewer'].includes(role)) throw new Error("Invalide role assigned");
+
     return await MemberRepo.edit_role(role, trip_id, collab_id);
   },
 
