@@ -24,6 +24,7 @@ function todayUTC(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
+
 function diffDaysUtc(targetISO: string): number {
   const t = parseDateUTC(targetISO).getTime();
   const today = todayUTC().getTime();
