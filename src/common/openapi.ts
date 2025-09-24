@@ -8,6 +8,8 @@ import { registerActivity } from "../features/activity/activity.openapi";
 import { registerBookmarks } from "../features/bookmarks/bookmarks.openapi";
 import { registerFlights } from "../features/flights/flights.openapi";
 import { registerInvitations } from "../features/invitations/invitations.openapi";
+import { registerMembers } from "../features/member/members.openapi";
+import { $ZodRegistry } from "zod/v4/core";
 
 export function buildOpenApiDoc() {
   const registry = new OpenAPIRegistry();
@@ -25,6 +27,8 @@ export function buildOpenApiDoc() {
   registerUsers(registry);
 
   registerTrips(registry);
+  registerMembers(registry);
+  
   registerActivity(registry);
   registerBookmarks(registry);
   registerFlights(registry);

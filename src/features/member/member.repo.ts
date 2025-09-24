@@ -2,6 +2,7 @@ import { pool } from '../../config/db';
 import { MemberSchema, rSchema } from './member.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
+import { parse } from 'dotenv';
 
 export const MemberRepo = {
 	async get_trip_members( trip_id: number ){
@@ -53,8 +54,10 @@ export const MemberRepo = {
 			WHERE collab_id = $1 AND trip_id = $2
 			RETURNING *
 		`;
-		const result = await pool.query(query, [collab_id, trip_id]);
-		return result.rowCount;
+		const {rows} = await pool.query(query, [collab_id, trip_id]);
+		const parsed = MemberSchema.safeParse(rows[0]);
+		if (!parsed.success) throw INTERNAL("Fail to parsed query");
+		return parsed.data;
 	},
 
 	async get_memberid (trip_id:number){
