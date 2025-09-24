@@ -1,5 +1,7 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as S from "./weather.schema";
+import {z} from "zod";
+
 
 export function registerWeather(registry: OpenAPIRegistry) {
   registry.register("WeatherItem", S.WeatherItem);
