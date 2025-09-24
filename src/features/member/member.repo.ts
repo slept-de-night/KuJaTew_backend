@@ -1,5 +1,5 @@
 import { pool } from '../../config/db';
-import { MemberSchema, rSchema } from './member.schema';
+import { MemberSchema, ruSchema } from './member.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import { parse } from 'dotenv';
@@ -69,7 +69,7 @@ export const MemberRepo = {
 			WHERE trip_id = $1
 		`;
 		const {rows} = await pool.query(query, [trip_id]);
-		const urlist = z.array(rSchema);
+		const urlist = z.array(ruSchema);
 		const parsed = urlist.safeParse(rows);
 		if (!parsed.success) throw INTERNAL("Fail to parsed");
 		return parsed.data;
