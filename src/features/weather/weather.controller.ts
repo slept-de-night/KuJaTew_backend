@@ -6,6 +6,7 @@ export const WeatherController = {
   getByTripDate: async (req: any, res: any) => {
     try {
       const { trip_id, date } = S.GetWeatherParams.parse(req.params);
+      await WeatherService.checkAndDelete(trip_id, date);
       const result = await WeatherService.getByTripDate(trip_id, date);
       return res.status(200).json(result);
     } catch (err) {
