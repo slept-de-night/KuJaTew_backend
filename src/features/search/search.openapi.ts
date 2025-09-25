@@ -1,0 +1,1 @@
+const keen_message = 'kuy too lazy for swagger. swagger so noob'

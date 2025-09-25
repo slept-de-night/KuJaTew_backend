@@ -5,6 +5,7 @@ import { env } from "../../config/env";
 import { supabase } from "../../config/db";
 import { TripsRepo } from "../trips/trips.repo";
 import { memberRouter } from "./member.routes";
+import { etcService } from "../../etc/etc.service";
 import z from "zod";
 
 export const MemberService = {
@@ -14,7 +15,19 @@ export const MemberService = {
     if (!isin){
       throw new Error("Only trip member can do this");
     }
-    return await MemberRepo.get_trip_members(trip_id);
+    const results = await MemberRepo.get_trip_members(trip_id);
+    const updated = await Promise.all(
+          results.map(async (result) => {
+            if (!result.profile_picture_link) {
+              return result;
+            }
+            const trip_pic = await etcService.get_file_link(result.profile_picture_link, "profiles", 3600);
+            result.profile_picture_link = trip_pic.signedUrl;
+            return result;
+          })
+        );
+    
+        return updated;
   },
 
   async edit_role(user_id:string, trip_id:number, collab_id: number, role:string){

@@ -89,7 +89,7 @@ export function registerTrips(registry: OpenAPIRegistry) {
   });
 
   registry.registerPath({
-    method: "put",
+    method: "patch",
     path: "/api/trips/{trip_id}",
     operationId: "Update trip detail",
     summary: "Returns updated trip detail",

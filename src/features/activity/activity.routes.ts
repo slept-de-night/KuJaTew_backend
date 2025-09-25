@@ -1,11 +1,9 @@
 import express from "express"
 import { ActivityController, EventController, PlaceController, VoteController } from "./activity.controller"
-import z from 'zod';
-
+import { requireRole } from "./activity.service"
+import {z} from "zod";
 
 export const activityRouter = express.Router({ mergeParams:true })
-
-import { requireRole } from "./activity.service"
 
 function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
   return async (req:any, res:any, next:any) => {

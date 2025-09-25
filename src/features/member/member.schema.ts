@@ -23,6 +23,7 @@ export const roleSchema = z.object({
     role: z.string().trim()
 });
 
-export const rSchema = z.object({
+export const ruSchema = z.object({
+    user_id: z.string().trim(),
     role: z.string().trim()
 });

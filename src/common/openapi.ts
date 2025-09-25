@@ -9,6 +9,9 @@ import { registerWeather } from "../features/weather/weather.openapi";
 import { registerBookmarks } from "../features/bookmarks/bookmarks.openapi";
 import { registerFlights } from "../features/flights/flights.openapi";
 import { registerInvitations } from "../features/invitations/invitations.openapi";
+import { registerMembers } from "../features/member/members.openapi";
+import { $ZodRegistry } from "zod/v4/core";
+import { registerNotes } from "../features/notes/notes.openapi";
 import { registerNotifications } from "../features/notifications/notifications.openapi";
 
 export function buildOpenApiDoc() {
@@ -27,6 +30,9 @@ export function buildOpenApiDoc() {
   registerUsers(registry);
 
   registerTrips(registry);
+  registerMembers(registry);
+  registerNotes(registry);
+  
   registerActivity(registry);
   registerWeather(registry);
   registerBookmarks(registry);
