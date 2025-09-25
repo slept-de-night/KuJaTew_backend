@@ -1,16 +1,15 @@
 import express from "express"
 import { ActivityController, EventController, PlaceController, VoteController } from "./activity.controller"
-
-export const activityRouter = express.Router({ mergeParams:true })
-
 import { requireRole } from "./activity.service"
 import {z} from "zod";
+
+export const activityRouter = express.Router({ mergeParams:true })
 
 function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
   return async (req:any, res:any, next:any) => {
     try {
-      const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-      if(!parsed.success) throw new Error("Invalide Request");
+      const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+        if(!parsed.success) throw new Error("Missing user");
       let user_id = parsed.data.user_id;
       const { trip_id } = req.params
       await requireRole(Number(trip_id), String(user_id), minRole)
@@ -25,6 +24,7 @@ function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
 activityRouter.get("/AllDate", withRole("Viewer", ActivityController.listAll))
 activityRouter.get("/:date", withRole("Viewer", ActivityController.list))
 activityRouter.delete("/:pit_id", withRole("Editor", ActivityController.remove))
+activityRouter.get("onlyPlaces/:date", withRole("Viewer", ActivityController.getPlacesByTripDate))
 
 // Events
 activityRouter.post("/events", withRole("Editor", EventController.create))

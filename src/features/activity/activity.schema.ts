@@ -140,6 +140,16 @@ export const PostVoteEndOwnerParams = z.object({
 
 
 // ---------- Response Schemas ----------
+export const PlaceItem = z.object({
+  title: z.string(),
+  latitude: z.number(),
+  longitude: z.number(),
+})
+
+export type TPlaceItem = z.infer<typeof PlaceItem>;
+
+export const PlaceResponse = z.array(PlaceItem);
+
 export const ActivityItem = z.object({
   pit_id: z.number(),
   place_id: z.number().nullable(),

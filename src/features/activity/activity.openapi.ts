@@ -8,7 +8,7 @@ import {z} from "zod";
 //place_id = 0 , is_vote = True , is_event = False : Block Vote ของ place
 //place_id > 0 , is_vote = True , is_event = True : Block Vote ของ event
 //place_id > 0 , is_vote = True , is_event = False : candidate ของ place
-//place_id = 0 , is_vote = True , is_event = True  : candidate ของ event
+//place_id = 0 , is_vote = True , is_event = True  : candidate ของ event 
 
 
 export function registerActivity(registry: OpenAPIRegistry) {
@@ -18,6 +18,8 @@ export function registerActivity(registry: OpenAPIRegistry) {
   registry.register("PlacesVotingResponse", schema.PlacesVotingResponse);
   registry.register("EventVotingResponse", schema.EventVotingResponse);
   registry.register("GetUserVotedResponse", schema.GetUserVotedResponse);
+  registry.register("PlaceItem", schema.PlaceItem);
+  registry.register("PlaceResponse", schema.PlaceResponse);
 
   // ---------- Activities ----------
   registry.registerPath({
@@ -63,6 +65,32 @@ export function registerActivity(registry: OpenAPIRegistry) {
       400: { description: "Validation error" },
     },
     tags: ["Activities"],
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/api/trips/{trip_id}/activities/{date}/places",
+    operationId: "getPlacesByTripDate",
+    summary: "Get only places of a trip by date",
+    description:
+      "Return only places (exclude events/votes) of a trip for a given date, sorted by time_start.",
+    tags: ["activity"],
+    request: {
+      params: schema.GetActivitiesByDateParams,
+    },
+    responses: {
+      200: {
+        description: "List of places for the trip and date",
+        content: {
+          "application/json": {
+            schema: schema.PlaceResponse,
+          },
+        },
+      },
+      400: { description: "Invalid parameters" },
+      500: { description: "Internal Server Error" },
+    },
+    security: [{ bearerAuth: [] }],
   });
 
   // ---------- Events ----------

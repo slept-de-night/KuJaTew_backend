@@ -23,6 +23,10 @@ export const ActivityService = {
   },
   
   remove:(pit_id:number)=>ActivityRepo.remove(pit_id),
+
+  async getPlacesByTripDate(trip_id: number, date: string) {
+    return ActivityRepo.findPlacesByTripDate(trip_id, date);
+  }
 }
 
 export const EventService = {
