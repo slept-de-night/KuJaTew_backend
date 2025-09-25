@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import * as service from "./flights.service";
 import * as schema from "./flights.schema";
-import { ZodError } from "zod";
-
-const TEST_USER_ID = "OSHI"
+import { z, ZodError } from "zod";
+import { BadRequest } from '../../core/errors';
 
 export async function get_flight(req: Request, res: Response, next: NextFunction) {
   try {
@@ -21,7 +20,9 @@ export async function get_flight(req: Request, res: Response, next: NextFunction
 
 export async function delete_flight(req: Request, res: Response, next: NextFunction) {
   try {
-    const user_id = TEST_USER_ID
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
     const { trip_id, flight_id } = schema.trip_flight_schema.parse(req.params);
 
@@ -40,7 +41,9 @@ export async function delete_flight(req: Request, res: Response, next: NextFunct
 
 export async function post_flight(req: Request, res: Response, next: NextFunction) {
   try {
-    const user_id = TEST_USER_ID
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
     const body = schema.CreateFlightBodySchema.parse(req.body);
@@ -60,7 +63,10 @@ export async function post_flight(req: Request, res: Response, next: NextFunctio
 
 export async function put_flight(req: Request, res: Response, next: NextFunction) {
   try {
-    const user_id = TEST_USER_ID
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
+
     const { trip_id, flight_id } = schema.trip_flight_schema.parse(req.params);
     const body = schema.CreateFlightBodySchema.parse(req.body);
 
