@@ -21,6 +21,7 @@ import { memberRouter } from "./features/member/member.routes";
 import { bookmarkRouter } from "./features/bookmarks/bookmarks.routes"; //e
 import { flightRouter } from "./features/flights/flights.routes"; //e
 import { inviteRouter } from "./features/invitations/invitations.routes"; //e
+import { notificationsRouter } from "./features/notifications/notifications.routes"; //e
 import { activityRouter } from "./features/activity/activity.routes" //zennnne!!!
 import { weatherRouter } from "./features/weather/weather.routes";//zennnne!!!
 import { notesRouter } from "./features/notes/notes.route";
@@ -50,6 +51,7 @@ export function buildApp() {
     app.use('/api/users', bookmarkRouter); //e
     app.use('/api/trips', flightRouter); //e
     app.use('/api/trips', inviteRouter); //e
+    app.use('/api/trips', notificationsRouter) //e
     app.use('/api/trips/:trip_id/activities', activityRouter);
     app.use("/api/weather", weatherRouter);
 
