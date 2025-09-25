@@ -26,6 +26,7 @@ import { weatherRouter } from "./features/weather/weather.routes";//zennnne!!!
 import { notesRouter } from "./features/notes/notes.route";
 import { copyRouter } from "./features/copy/copy.route";
 import { docsRouter } from "./features/documents/docs.route";
+import { searchRouter } from "./features/search/search.route";
 
 export function buildApp() {
 
@@ -52,6 +53,7 @@ export function buildApp() {
     app.use('/api/trips', inviteRouter); //e
     app.use('/api/trips/:trip_id/activities', activityRouter);
     app.use("/api/weather", weatherRouter);
+    app.use('/api/search', searchRouter);
 
 
     // route without authentication

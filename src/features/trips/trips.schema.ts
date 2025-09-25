@@ -5,7 +5,7 @@ export const TripSchema = z.object({
     trip_id:z.number(),
     title:z.string(),
     joined_people:z.number(),
-    total_copied:z.number(),    
+    total_copied:z.number(),
     start_date:z.date(),
     end_date:z.date(),
     poster_image_link:z.string().nullable(),
