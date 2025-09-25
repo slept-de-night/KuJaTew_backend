@@ -20,6 +20,26 @@ export const NotesRepo = {
         return parsed.data;
     },
 
+    async is_creator(collab_id:number, nit_id:number){
+        const query = `
+            SELECT *
+            FROM note_in_trip
+            WHERE nit_id = $1 AND collab_id = $2
+        `;
+        const {rowCount} = await pool.query(query, [nit_id, collab_id]);
+        return rowCount;
+    },
+
+    async is_creator2(collab_id:number, pnote_id:number){
+        const query = `
+            SELECT *
+            FROM note
+            WHERE pnote_id = $1 and collab_id = $2
+        `
+        const {rowCount} = await pool.query(query, [pnote_id, collab_id]);
+        return rowCount;
+    },
+
 // overview part
     async get_overview_notes(trip_id:number, user_id:string){
         const query = `
