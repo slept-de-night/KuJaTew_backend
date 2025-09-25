@@ -4,12 +4,14 @@ import { ActivityController, EventController, PlaceController, VoteController } 
 export const activityRouter = express.Router({ mergeParams:true })
 
 import { requireRole } from "./activity.service"
+import {z} from "zod";
 
 function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
   return async (req:any, res:any, next:any) => {
     try {
-      const user_id = req.user?.id || req.headers["user_id"]
-      if (!user_id) return res.status(401).json({ message: "Missing user" })
+      const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+      if(!parsed.success) throw new Error("Invalide Request");
+      let user_id = parsed.data.user_id;
       const { trip_id } = req.params
       await requireRole(Number(trip_id), String(user_id), minRole)
       return handler(req,res,next)
