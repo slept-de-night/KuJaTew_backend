@@ -31,6 +31,21 @@ export const ActivityController = {
     }
   },
 
+  getPlacesByTripDate: async (req: any, res: any) => {
+    try {
+      const { trip_id, date } = S.GetActivitiesByDateParams.parse(req.params);
+      const dateStr = date.toISOString().slice(0,10)
+      const result = await ActivityService.getPlacesByTripDate(trip_id, dateStr);
+      return res.status(200).json(result);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid parameters" });
+      }
+      console.error("[getPlacesByTripDate] error:", err);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
   remove: async (req:any,res:any,next:any) => {
     try {
       const { pit_id } = S.DeleteActivityParams.parse(req.params)

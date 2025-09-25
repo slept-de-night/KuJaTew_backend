@@ -69,6 +69,23 @@ export const ActivityRepo = {
     )
   },
 
+  async findPlacesByTripDate(trip_id: number, date: string) {
+    const sql = `
+      SELECT p.name AS title,
+             p.lat::float AS latitude,
+             p.lon::float AS longitude
+      FROM places_in_trip pit
+      JOIN places p ON pit.place_id = p.place_id
+      WHERE pit.trip_id = $1
+        AND pit.date = $2
+        AND COALESCE(pit.is_event, false) = false
+        AND pit.place_id IS NOT NULL
+      ORDER BY pit.time_start ASC
+    `;
+    const res = await query(sql, [trip_id, date]);
+    return res.rows as { title: string; latitude: number; longitude: number }[];
+  },
+
   async remove(pit_id: number) {
     const sql = `DELETE FROM places_in_trip WHERE pit_id = $1 RETURNING pit_id`
     const res = await query(sql, [pit_id])

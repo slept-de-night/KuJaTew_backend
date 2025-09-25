@@ -23,6 +23,7 @@ function withRole(minRole:"Viewer"|"Editor"|"Owner", handler:any) {
 activityRouter.get("/AllDate", withRole("Viewer", ActivityController.listAll))
 activityRouter.get("/:date", withRole("Viewer", ActivityController.list))
 activityRouter.delete("/:pit_id", withRole("Editor", ActivityController.remove))
+activityRouter.get("onlyPlaces/:date", withRole("Viewer", ActivityController.getPlacesByTripDate))
 
 // Events
 activityRouter.post("/events", withRole("Editor", EventController.create))
