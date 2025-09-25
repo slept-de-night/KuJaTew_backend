@@ -18,9 +18,9 @@ export async function post_notifications(req: Request, res: Response, next: Next
   try {
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
-    const { noti_title, noti_text, noti_time } = schema.post_notifications_body_schema.parse(req.params);
+    const { noti_title, noti_text, noti_date, noti_time } = schema.post_notifications_body_schema.parse(req.body);
 
-    const inserted = await service.post_noti(trip_id, noti_title, noti_text, noti_time);
+    const inserted = await service.post_noti(trip_id, noti_title, noti_text, noti_date, noti_time);
     if (!inserted) {
       return res.status(200).json({ message: "Notification already exist" });
     }
