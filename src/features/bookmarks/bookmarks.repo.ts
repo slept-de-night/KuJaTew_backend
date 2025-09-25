@@ -32,6 +32,7 @@ export async function get_guide(userId: string) {
   const sql = `
     SELECT 
       t.trip_id, 
+      t.title,
       g.gbookmark_id, 
       (t.end_date - t.start_date) AS duration, 
       t.trip_url,
