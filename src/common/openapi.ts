@@ -10,6 +10,7 @@ import { registerFlights } from "../features/flights/flights.openapi";
 import { registerInvitations } from "../features/invitations/invitations.openapi";
 import { registerMembers } from "../features/member/members.openapi";
 import { $ZodRegistry } from "zod/v4/core";
+import { registerNotes } from "../features/notes/notes.openapi";
 
 export function buildOpenApiDoc() {
   const registry = new OpenAPIRegistry();
@@ -28,6 +29,7 @@ export function buildOpenApiDoc() {
 
   registerTrips(registry);
   registerMembers(registry);
+  registerNotes(registry);
   
   registerActivity(registry);
   registerBookmarks(registry);
