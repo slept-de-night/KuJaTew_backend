@@ -43,6 +43,8 @@ export const GuideBookmarkItemSchema = z.object({
   trip_url: z.string().url().openapi({ example: "https://api.example.com/trips/101" }),
   trip_picture_path: z.string().openapi({ example: "https://kfvtpdwnpkkrcsjnopax.supabase.co/storage/v1/object/sign/posters/25-gojo_ass.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNzc5MThkMC01MzZmLTRkNmItYjYwZS0zYmEyMTJjYzRhMmIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwb3N0ZXJzLzI1LWdvam9fYXNzLnBuZyIsImlhdCI6MTc1ODg1NTM2NCwiZXhwIjoxNzU4ODU4OTY0fQ.vPP4jFidolxpeP8fQPc13Lu1UbdZksUt_R6RSMpSNH0" }),
   trip_owner: z.string().openapi({ example: "Alice Smith" }),
+  trip_owner_picture_path: z.string().openapi({ example: "https://kfvtpdwnpkkrcsjnopax.supabase.co/storage/v1/object/sign/posters/25-gojo_ass.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNzc5MThkMC01MzZmLTRkNmItYjYwZS0zYmEyMTJjYzRhMmIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwb3N0ZXJzLzI1LWdvam9fYXNzLnBuZyIsImlhdCI6MTc1ODg1NTM2NCwiZXhwIjoxNzU4ODU4OTY0fQ.vPP4jFidolxpeP8fQPc13Lu1UbdZksUt_R6RSMpSNH0" }),
+  likes: z.string().openapi({ example: "7" }),
 });
 
 export const BookmarkGuideList = z.object({
