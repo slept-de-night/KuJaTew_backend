@@ -1,9 +1,11 @@
+import { describe } from 'node:test';
 import z, { date, file } from 'zod';
 
 export const TripSchema = z.object({ 
     trip_id:z.number(),
     title:z.string(),
     joined_people:z.number(),
+    total_copied:z.number(),
     start_date:z.date(),
     end_date:z.date(),
     poster_image_link:z.string().nullable(),
@@ -25,7 +27,10 @@ export const BodySchema = z.object({
     end_date:z.date().optional(),
     trip_code:z.string().optional(),
     trip_pass:z.string().optional(),
-    planning_status:z.boolean().optional()
+    planning_status:z.boolean().optional(),
+    visibility_status:z.boolean().optional(),
+    budget:z.coerce.number().optional(),
+    description:z.string().optional()
 });
 
 export const cSchema = z.object({ 
@@ -44,6 +49,7 @@ export const tripsumschema = z.object({
     trip_id:z.number(),
     title:z.string(),
     joined_people:z.number(),
+    total_copied:z.number(),
     start_date:z.date(),
     end_date:z.date(),
     budget:z.number(),
@@ -68,5 +74,7 @@ export const TripUpdateSchema = z.object({
     end_date: z.date().default(()=>new Date()),
     trip_code: z.string().default(""), 
     trip_pass: z.string().default(""), 
-    trip_image: z.string().openapi({ type: "string", format: "binary" }).optional(), 
+    trip_image: z.any().openapi({ type: "string", format: "binary" }).optional(),
+    planning_status: z.boolean().optional(),
+    description: z.string().optional(),
 });

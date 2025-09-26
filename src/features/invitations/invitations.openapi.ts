@@ -81,7 +81,7 @@ export function registerInvitations(registry: OpenAPIRegistry) {
     },
     responses: {
       201: { description: "Reject invite successfully" },
-      200: { description: "User already rejected invite" },
+      200: { description: "Invitation doesn't exist" },
       400: { description: "Validation error" },
       500: { description: "Invalid permission" },
     },

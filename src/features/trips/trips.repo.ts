@@ -8,23 +8,33 @@ export const TripsRepo = {
 		const query = `
 			WITH joinedP AS (
 				SELECT trip_id, COUNT(user_id)::int AS joined_people
-				FROM trip_collaborators tc
-				WHERE tc.accepted = TRUE
+				FROM trip_collaborators
+				WHERE accepted = TRUE
+				GROUP BY trip_id
+			),
+				total_copied AS (
+				SELECT trip_id, COUNT(user_id)::int AS total_copied
+				FROM likes
 				GROUP BY trip_id
 			)
-			SELECT 
-				t.trip_id, 
-				t.title, 
-				jp.joined_people AS joined_people, 
-				t.start_date, 
-				t.end_date, 
-				t.trip_picture_path AS poster_image_link, 
+			SELECT
+				t.trip_id,
+				t.title,
+				jp.joined_people,
+				COALESCE(ttcp.total_copied, 0) AS total_copied,
+				t.start_date,
+				t.end_date,
+				t.trip_picture_path AS poster_image_link,
 				t.planning_status
-			FROM joinedP jp
-			JOIN trips t ON jp.trip_id = t.trip_id
-			JOIN trip_collaborators tc ON t.trip_id = tc.trip_id
-			JOIN users u ON u.user_id = tc.user_id
-			WHERE u.user_id = $1
+			FROM trips t
+			JOIN joinedP jp ON jp.trip_id = t.trip_id
+			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			WHERE EXISTS (
+				SELECT 1
+				FROM trip_collaborators tc
+				WHERE tc.trip_id = t.trip_id
+					AND tc.user_id = $1
+			);
 		`;
 		const TripsListSchema = z.array(TripSchema);
 		const { rows } = await pool.query(query, [user_id]);
@@ -37,27 +47,37 @@ export const TripsRepo = {
 		const query = `
 			WITH joinedP AS (
 				SELECT trip_id, COUNT(user_id)::int AS joined_people
-				FROM trip_collaborators tc
-				WHERE tc.accepted = TRUE
+				FROM trip_collaborators
+				WHERE accepted = TRUE
+				GROUP BY trip_id
+			),
+				total_copied AS (
+				SELECT trip_id, COUNT(user_id)::int AS total_copied
+				FROM likes
 				GROUP BY trip_id
 			)
 			SELECT
-				t.trip_id, 
-				t.title, 
-				jp.joined_people AS joined_people, 
-				t.start_date, 
-				t.end_date, 
-				t.trip_picture_path as poster_image_link, 
+				t.trip_id,
+				t.title,
+				jp.joined_people,
+				COALESCE(ttcp.total_copied, 0) AS total_copied,
+				t.start_date,
+				t.end_date,
+				t.trip_picture_path AS poster_image_link,
 				t.planning_status
-			FROM joinedP jp
-			JOIN trips t ON jp.trip_id = t.trip_id
-			WHERE t.trip_id = $1
+			FROM trips t
+			JOIN joinedP jp ON jp.trip_id = t.trip_id
+			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			WHERE EXISTS (
+				SELECT 1
+				FROM trip_collaborators tc
+				WHERE tc.trip_id = t.trip_id
+					AND tc.trip_id = $1
+			);
 		`;
-		
-		const TripListSchema = z.array(TripSchema);
 
 		const { rows } = await pool.query(query,[trip_id]);
-		const parsed = TripListSchema.safeParse(rows);
+		const parsed = TripSchema.safeParse(rows[0]);
 		if(!parsed.success) throw INTERNAL("Fail to parsed data");
 		return parsed.data;
 	},
@@ -132,7 +152,19 @@ export const TripsRepo = {
 		return parsed.rowCount
 	},
 
-	async edit_trip_detail(trip_id:number, title?:string, start_date?:Date, end_date?:Date, trip_code?:string, trip_pass?:string, trip_picture_url?:string, planning_status?:boolean){
+	async edit_trip_detail(
+		trip_id:number, 
+		title?:string, 
+		start_date?:Date, 
+		end_date?:Date, 
+		trip_code?:string, 
+		trip_pass?:string, 
+		trip_picture_url?:string, 
+		planning_status?:boolean,
+		visibility_status?:boolean,
+		budget?:number, 
+		description?:string
+	){
 		const query = `
 			UPDATE trips
 			SET 
@@ -142,14 +174,32 @@ export const TripsRepo = {
 				trip_code = COALESCE($4, trip_code),
 				trip_pass = COALESCE($5, trip_pass),
 				trip_picture_path = COALESCE($6, trip_picture_path),
-				planning_status = COALESCE($7, planning_status)
-			WHERE trip_id = $8
+				planning_status = COALESCE($7, planning_status),
+				visibility_status = COALESCE($8, visibility_status),
+				budget = COALESCE($9, budget),
+				description = COALESCE($10, description)
+			WHERE trip_id = $11
 			RETURNING *
-		`
-		const values = [title, start_date, end_date, trip_code, trip_pass, trip_picture_url, planning_status, trip_id];
+		`;
+
+		const values = [
+			title, 
+			start_date, 
+			end_date, 
+			trip_code, 
+			trip_pass, 
+			trip_picture_url, 
+			planning_status, 
+			visibility_status,
+			budget, 
+			description, 
+			trip_id
+		];
+
 		const result = await pool.query(query, values);
 		return result.rows[0];
 	},
+
 
 	async get_trip_pic(trip_id:number){
 		const query = `
@@ -248,26 +298,38 @@ export const TripsRepo = {
 		const query = `
 			WITH joinedP AS (
 				SELECT trip_id, COUNT(user_id)::int AS joined_people
-				FROM trip_collaborators tc
-				WHERE tc.accepted = TRUE
+				FROM trip_collaborators
+				WHERE accepted = TRUE
+				GROUP BY trip_id
+			),
+				total_copied AS (
+				SELECT trip_id, COUNT(user_id)::int AS total_copied
+				FROM likes
 				GROUP BY trip_id
 			)
 			SELECT
-				t.trip_id, 
-				t.title, 
-				jp.joined_people AS joined_people, 
-				t.start_date, 
+				t.trip_id,
+				t.title,
+				jp.joined_people,
+				COALESCE(ttcp.total_copied, 0) AS total_copied,
+				t.start_date,
 				t.end_date,
-				t.budget,
-				t.trip_picture_path as poster_image_link
-			FROM joinedP jp
-			JOIN trips t ON jp.trip_id = t.trip_id
-			WHERE t.trip_id = $1
+				t.trip_picture_path AS poster_image_link,
+				t.budget
+			FROM trips t
+			JOIN joinedP jp ON jp.trip_id = t.trip_id
+			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			WHERE EXISTS (
+				SELECT 1
+				FROM trip_collaborators tc
+				WHERE tc.trip_id = t.trip_id
+					AND tc.trip_id = $1
+			);
 		`;
-		const TripsListSchema = z.array(tripsumschema);
+
 		const {rows} = await pool.query(query, [trip_id]);
-		const parsed = TripsListSchema.safeParse(rows);
-		if (!parsed.success) throw INTERNAL("Fail to parsed data");
+		const parsed = tripsumschema.safeParse(rows[0]);
+		if (!parsed.success) throw INTERNAL("Fail to parsed query");
 		return parsed.data;
 	},
 
@@ -282,5 +344,5 @@ export const TripsRepo = {
 		const parsed = pschema.safeParse(rows[0]);
 		if (!parsed.success) throw INTERNAL("Fail to parsed");
 		return parsed.data.joined_people;
-	}
+	},
 }

@@ -32,15 +32,34 @@ export async function get_guide(userId: string) {
   const sql = `
     SELECT 
       t.trip_id, 
-      g.gbookmark_id, 
+      t.title,
+      g.gbookmark_id,
+      TO_CHAR(t.start_date, 'DD/MM/YYYY') AS start_date,
+      TO_CHAR(t.end_date, 'DD/MM/YYYY') AS end_date,
       (t.end_date - t.start_date) AS duration, 
       t.trip_url,
-      t.trip_picture_path,  
-      u.name as trip_owner
+      t.trip_picture_path,
+      owner.name AS trip_owner,
+      owner.profile_picture_path AS trip_owner_picture_path,
+      COALESCE(COUNT(l.trip_id), 0) AS likes
     FROM guide_bookmark g
     JOIN trips t ON t.trip_id = g.trip_id
-    JOIN users u ON u.user_id = t.user_id
+    LEFT JOIN trip_collaborators tc 
+           ON tc.trip_id = t.trip_id 
+          AND tc.role = 'Owner'
+    LEFT JOIN users owner ON owner.user_id = tc.user_id
+    LEFT JOIN likes l ON l.trip_id = t.trip_id
     WHERE g.user_id = $1
+    GROUP BY 
+      t.trip_id, 
+      t.title,
+      g.gbookmark_id,
+      t.start_date,
+      t.end_date,
+      t.trip_url,
+      t.trip_picture_path,
+      owner.name,
+      owner.profile_picture_path
     ORDER BY g.gbookmark_id DESC
   `;
   const res = await query(sql, [userId]);

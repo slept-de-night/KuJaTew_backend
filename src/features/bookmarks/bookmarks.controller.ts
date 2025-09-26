@@ -1,15 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import * as service from "./bookmarks.service";
 import * as schema from "./bookmarks.schema";
-import { ZodError } from "zod";
-
-const TEST_USER_ID = "OSHI"; //for testing only //OSHI
+import { z, ZodError } from "zod";
+import { BadRequest } from '../../core/errors';
+import { etcService } from '../../etc/etc.service';
 
 export async function get_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = TEST_USER_ID; //for testing only
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
-    const bookmarks = await service.get_place(userId);
+    const rows = await service.get_place(user_id);
+
+    const bookmarks = await Promise.all(
+      rows.map(async (row) => {
+        if (row.places_picture_path) {
+          const { signedUrl } = await etcService.get_file_link(row.places_picture_path, "places", 3600);
+          row.places_picture_path = signedUrl;
+        }
+        return row;
+      })
+    );
     return res.status(200).json({ bookmarks });
   } catch (err) {
     next(err);
@@ -18,11 +30,12 @@ export async function get_place_bookmark(req: Request, res: Response, next: Next
 
 export async function post_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = TEST_USER_ID; //for testing only
-
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
     const { place_id } = schema.place_id_schema.parse(req.params);
 
-    const inserted = await service.add_place(userId, place_id);
+    const inserted = await service.add_place(user_id, place_id);
     if (!inserted) {
       return res.status(409).json({ message: "Place already bookmarked by user" });
     }
@@ -37,11 +50,13 @@ export async function post_place_bookmark(req: Request, res: Response, next: Nex
 
 export async function delete_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = TEST_USER_ID; //for testing only
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
     const { bookmark_id } = schema.bookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_place(userId, bookmark_id);
+    const removed = await service.remove_place(user_id, bookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Place doesn't exist in user's bookmark" });
     }
@@ -56,9 +71,25 @@ export async function delete_place_bookmark(req: Request, res: Response, next: N
 
 export async function get_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = TEST_USER_ID; //for testing only
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
-    const guide_bookmarks = await service.get_guide(userId);
+    const rows = await service.get_guide(user_id);
+
+    const guide_bookmarks = await Promise.all(
+      rows.map(async (row) => {
+        if (row.trip_picture_path) {
+          const { signedUrl } = await etcService.get_file_link(row.trip_picture_path, "posters", 3600);
+          row.trip_picture_path = signedUrl;
+        }
+        if (row.trip_owner_picture_path) {
+          const { signedUrl } = await etcService.get_file_link(row.trip_owner_picture_path, "profiles", 3600);
+          row.trip_owner_picture_path = signedUrl;
+        }
+        return row;
+      })
+    );
     return res.status(200).json({ guide_bookmarks });
   } catch (err) {
     next(err);
@@ -67,11 +98,13 @@ export async function get_guide_bookmark(req: Request, res: Response, next: Next
 
 export async function post_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = TEST_USER_ID; //for testing only
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
-    const inserted = await service.add_guide(userId, trip_id);
+    const inserted = await service.add_guide(user_id, trip_id);
     if (!inserted) {
       return res.status(200).json({ message: "Bookmark already exist" });
     }
@@ -86,11 +119,13 @@ export async function post_guide_bookmark(req: Request, res: Response, next: Nex
 
 export async function delete_guide_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = TEST_USER_ID; //for testing only
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
     const { gbookmark_id } = schema.gbookmark_id_schema.parse(req.params);
 
-    const removed = await service.remove_guide(userId, gbookmark_id);
+    const removed = await service.remove_guide(user_id, gbookmark_id);
     if (!removed) {
       return res.status(404).json({ message: "Guide doesn't exist inside user's bookmark" });
     }
