@@ -29,6 +29,7 @@ export const CreateEventBody = z.object({
   event_name: z.string().min(1),
   is_vote: z.literal(false),
   is_event: z.literal(true),
+  event_title: z.string().min(1)
 })
 
 export const UpdateEventBody = z.object({
@@ -36,6 +37,7 @@ export const UpdateEventBody = z.object({
   time_start: isoTime,
   time_end: isoTime,
   event_name: z.string().min(1),
+  event_title: z.string().min(1)
 })
 
 // ---------- Places ----------
@@ -46,6 +48,7 @@ export const AddPlaceBody = z.object({
   time_end: isoTime,
   is_vote: z.literal(false),
   event_name: z.literal(""),
+  event_title: z.literal(""),
   is_event: z.literal(false),
 })
 
@@ -88,6 +91,7 @@ export const InitVotingBodyEvents = z.object({
   time_end: z.string(),
   is_vote: z.literal(true),
   is_event: z.literal(true),
+  event_title: z.string().min(1)
 })
 
 
@@ -160,6 +164,7 @@ export const ActivityItem = z.object({
   address: z.string().nullable(),
   is_vote: z.boolean(),
   event_name: z.string().nullable(),
+  event_title: z.string().nullable(),
   is_event: z.boolean(),
   photo_url: z.string().nullable(),
 })
@@ -189,6 +194,7 @@ export const EventVotingResponse = z.object({
   event_voting: z.object({
     pit_id: z.number(),
     event_name: z.string(),
+    event_title: z.string(),
     voting_count: z.number(),
     is_voted: z.boolean(),
     is_most_voted: z.string(),
