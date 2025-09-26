@@ -55,9 +55,9 @@ export const MemberRepo = {
 			RETURNING *
 		`;
 		const {rows} = await pool.query(query, [collab_id, trip_id]);
-		const parsed = MemberSchema.safeParse(rows[0]);
-		if (!parsed.success) throw INTERNAL("Fail to parsed query");
-		return parsed.data;
+		// const parsed = MemberSchema.safeParse(rows[0]);
+		// if (!parsed.success) throw INTERNAL("Fail to parsed query");
+		return rows;
 	},
 
 	async get_memberid (trip_id:number){

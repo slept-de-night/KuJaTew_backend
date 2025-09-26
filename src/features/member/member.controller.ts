@@ -10,21 +10,21 @@ import th from 'zod/v4/locales/th.js';
 let user_id = 'OSHI';
 
 export const Trip_Members = asyncHandler(async (req: Request, res: Response) => {
-  //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-  //if(!parsed.success) throw BadRequest("Invalide Request");
-  //let user_id = parsed.data.user_id;
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  let user_id = parsed.data.user_id;
 
-  const parsed = tSchema.safeParse(req.params);
-  if (!parsed.success) throw BadRequest("Invalid Request");
-  const {trip_id} = parsed.data;
+  const parsedparams = tSchema.safeParse(req.params);
+  if (!parsedparams.success) throw BadRequest("Invalid Request");
+  const {trip_id} = parsedparams.data;
   const members = await MemberService.get_trip_member(user_id, trip_id);
   return res.status(200).json(members);
 });
 
 export const Edit_Role = asyncHandler(async (req: Request, res: Response) => {
-  //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-  //if(!parsed.success) throw BadRequest("Invalide Request");
-  //let user_id = parsed.data.user_id;
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  let user_id = parsed.data.user_id;
 
   const parsedparams = tSchema.safeParse(req.params);
   if (!parsedparams.success) throw BadRequest("Invalid Params Request");
@@ -38,13 +38,13 @@ export const Edit_Role = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const Delete_Member = asyncHandler(async (req: Request, res: Response) => {
-  //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-  //if(!parsed.success) throw BadRequest("Invalide Request");
-  //let user_id = parsed.data.user_id;
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  let user_id = parsed.data.user_id;
 
-  const parsed = tcSchema.safeParse(req.params);
-  if (!parsed.success) throw BadRequest("Invalid Request");
-  const {trip_id, collab_id} = parsed.data;
+  const parsedparams = tcSchema.safeParse(req.params);
+  if (!parsedparams.success) throw BadRequest("Invalid Request");
+  const {trip_id, collab_id} = parsedparams.data;
   const result = await MemberService.delete_member(user_id, trip_id, collab_id);
   return res.status(204).json(result);
 });

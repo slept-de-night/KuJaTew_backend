@@ -344,5 +344,5 @@ export const TripsRepo = {
 		const parsed = pschema.safeParse(rows[0]);
 		if (!parsed.success) throw INTERNAL("Fail to parsed");
 		return parsed.data.joined_people;
-	}
+	},
 }
