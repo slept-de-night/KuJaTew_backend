@@ -8,6 +8,6 @@ tripsRouter.get('/by-user', controler.User_All_Trip); //test with authen
 tripsRouter.get('/by-trip/:trip_id', controler.Specific_Trip);
 tripsRouter.get('/:trip_id/summarize', controler.Trip_Sum);
 tripsRouter.post("/", upload.single("file"), controler.Add_Trip);
-tripsRouter.put("/:trip_id", upload.single("file") ,controler.Edit_Trip_Detail);
+tripsRouter.patch("/:trip_id", upload.single("file") ,controler.Edit_Trip_Detail);
 tripsRouter.delete("/:trip_id", controler.Delete_Trip);
 tripsRouter.delete("/:trip_id/leave", controler.Leave_Trip);

@@ -1,6 +1,5 @@
 import { pool } from '../../config/db';
 import { copySchema } from './copy.schema';
-import { utSchema } from '../member/member.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 
@@ -25,7 +24,10 @@ export const CopyRepo = {
             RETURNING *
         `;
         const {rows} = await pool.query(query, [trip_id, user_id]);
-        const parsed = utSchema.safeParse(rows[0]);
+        const parsed = z.object({
+            trip_id: z.coerce.number(),
+            user_id: z.string().min(1),   
+        }).safeParse(rows[0]);
         if (!parsed.success) throw INTERNAL("Fail to parsed query");
         return parsed.data;
     },

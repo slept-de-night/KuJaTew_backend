@@ -2,6 +2,7 @@ import { INTERNAL } from "../../core/errors";
 import { NotesRepo } from "./notes.repo";
 import { UsersRepo } from "../users/users.repo";
 import { MemberRepo } from "../member/member.repo";
+import { throwDeprecation } from "node:process";
 
 export const NoteService = {
   // overview part
@@ -28,6 +29,10 @@ export const NoteService = {
         if (!user_id || !trip_id || !nit_id || !note) throw INTERNAL("trip note detail required");
         const iit = await MemberRepo.is_in_trip(user_id, trip_id);
         if (!iit) throw Error("User not in trip");
+
+        const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
+        const cre = await NotesRepo.is_creator(collab_id, nit_id);
+        if (!cre) throw new Error("User can't edit other user notes");
         const result = await NotesRepo.edit_trip_note(nit_id, note);
         return result;
     },
@@ -36,6 +41,7 @@ export const NoteService = {
       if (!user_id || !trip_id) throw INTERNAL("UserID and TripID are required");
       const iit = await MemberRepo.is_in_trip(user_id, trip_id);
         if (!iit) throw Error("User not in trip");
+
       const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
       const total_note = await NotesRepo.check_nit(collab_id, trip_id);
       if (total_note.total_note){ //total_note == 1 --> can't add more
@@ -49,7 +55,11 @@ export const NoteService = {
       if (!user_id || !trip_id || !nit_id) throw INTERNAL("UserID, TripID and nitID are required");
       const iit = await MemberRepo.is_in_trip(user_id, trip_id);
         if (!iit) throw Error("User not in trip");
+
       const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
+        const cre = await NotesRepo.is_creator(collab_id, nit_id);
+        if (!cre) throw new Error("User can't edit other user notes");
+
       const result = await NotesRepo.delete_overview_note(collab_id,nit_id);
       return result;
     },
@@ -78,6 +88,11 @@ export const NoteService = {
         if (!user_id || !trip_id || !pnote_id || !note) throw INTERNAL("activity note detail required");
         const iit = await MemberRepo.is_in_trip(user_id, trip_id);
         if (!iit) throw Error("User not in trip");
+
+        const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
+        const cre = await NotesRepo.is_creator2(collab_id, pnote_id);
+        if (!cre) throw new Error("User can't edit other user notes");
+
         const result = await NotesRepo.edit_activity_note(pnote_id, note);
         return result;
     },
@@ -99,7 +114,11 @@ export const NoteService = {
       if (!user_id || !trip_id || !pnote_id) throw INTERNAL("UserID, TripID and pnoteID are required");
       const iit = await MemberRepo.is_in_trip(user_id, trip_id);
         if (!iit) throw Error("User not in trip");
+
       const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
+        const cre = await NotesRepo.is_creator2(collab_id, pnote_id);
+        if (!cre) throw new Error("User can't edit other user notes");
+
       const result = await NotesRepo.delete_activity_note(collab_id, pnote_id);
       return result;
     },

@@ -3,6 +3,7 @@ import * as service from "./bookmarks.service";
 import * as schema from "./bookmarks.schema";
 import { z, ZodError } from "zod";
 import { BadRequest } from '../../core/errors';
+import { etcService } from '../../etc/etc.service';
 
 export async function get_place_bookmark(req: Request, res: Response, next: NextFunction) {
   try {
@@ -10,7 +11,17 @@ export async function get_place_bookmark(req: Request, res: Response, next: Next
     if(!parsed.success) throw BadRequest("Invalide Request");
     const { user_id } = parsed.data;
 
-    const bookmarks = await service.get_place(user_id);
+    const rows = await service.get_place(user_id);
+
+    const bookmarks = await Promise.all(
+      rows.map(async (row) => {
+        if (row.places_picture_path) {
+          const { signedUrl } = await etcService.get_file_link(row.places_picture_path, "places", 3600);
+          row.places_picture_path = signedUrl;
+        }
+        return row;
+      })
+    );
     return res.status(200).json({ bookmarks });
   } catch (err) {
     next(err);
@@ -64,7 +75,17 @@ export async function get_guide_bookmark(req: Request, res: Response, next: Next
     if(!parsed.success) throw BadRequest("Invalide Request");
     const { user_id } = parsed.data;
 
-    const guide_bookmarks = await service.get_guide(user_id);
+    const rows = await service.get_guide(user_id);
+
+    const guide_bookmarks = await Promise.all(
+      rows.map(async (row) => {
+        if (row.trip_picture_path) {
+          const { signedUrl } = await etcService.get_file_link(row.trip_picture_path, "posters", 3600);
+          row.trip_picture_path = signedUrl;
+        }
+        return row;
+      })
+    );
     return res.status(200).json({ guide_bookmarks });
   } catch (err) {
     next(err);

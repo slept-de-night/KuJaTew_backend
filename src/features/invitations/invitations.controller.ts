@@ -78,7 +78,7 @@ export async function reject_invite(req: Request, res: Response, next: NextFunct
 
     const rejected = await service.reject_invite(trip_id, user_id);
     if (!rejected) {
-      return res.status(200).json({ message: "user already reject invite" });
+      return res.status(200).json({ message: "Invitation doesn't exist" });
     }
     return res.status(201).json({ message: "reject invite successfully" });
   } catch (err) {

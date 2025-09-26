@@ -10,6 +10,7 @@ import { UsersService } from "../users/users.service";
 import * as Flightservice from "../flights/flights.service";
 import { promise } from "zod";
 import { all } from "axios";
+import { etcService } from "../../etc/etc.service";
 
 export const TripsService = {
   async get_user_trips(user_id: string) {
@@ -34,18 +35,14 @@ export const TripsService = {
     if (!trip_id) throw INTERNAL("Trip ID is required");
     const trips = await TripsRepo.get_specific_trip(trip_id);
     
-    const updatedTrips = await Promise.all(
-      trips.map(async (trip) => {
-        if (!trip.poster_image_link) {
-          return trip;
-        }
-        const trip_pic = await UsersRepo.get_file_link(trip.poster_image_link, "posters", 3600);
-        trip.poster_image_link = trip_pic.signedUrl;
-        return trip;
-      })
-    );
-
-    return updatedTrips;
+    const filepath = trips.poster_image_link;
+    if (!filepath) {
+      return trips;
+    } else {
+      const trip_pic = await etcService.get_file_link(filepath, "posters", 3600);
+      trips.poster_image_link = trip_pic.signedUrl;
+      return trips;
+    }
   },
 
   async add_trip(
@@ -101,7 +98,7 @@ export const TripsService = {
     const isOwner = await TripsRepo.check_owner(user_id, trip_id);
     if (!isOwner) throw new Error("Only trip owner can delete trip");
     const pic = await TripsRepo.get_specific_trip(trip_id);
-    const old_pic_path = pic[0]?.poster_image_link;
+    const old_pic_path = pic.poster_image_link;
     if (old_pic_path){
       const { error } = await supabase.storage.from("posters").remove([old_pic_path]);
       if (error) {console.error("Failed to delete:", error.message);}
@@ -110,7 +107,20 @@ export const TripsService = {
     return trips;
   },
 
-  async edit_trip_detail(owner_id:string, trip_id:number, title?:string, start_date?:Date, end_date?:Date, trip_code?:string, trip_pass?:string, planning_status?:boolean, file?: Express.Multer.File){
+  async edit_trip_detail(
+    owner_id:string, 
+    trip_id:number, 
+    title?:string,
+    start_date?:Date, 
+    end_date?:Date, 
+    trip_code?:string, 
+    trip_pass?:string, 
+    planning_status?:boolean,
+		visibility_status?:boolean,
+		budget?:number, 
+		description?:string,
+    file?: Express.Multer.File){
+
     if (!owner_id || !trip_id) throw INTERNAL("OwnerID and TripID are required");
     const isOwner = await TripsRepo.check_owner(owner_id, trip_id);
     if (!isOwner){
@@ -134,7 +144,7 @@ export const TripsService = {
         if (error) {console.error("Failed to delete:", error.message);}
       }
     }
-    return await TripsRepo.edit_trip_detail(trip_id, title, start_date, end_date, trip_code, trip_pass, trip_picture_path, planning_status);
+    return await TripsRepo.edit_trip_detail(trip_id,title,start_date,end_date,trip_code,trip_pass,trip_picture_path,planning_status, visibility_status, budget, description);
   },
 
   async leave_trip(user_id:string, trip_id:number, collab_id?:number){
@@ -159,16 +169,14 @@ export const TripsService = {
 
   async trip_sum(trip_id:number){
     if (!trip_id) throw INTERNAL("Trip ID is required");
-    const trips = await TripsRepo.trip_sum(trip_id);
+    const trip_detail = await TripsRepo.trip_sum(trip_id);
     // get trip file link
-    const trip_detail = await Promise.all(
-      trips.map(async (trip) => {
-        if (!trip.poster_image_link) return trip;
-        const trip_pic = await UsersRepo.get_file_link(trip.poster_image_link, "posters", 3600);
-        trip.poster_image_link = trip_pic.signedUrl;
-        return trip;
-      })
-    );
+    const filepath = trip_detail.poster_image_link;
+    if (!filepath) {}
+    else {
+      const trip_pic = await etcService.get_file_link(filepath, "posters", 3600);
+      trip_detail.poster_image_link = trip_pic.signedUrl;
+    }
     // get owner & members detail
     const all_members = await MemberRepo.get_memberid(trip_id);
     const owner = all_members.find(m => m.role === "Owner")!;
@@ -189,7 +197,7 @@ export const TripsService = {
         dep_date: f.dep_date,
         dep_time: f.dep_time,
         dep_country: f.dep_country,
-        dep_airp_code: f.dep_airport_code,  // map ชื่อ field
+        dep_airp_code: f.dep_airport_code,
       },
       arrive: {
         arr_date: f.arr_date,

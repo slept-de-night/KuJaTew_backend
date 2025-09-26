@@ -5,6 +5,7 @@ import { ProfileFileSchema } from '../users/users.schema';
 import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
+import { title } from 'node:process';
 
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
@@ -26,7 +27,6 @@ export const Add_Trip = asyncHandler(async (req: Request, res: Response) => {
   try {
     const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
     if(!parsed.success) throw BadRequest("Invalide Request");
-
     const parsedbody = addtripSchema.safeParse(req.body);
     if (!parsedbody.success) throw BadRequest("Invalid Body Request");
     const file = req.file;
@@ -80,7 +80,7 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
   }
   const { user_id } = parsed.data;
   const { trip_id } = parsedtrip.data;
-  const {trip_name, start_date, end_date, trip_code, trip_pass, planning_status} = parsedbody.data;
+  const {trip_name, start_date, end_date, trip_code, trip_pass, planning_status, visibility_status, budget, description} = parsedbody.data;
 
   const file = req.file;
     if (file) {
@@ -89,7 +89,7 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
         throw new Error("Only JPEG, JPG, and PNG files are allowed");
       }
     }
-  const result = await TripsService.edit_trip_detail(user_id, trip_id, trip_name, start_date, end_date, trip_code, trip_pass, planning_status, file);
+  const result = await TripsService.edit_trip_detail(user_id, trip_id, trip_name, start_date, end_date, trip_code, trip_pass, planning_status, visibility_status, budget, description);
   return res.status(200).json(result);
 });
 

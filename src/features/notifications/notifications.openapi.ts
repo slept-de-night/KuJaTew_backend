@@ -17,9 +17,7 @@ export function registerNotifications(registry: OpenAPIRegistry) {
         description: "List of notifications",
         content: {
           "application/json": {
-            // you don’t yet have a dedicated response schema,
-            // so for now just return an array/object
-            schema: schema.get_notifications_schema, 
+            schema: schema.get_noti_schema, 
           },
         },
       },
@@ -39,7 +37,7 @@ export function registerNotifications(registry: OpenAPIRegistry) {
         body: {
           content: {
             "application/json": {
-              schema: schema.post_notifications_body_schema,
+              schema: schema.example_swagger,
             },
           },
         },

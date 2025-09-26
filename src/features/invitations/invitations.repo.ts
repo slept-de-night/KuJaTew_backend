@@ -92,17 +92,17 @@ export async function reject_invite(trip_id: number, user_id: string) { // NEED!
   const check_match_user = `
   SELECT *
   FROM trip_collaborators
-  WHERE trip_id = $1 AND user_id = $2 AND accepted = false
+  WHERE trip_id = $1 AND user_id = $2
   LIMIT 1
   `
 
   const check_match = await query(check_match_user, [trip_id, user_id,]);
 
   if (check_match.rowCount === 0) {
-    throw new Error("user_id doesn't match / already accepted / wrong trip_id");
+    throw new Error("user_id doesn't match / wrong trip_id");
   }
 
-  const sql = `DELETE FROM trip_collaborators WHERE trip_id = $1 AND user_id = $2`;
+  const sql = `DELETE FROM trip_collaborators WHERE trip_id = $1 AND user_id = $2 AND accepted = false`;
   const res = await query(sql, [trip_id, user_id]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if remove successfully | Else return 0
 }
