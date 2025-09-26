@@ -33,7 +33,9 @@ export async function get_guide(userId: string) {
     SELECT 
       t.trip_id, 
       t.title,
-      g.gbookmark_id, 
+      g.gbookmark_id,
+      TO_CHAR(t.start_date, 'DD/MM/YYYY') as start_date,
+      TO_CHAR(t.end_date, 'DD/MM/YYYY') as end_date,
       (t.end_date - t.start_date) AS duration, 
       t.trip_url,
       t.trip_picture_path,  

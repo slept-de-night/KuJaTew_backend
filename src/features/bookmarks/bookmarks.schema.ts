@@ -37,6 +37,8 @@ export const BookmarkPlaceList = z.object({
 export const GuideBookmarkItemSchema = z.object({
   trip_id: z.number().int().openapi({ example: 101 }),
   gbookmark_id: z.number().int().openapi({ example: 5 }),
+  start_date: z.string().openapi({ example: "01/02/2025" }), // number of days as string
+  end_date: z.string().openapi({ example: "03/04/2025" }), // number of days as string
   duration: z.string().openapi({ example: "7" }), // number of days as string
   trip_url: z.string().url().openapi({ example: "https://api.example.com/trips/101" }),
   trip_picture_path: z.string().openapi({ example: "https://kfvtpdwnpkkrcsjnopax.supabase.co/storage/v1/object/sign/posters/25-gojo_ass.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jNzc5MThkMC01MzZmLTRkNmItYjYwZS0zYmEyMTJjYzRhMmIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwb3N0ZXJzLzI1LWdvam9fYXNzLnBuZyIsImlhdCI6MTc1ODg1NTM2NCwiZXhwIjoxNzU4ODU4OTY0fQ.vPP4jFidolxpeP8fQPc13Lu1UbdZksUt_R6RSMpSNH0" }),
