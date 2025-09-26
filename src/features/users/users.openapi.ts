@@ -87,7 +87,6 @@ export function registerUsers(registry: OpenAPIRegistry) {
      
     },
     tags: ["Users"],
-    security: []
   });
   registry.registerPath({
     method: "patch",

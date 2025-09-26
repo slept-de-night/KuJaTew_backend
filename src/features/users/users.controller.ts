@@ -11,7 +11,6 @@ import { ImageFileSchema } from '../../etc/etc.schema';
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
  
 
-  let upload_profile = {}; 
   const body_parsed = UserSchema.safeParse(req.body);
   if(!body_parsed.success) throw BadRequest("Request Structure is not invalide!")
 
@@ -21,7 +20,6 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   
   const file_parsed = ImageFileSchema.safeParse(req.file) ;
   if(!file_parsed.success) throw BadRequest("Request File is not invalide!")
-  
   
   await UsersService.update_user({...body_parsed.data},(req as any).user.user_id,file_parsed.data ??null);
   res.status(200).json({mes:"updated user success!"});
