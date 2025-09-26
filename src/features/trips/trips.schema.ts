@@ -78,3 +78,15 @@ export const TripUpdateSchema = z.object({
     planning_status: z.boolean().optional(),
     description: z.string().optional(),
 });
+
+export const guidebox = z.object({
+    trip_id: z.coerce.number(),
+    title: z.string(),
+    start_date: z.coerce.date(),
+    end_date: z.coerce.date(),
+    guide_image: z.string(),
+    total_copied: z.coerce.number(),
+    owner_name: z.string(),
+    owner_image: z.string(),
+    description: z.string().nullable(),
+});

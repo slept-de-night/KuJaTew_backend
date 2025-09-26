@@ -1,5 +1,5 @@
 import { pool } from '../../config/db';
-import { TripSchema, tripsumschema, pschema } from './trips.schema';
+import { TripSchema, tripsumschema, pschema, guidebox } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 
@@ -345,4 +345,33 @@ export const TripsRepo = {
 		if (!parsed.success) throw INTERNAL("Fail to parsed");
 		return parsed.data.joined_people;
 	},
+
+	async get_recommended_trip(){
+		const query = `
+			WITH total_copied AS (
+				SELECT trip_id, COUNT(user_id)::int AS total_copied
+				FROM likes
+				GROUP BY trip_id
+			)
+			SELECT
+				t.trip_id,
+				t.title,
+				t.start_date,
+				t.end_date,
+				t.trip_picture_path AS guide_image,
+				COALESCE(ttcp.total_copied, 0) AS total_copied,
+				u.name as owner_name,
+				u.profile_picture_path as owner_image,
+				t.description as description
+			FROM trips t
+			JOIN users u ON u.user_id = t.user_id
+			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			ORDER BY total_copied desc
+		`
+		const {rows} = await pool.query(query);
+		console.log(rows)
+		const parsed = z.array(guidebox).safeParse(rows);
+		if(!parsed.success) throw INTERNAL("Fail to parsed query");
+		return parsed.data;
+	}
 }

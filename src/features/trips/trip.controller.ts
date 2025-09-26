@@ -122,3 +122,8 @@ export const Trip_Sum = asyncHandler(async (req: Request, res:Response) =>{
   const tripinfo = await TripsService.trip_sum(tripID);
   return res.status(200).json(tripinfo);
 });
+
+export const Recommended_trip = asyncHandler(async (req: Request, res:Response) =>{
+  const trips = await TripsService.get_recommended_trip();
+  return res.status(200).json(trips);
+});
