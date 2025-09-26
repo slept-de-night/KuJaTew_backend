@@ -10,7 +10,6 @@ import { ImageFileSchema } from '../../etc/etc.schema';
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
  
-
   const body_parsed = UserSchema.safeParse(req.body);
   if(!body_parsed.success) throw BadRequest("Request Structure is not invalide!")
 

@@ -22,9 +22,18 @@ export const UsersRepo = {
     },
 
     async update_profile_path(path:string,user_id:string):Promise<string>{
+        await this.delete_profile_path(user_id);
         const {error} = await supabase.from('users').update({'profile_picture_path':path}).eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
         return path;
+    },
+    async delete_profile_path(user_id:string){
+        const {data,error} = await supabase.from('users').select('profile_picture_path').eq('user_id',user_id);
+        if(error) throw POSTGREST_ERR(error);
+        if(data.length>0){
+            const {error} = await supabase.storage.from('profiles').remove(data[0]?.profile_picture_path);
+            if(error) throw STORAGE_ERR(error);
+        }
     },
     async get_user_details(user_id:string):Promise<z.infer<typeof UsersFullSchema>>{
 
