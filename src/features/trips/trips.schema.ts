@@ -54,6 +54,7 @@ export const tripsumschema = z.object({
     end_date:z.date(),
     budget:z.number(),
     poster_image_link:z.string().nullable(),
+    description:z.string(),
 });
 
 export const pschema = z.object({

@@ -5,12 +5,10 @@ import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
 
-let user_id = 'OSHI';
-
 export const Get_Copy = asyncHandler(async (req: Request, res: Response) => {
-//   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-//   if(!parsed.success) throw BadRequest("Invalide Request");
-//   let user_id = parsed.data.user_id;
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  let user_id = parsed.data.user_id;
 
   const parseparams = z.object({trip_id:z.coerce.number()}).safeParse(req.params);
   if (!parseparams.success) throw BadRequest("Invalide Request");
@@ -20,9 +18,9 @@ export const Get_Copy = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const Add_Copy = asyncHandler(async (req: Request, res: Response) => {
-//   const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-//   if(!parsed.success) throw BadRequest("Invalide Request");
-//   let user_id = parsed.data.user_id;
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  let user_id = parsed.data.user_id;
 
   const parseparams = z.object({trip_id:z.coerce.number()}).safeParse(req.params);
   if (!parseparams.success) throw BadRequest("Invalide Request");

@@ -28,7 +28,7 @@ export const TripsService = {
       })
     );
 
-    return updatedTrips;
+    return { trips : updatedTrips};
   },
 
   async get_specific_trip(trip_id: number) {
@@ -231,6 +231,6 @@ export const TripsService = {
         return trip;
       })
     );
-    return updatedTrips;
+    return { guides: updatedTrips};
   },
 };

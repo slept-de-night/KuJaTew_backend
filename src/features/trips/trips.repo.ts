@@ -315,7 +315,8 @@ export const TripsRepo = {
 				t.start_date,
 				t.end_date,
 				t.trip_picture_path AS poster_image_link,
-				t.budget
+				t.budget,
+				t.description as description
 			FROM trips t
 			JOIN joinedP jp ON jp.trip_id = t.trip_id
 			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
@@ -366,6 +367,7 @@ export const TripsRepo = {
 			FROM trips t
 			JOIN users u ON u.user_id = t.user_id
 			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			WHERE t.visibility_status = true
 			ORDER BY total_copied desc
 		`
 		const {rows} = await pool.query(query);
