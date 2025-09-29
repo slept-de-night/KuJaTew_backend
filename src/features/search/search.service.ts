@@ -30,11 +30,16 @@ export const searchService = {
 
         const updated = await Promise.all(
           results.map(async (result) => {
-            if (!result.guide_poster_link) {
+            if (result.guide_poster_link) {
+              const trip_pic = await etcService.get_file_link(result.guide_poster_link, "posters", 3600);
+              result.guide_poster_link = trip_pic.signedUrl;
               return result;
             }
-            const trip_pic = await etcService.get_file_link(result.guide_poster_link, "posters", 3600);
-            result.guide_poster_link = trip_pic.signedUrl;
+            if (result.owner_image) {
+              const owner_pic = await etcService.get_file_link(result.owner_image, "profiles", 3600);
+              result.owner_image = owner_pic.signedUrl;
+              return result
+            }
             return result;
           })
         );

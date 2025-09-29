@@ -36,6 +36,7 @@ export const searchRepo = {
                 t.start_date as start_date,
                 t.end_date as end_date,
                 u.name as owner_name,
+                u.profile_picture_path as owner_image,
                 t.trip_picture_path as guide_poster_link
             FROM trips t
             JOIN users u ON t.user_id = u.user_id
