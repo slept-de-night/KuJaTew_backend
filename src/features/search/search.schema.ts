@@ -14,5 +14,6 @@ export const guideschema = z.object({
     start_date:z.date(),
     end_date:z.date(),
     owner_name:z.string(),
+    owner_image:z.string(),
     guide_poster_link:z.string(),
 });

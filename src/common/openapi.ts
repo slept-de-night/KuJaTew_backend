@@ -14,6 +14,7 @@ import { $ZodRegistry } from "zod/v4/core";
 import { registerNotes } from "../features/notes/notes.openapi";
 import { registerNotifications } from "../features/notifications/notifications.openapi";
 import { registerSearch } from "../features/search/search.openapi";
+import { registerDocs } from "../features/documents/docs.openapi";
 
 export function buildOpenApiDoc() {
   const registry = new OpenAPIRegistry();
@@ -41,6 +42,7 @@ export function buildOpenApiDoc() {
   registerInvitations(registry);
   registerNotifications(registry);
   registerSearch(registry);
+  registerDocs(registry);
   // registerUser(registry);
 
   const generator = new OpenApiGeneratorV31(registry.definitions);
