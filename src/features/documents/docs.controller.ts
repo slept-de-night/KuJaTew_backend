@@ -6,12 +6,11 @@ import { BadRequest, INTERNAL } from '../../core/errors';
 import z from 'zod';
 import { trip_code_password_schema } from '../invitations/invitations.schema';
 
-let user_id = 'keen1234';
 
 export const Upload_Docs = asyncHandler(async (req: Request, res: Response) => {
-    //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    //if(!parsed.success) throw BadRequest("Invalide Request");
-    //let user_id = parsed.data.user_id;
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    let user_id = parsed.data.user_id;
 
     const parseparams = scheme.UploadDocumentSchema.safeParse(req.params);
     if (!parseparams.success) throw BadRequest("Invalide Request");
@@ -31,9 +30,9 @@ export const Upload_Docs = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const Get_Docs = asyncHandler(async (req: Request, res: Response) => {
-    //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    //if(!parsed.success) throw BadRequest("Invalide Request");
-    //let user_id = parsed.data.user_id;
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    let user_id = parsed.data.user_id;
 
     const parseparams = scheme.UploadDocumentSchema.safeParse(req.params);
     if (!parseparams.success) throw BadRequest("Invalide Request");
@@ -44,9 +43,9 @@ export const Get_Docs = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const Get_Doc = asyncHandler(async (req: Request, res: Response) => {
-    //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    //if(!parsed.success) throw BadRequest("Invalide Request");
-    //let user_id = parsed.data.user_id;
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    let user_id = parsed.data.user_id;
 
     const parseparams = scheme.GetDocumentSchema.safeParse(req.params);
     if (!parseparams.success) throw BadRequest("Invalide Request");
@@ -57,9 +56,9 @@ export const Get_Doc = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const Delete_Doc = asyncHandler(async (req: Request, res: Response) => {
-    //const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    //if(!parsed.success) throw BadRequest("Invalide Request");
-    //let user_id = parsed.data.user_id;
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    let user_id = parsed.data.user_id;
 
     const parseparams = scheme.GetDocumentSchema.safeParse(req.params);
     if (!parseparams.success) throw BadRequest("Invalide Request");

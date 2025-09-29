@@ -8,10 +8,12 @@ export const userschema = z.object({
 });
 
 export const guideschema = z.object({
+    trip_id:z.coerce.number(),
     guide_name:z.string(),
     total_copied:z.coerce.number(),
     start_date:z.date(),
     end_date:z.date(),
     owner_name:z.string(),
+    owner_image:z.string(),
     guide_poster_link:z.string(),
 });

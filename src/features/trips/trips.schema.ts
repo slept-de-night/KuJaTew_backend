@@ -54,6 +54,7 @@ export const tripsumschema = z.object({
     end_date:z.date(),
     budget:z.number(),
     poster_image_link:z.string().nullable(),
+    description:z.string(),
 });
 
 export const pschema = z.object({
@@ -77,4 +78,16 @@ export const TripUpdateSchema = z.object({
     trip_image: z.any().openapi({ type: "string", format: "binary" }).optional(),
     planning_status: z.boolean().optional(),
     description: z.string().optional(),
+});
+
+export const guidebox = z.object({
+    trip_id: z.coerce.number(),
+    title: z.string(),
+    start_date: z.coerce.date(),
+    end_date: z.coerce.date(),
+    guide_image: z.string(),
+    total_copied: z.coerce.number(),
+    owner_name: z.string(),
+    owner_image: z.string(),
+    description: z.string().nullable(),
 });

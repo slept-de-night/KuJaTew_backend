@@ -30,16 +30,18 @@ export const searchRepo = {
 				GROUP BY trip_id
 			)
             SELECT
+                t.trip_id as trip_id,
                 t.title as guide_name,
                 COALESCE(ttcp.total_copied, 0) AS total_copied,
                 t.start_date as start_date,
                 t.end_date as end_date,
                 u.name as owner_name,
+                u.profile_picture_path as owner_image,
                 t.trip_picture_path as guide_poster_link
             FROM trips t
             JOIN users u ON t.user_id = u.user_id
 			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
-            WHERE t.title ILIKE '%' || $1 || '%'
+            WHERE t.title ILIKE '%' || $1 || '%' AND t.visibility_status = true
             LIMIT 5;
         `;
 

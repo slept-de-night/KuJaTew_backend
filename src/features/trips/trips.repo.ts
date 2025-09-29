@@ -1,5 +1,5 @@
 import { pool } from '../../config/db';
-import { TripSchema, tripsumschema, pschema } from './trips.schema';
+import { TripSchema, tripsumschema, pschema, guidebox } from './trips.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 
@@ -315,7 +315,8 @@ export const TripsRepo = {
 				t.start_date,
 				t.end_date,
 				t.trip_picture_path AS poster_image_link,
-				t.budget
+				t.budget,
+				t.description as description
 			FROM trips t
 			JOIN joinedP jp ON jp.trip_id = t.trip_id
 			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
@@ -344,5 +345,64 @@ export const TripsRepo = {
 		const parsed = pschema.safeParse(rows[0]);
 		if (!parsed.success) throw INTERNAL("Fail to parsed");
 		return parsed.data.joined_people;
+	},
+
+	async get_recommended_trip(){
+		const query = `
+			WITH total_copied AS (
+				SELECT trip_id, COUNT(user_id)::int AS total_copied
+				FROM likes
+				GROUP BY trip_id
+			)
+			SELECT
+				t.trip_id,
+				t.title,
+				t.start_date,
+				t.end_date,
+				t.trip_picture_path AS guide_image,
+				COALESCE(ttcp.total_copied, 0) AS total_copied,
+				u.name as owner_name,
+				u.profile_picture_path as owner_image,
+				t.description as description
+			FROM trips t
+			JOIN users u ON u.user_id = t.user_id
+			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			WHERE t.visibility_status = true
+			ORDER BY total_copied desc
+		`
+		const {rows} = await pool.query(query);
+		console.log(rows)
+		const parsed = z.array(guidebox).safeParse(rows);
+		if(!parsed.success) throw INTERNAL("Fail to parsed query");
+		return parsed.data;
+	},
+
+	async get_invited_trips(user_id:string){
+		const query =  `
+			SELECT
+				t.trip_id,
+				t.title,
+				t.start_date,
+				t.end_date,
+				t.trip_picture_path AS guide_image,
+				u.name as owner_name,
+				u.profile_picture_path as owner_image
+			FROM trips t
+			JOIN users u ON u.user_id = t.user_id
+			JOIN trip_collaborators tc ON tc.trip_id = t.trip_id
+			WHERE tc.accepted = false AND tc.user_id = $1
+		`;
+		const { rows } = await pool.query(query, [user_id]);
+		const parsed = z.array(z.object({
+			trip_id:z.coerce.number(),
+			title:z.string(),
+			start_date:z.date(),
+			end_date:z.date(),
+			guide_image:z.string(),
+			owner_name:z.string(),
+			owner_image:z.string(),
+		})).safeParse(rows);
+		if (!parsed.success) throw INTERNAL("Fail to parsed data");
+		return parsed.data;
 	},
 }

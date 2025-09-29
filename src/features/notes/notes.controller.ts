@@ -10,13 +10,12 @@ import { native } from 'pg';
 import no from 'zod/v4/locales/no.js';
 import { PassThrough } from 'node:stream';
 
-let user_id = 'OSHI';
 
 //overview part
 export const Get_Overview_Notes = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({trip_id: z.coerce.number().int()}).safeParse(req.params);
     if(!parseparams.success) throw INTERNAL("Fail to parse params"); 
@@ -26,9 +25,9 @@ export const Get_Overview_Notes = asyncHandler(async (req: Request, res: Respons
 });
 
 export const Edit_Overview_Note = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(), 
@@ -43,9 +42,9 @@ export const Edit_Overview_Note = asyncHandler(async (req: Request, res: Respons
 });
 
 export const Add_Overview_Note = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int()
@@ -59,9 +58,9 @@ export const Add_Overview_Note = asyncHandler(async (req: Request, res: Response
 });
 
 export const Delete_Overview_Note = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(),
@@ -74,9 +73,9 @@ export const Delete_Overview_Note = asyncHandler(async (req: Request, res: Respo
 });
 //activity part
 export const Get_Activity_Notes = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(),
@@ -90,9 +89,9 @@ export const Get_Activity_Notes = asyncHandler(async (req: Request, res: Respons
 });
 
 export const Edit_Activity_Note = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(), 
@@ -108,9 +107,9 @@ export const Edit_Activity_Note = asyncHandler(async (req: Request, res: Respons
 });
 
 export const Add_Activity_Note = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(),
@@ -126,9 +125,9 @@ export const Add_Activity_Note = asyncHandler(async (req: Request, res: Response
 });
 
 export const Delete_Activity_note = asyncHandler(async (req: Request, res: Response) => {
-    // const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
-    // if(!parseduser.success) throw BadRequest("Invalide Request");
-    // let user_id = parseduser.data.user_id;
+    const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
+    if(!parseduser.success) throw BadRequest("Invalide Request");
+    let user_id = parseduser.data.user_id;
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(),
