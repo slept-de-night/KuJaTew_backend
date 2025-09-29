@@ -233,4 +233,19 @@ export const TripsService = {
     );
     return { guides: updatedTrips};
   },
+
+  async get_invited_trips(user_id:string){
+    if(!user_id) throw BadRequest("UserID is required");
+    const trips = await TripsRepo.get_invited_trips(user_id);
+    const updatedTrips = await Promise.all(
+      trips.map(async (trip) => {
+        if (trip.poster_image_link){
+          const poster_pic = await etcService.get_file_link(trip.poster_image_link, "posters", 3600);
+          trip.poster_image_link = poster_pic.signedUrl;
+        }
+        return trip;
+      })
+    );
+    return { trips : trips};
+  },
 };

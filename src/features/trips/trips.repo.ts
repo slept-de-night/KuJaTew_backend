@@ -375,5 +375,42 @@ export const TripsRepo = {
 		const parsed = z.array(guidebox).safeParse(rows);
 		if(!parsed.success) throw INTERNAL("Fail to parsed query");
 		return parsed.data;
-	}
+	},
+
+	async get_invited_trips(user_id:string){
+		const query =  `
+			WITH joinedP AS (
+				SELECT trip_id, COUNT(user_id)::int AS joined_people
+				FROM trip_collaborators
+				WHERE accepted = TRUE
+				GROUP BY trip_id
+			),
+				total_copied AS (
+				SELECT trip_id, COUNT(user_id)::int AS total_copied
+				FROM likes
+				GROUP BY trip_id
+			)
+			SELECT
+				t.trip_id,
+				t.title,
+				jp.joined_people,
+				COALESCE(ttcp.total_copied, 0) AS total_copied,
+				t.start_date,
+				t.end_date,
+				t.trip_picture_path AS poster_image_link,
+				t.planning_status
+			FROM trips t
+			JOIN joinedP jp ON jp.trip_id = t.trip_id
+			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
+			WHERE EXISTS (
+				SELECT 1
+				FROM trip_collaborators tc
+				WHERE tc.trip_id = t.trip_id AND tc.user_id = $1 AND tc.accepted = false
+			);
+		`;
+		const { rows } = await pool.query(query, [user_id]);
+		const parsed = z.array(TripSchema).safeParse(rows);
+		if (!parsed.success) throw INTERNAL("Fail to parsed data");
+		return parsed.data;
+	},
 }
