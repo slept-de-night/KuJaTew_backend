@@ -210,7 +210,7 @@ export const VoteRepo = {
 
     const candidatesRes = await query(
       `SELECT pit.pit_id, pit.place_id, pit.event_names, pit.is_event, pit.event_title,
-              p.address, p.places_picture_path AS photo_url
+              p.address, p.places_picture_path AS photo_url , p.rating, p.rating_count, p.name
        FROM places_in_trip pit
        LEFT JOIN places p ON pit.place_id = p.place_id
        WHERE pit.trip_id=$1
@@ -246,6 +246,7 @@ export const VoteRepo = {
         candidatesRes.rows.map(async (row: any) => {
           const voting_count = votesMap[row.pit_id] || 0
           return {
+            name: row.name,
             pit_id: row.pit_id,
             place_id: row.place_id,
             address: row.address,
@@ -254,6 +255,8 @@ export const VoteRepo = {
               : null,
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
+            rating: row.rating,
+            rating_count: row.rating_count
           }
         })
       )
