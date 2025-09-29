@@ -379,37 +379,29 @@ export const TripsRepo = {
 
 	async get_invited_trips(user_id:string){
 		const query =  `
-			WITH joinedP AS (
-				SELECT trip_id, COUNT(user_id)::int AS joined_people
-				FROM trip_collaborators
-				WHERE accepted = TRUE
-				GROUP BY trip_id
-			),
-				total_copied AS (
-				SELECT trip_id, COUNT(user_id)::int AS total_copied
-				FROM likes
-				GROUP BY trip_id
-			)
 			SELECT
 				t.trip_id,
 				t.title,
-				jp.joined_people,
-				COALESCE(ttcp.total_copied, 0) AS total_copied,
 				t.start_date,
 				t.end_date,
-				t.trip_picture_path AS poster_image_link,
-				t.planning_status
+				t.trip_picture_path AS guide_image,
+				u.name as owner_name,
+				u.profile_picture_path as owner_image
 			FROM trips t
-			JOIN joinedP jp ON jp.trip_id = t.trip_id
-			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
-			WHERE EXISTS (
-				SELECT 1
-				FROM trip_collaborators tc
-				WHERE tc.trip_id = t.trip_id AND tc.user_id = $1 AND tc.accepted = false
-			);
+			JOIN users u ON u.user_id = t.user_id
+			JOIN trip_collaborators tc ON tc.trip_id = t.trip_id
+			WHERE tc.accepted = false AND tc.user_id = $1
 		`;
 		const { rows } = await pool.query(query, [user_id]);
-		const parsed = z.array(TripSchema).safeParse(rows);
+		const parsed = z.array(z.object({
+			trip_id:z.coerce.number(),
+			title:z.string(),
+			start_date:z.date(),
+			end_date:z.date(),
+			guide_image:z.string(),
+			owner_name:z.string(),
+			owner_image:z.string(),
+		})).safeParse(rows);
 		if (!parsed.success) throw INTERNAL("Fail to parsed data");
 		return parsed.data;
 	},

@@ -239,13 +239,17 @@ export const TripsService = {
     const trips = await TripsRepo.get_invited_trips(user_id);
     const updatedTrips = await Promise.all(
       trips.map(async (trip) => {
-        if (trip.poster_image_link){
-          const poster_pic = await etcService.get_file_link(trip.poster_image_link, "posters", 3600);
-          trip.poster_image_link = poster_pic.signedUrl;
+        if (trip.owner_image){
+          const owner_pic = await etcService.get_file_link(trip.owner_image, "profiles", 3600);
+          trip.owner_image = owner_pic.signedUrl;
+        }
+        if (trip.guide_image) {
+          const guide_pic = await etcService.get_file_link(trip.guide_image, "posters", 3600);
+          trip.guide_image = guide_pic.signedUrl;
         }
         return trip;
       })
     );
-    return { trips : trips};
+    return { trips: updatedTrips};
   },
 };
