@@ -23,8 +23,8 @@ export const mrSchema = z.object({
 
 export const BodySchema = z.object({ 
     trip_name:z.string().optional(),
-    start_date:z.date().optional(),
-    end_date:z.date().optional(),
+    start_date:z.coerce.date().optional(),
+    end_date:z.coerce.date().optional(),
     trip_code:z.string().optional(),
     trip_pass:z.string().optional(),
     planning_status:z.boolean().optional(),
