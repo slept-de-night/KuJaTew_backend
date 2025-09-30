@@ -87,3 +87,10 @@ export const UpdateInputSchema = z.object({
   image: z.any().openapi({ type: "string", format: "binary" }),
   ...UserSchema.shape
 })
+
+export const more_detail = z.object({
+    user_id:z.string(),
+    username:z.string(),
+    role:z.string(),
+    user_image:z.string()
+});

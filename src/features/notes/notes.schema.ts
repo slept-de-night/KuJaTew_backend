@@ -4,8 +4,10 @@ export const noteintripschema = z.object({
   nit_id: z.number().int(),
   note: z.string(),
   name: z.string(),
+  user_id: z.string(),
   profile_picture_path: z.string().nullable(),
-  is_editable: z.number().int()
+  is_editable: z.number().int(),
+  note_time: z.coerce.date(),
 });
 
 export const noteactivityschema = z.object({

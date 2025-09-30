@@ -97,3 +97,14 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     res.status(201).json({...user,...token});
   }
 });
+
+export const getmoredetail= asyncHandler(async (req: Request, res: Response) => {
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  
+  const parsedparams = z.object({trip_id:z.coerce.number()}).safeParse(req.params);
+  if(!parsedparams.success) throw BadRequest("Invalide Request");
+
+  const user_details = await UsersService.get_user_detail_krub(parsed.data.user_id, parsedparams.data.trip_id);
+  res.status(200).json(user_details);
+});
