@@ -1,5 +1,5 @@
 import { UsersRepo, User } from "./users.repo";
-import { BadRequest } from "../../core/errors";
+import { BadRequest, INTERNAL } from "../../core/errors";
 import { InvitedSchema, JWT_OBJ, ProfileFile,UsersFullSchema } from "./users.schema";
 import { OAuth2Client } from "google-auth-library";
 import { env } from "../../config/env";
@@ -99,6 +99,15 @@ export const UsersService = {
       });
       return invited_list;
     },
+    async get_user_detail_krub(user_id:string, trip_id:number){
+      if(!user_id || !trip_id) throw BadRequest("UserID and TripID are required");
+      const details = await UsersRepo.get_user_detail_krub(user_id, trip_id);
+      if (details.user_image){
+        const image_link = await UsersRepo.get_file_link(details.user_image,"profiles",3600);
+        details.user_image = image_link.signedUrl;
+      };
+      return details;
+    }
 }
 
 export async function downloadToProfileFile(

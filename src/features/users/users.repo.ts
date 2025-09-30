@@ -1,6 +1,6 @@
 
 import { pool, supabase } from '../../config/db';
-import { UserSchema, ProfileFile, UsersFullSchema,InvitedSchema } from './users.schema';
+import { UserSchema, ProfileFile, UsersFullSchema,InvitedSchema, more_detail } from './users.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import crypto from 'crypto';
@@ -83,6 +83,23 @@ export const UsersRepo = {
         
         if(!data.success) throw INTERNAL("Fail to parsed data");
         return data.data;
-    }
+    },
+    // keen adding something good na
 
+    async get_user_detail_krub(user_id:string, trip_id:number){
+        const query = `
+            SELECT 
+                tc.user_id as user_id,
+                u.name as username,
+                tc.role as role,
+                u.profile_picture_path as user_image
+            FROM trip_collaborators tc
+            JOIN users u ON tc.user_id = u.user_id
+            WHERE tc.user_id = $1 AND tc.trip_id = $2
+        `
+        const {rows} = await pool.query(query, [user_id, trip_id]);
+        const parsed = more_detail.safeParse(rows[0]);
+        if(!parsed.success) throw INTERNAL("Fail to parsed query");
+        return parsed.data;
+    },
 }
