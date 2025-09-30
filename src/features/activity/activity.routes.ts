@@ -37,7 +37,7 @@ activityRouter.patch("/:pit_id/places", withRole("Editor", PlaceController.updat
 // Voting
 activityRouter.get("/:pit_id/votes", withRole("Viewer", VoteController.list))
 activityRouter.post("/votes/:type", withRole("Owner", VoteController.postInit))
-activityRouter.post("/:pit_id/votes/:place_id", withRole("Editor", VoteController.voteByCandidate))
+activityRouter.post("/:pit_id/votes/:place_id", withRole("Editor", VoteController.addCandidate))
 activityRouter.post("/:pit_id/voted/:type", withRole("Viewer", VoteController.votedType))
 activityRouter.patch("/:pit_id/votes", withRole("Editor", VoteController.patchVote))
 activityRouter.delete("/:pit_id/votes", withRole("Owner", VoteController.cleanVote))

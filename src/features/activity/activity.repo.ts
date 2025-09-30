@@ -207,6 +207,8 @@ export const VoteRepo = {
       time_end: string
       is_event: boolean
     }
+    
+    let block_id: number = pit_id;
 
     const candidatesRes = await query(
       `SELECT pit.pit_id, pit.place_id, pit.event_names, pit.is_event, pit.event_title,
@@ -262,6 +264,7 @@ export const VoteRepo = {
       )
 
       return {
+        block_id: block_id,
         date,
         time_start,
         time_end,
@@ -284,6 +287,7 @@ export const VoteRepo = {
       )
 
       return {
+        block_id: block_id,
         date,
         time_start,
         time_end,

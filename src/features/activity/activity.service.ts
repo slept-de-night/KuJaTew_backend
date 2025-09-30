@@ -77,7 +77,7 @@ export const VoteService = {
     return VoteRepo.initVotingBlock(trip_id, type, body)
   },
 
-  voteByCandidate: (
+  addCandidate: (
     trip_id: number,
     pit_id: number,
     place_id: number,

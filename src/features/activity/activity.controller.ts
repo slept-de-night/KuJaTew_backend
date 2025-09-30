@@ -167,11 +167,11 @@ export const VoteController = {
       } 
   },
 
-voteByCandidate: async (req:any,res:any,next:any) => {
+addCandidate: async (req:any,res:any,next:any) => {
     try {
       const { trip_id, pit_id, place_id } = S.PostVoteByPlaceParams.parse(req.params)
       const body = req.body 
-      const result = await VoteService.voteByCandidate(trip_id, pit_id, place_id, body)
+      const result = await VoteService.addCandidate(trip_id, pit_id, place_id, body)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof z.ZodError) {
