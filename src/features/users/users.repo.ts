@@ -93,8 +93,10 @@ export const UsersRepo = {
                 u.name as username,
                 tc.role as role,
                 u.profile_picture_path as user_image
+                t.trip_code as trip_code
             FROM trip_collaborators tc
             JOIN users u ON tc.user_id = u.user_id
+            JOIN trips t ON t.trip_id = tc.trip_id
             WHERE tc.user_id = $1 AND tc.trip_id = $2
         `
         const {rows} = await pool.query(query, [user_id, trip_id]);
