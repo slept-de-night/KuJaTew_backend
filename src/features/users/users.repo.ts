@@ -92,7 +92,7 @@ export const UsersRepo = {
                 tc.user_id as user_id,
                 u.name as username,
                 tc.role as role,
-                u.profile_picture_path as user_image
+                u.profile_picture_path as user_image,
                 t.trip_code as trip_code
             FROM trip_collaborators tc
             JOIN users u ON tc.user_id = u.user_id
