@@ -27,8 +27,8 @@ export const BodySchema = z.object({
     end_date:z.coerce.date().optional(),
     trip_code:z.string().optional(),
     trip_pass:z.string().optional(),
-    planning_status:z.boolean().optional(),
-    visibility_status:z.boolean().optional(),
+    planning_status:z.coerce.boolean().optional(),
+    visibility_status:z.coerce.boolean().optional(),
     budget:z.coerce.number().optional(),
     description:z.string().optional()
 });
