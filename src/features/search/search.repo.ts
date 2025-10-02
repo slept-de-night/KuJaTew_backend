@@ -23,6 +23,20 @@ export const searchRepo = {
         return parsed.data;
     },
 
+    async member_userid(trip_id:number){
+        const query = `
+            SELECT
+                tc.user_id as user_id
+            FROM trips t
+            JOIN trip_collaborators tc ON t.trip_id = tc.trip_id
+            WHERE tc.trip_id = $1
+        `
+        const {rows} = await pool.query(query, [trip_id]);
+        const parsed = z.array(z.object({user_id:z.string()})).safeParse(rows);
+        if(!parsed.success) throw INTERNAL("Fail to parsed query");
+        return parsed.data;
+    },
+
     async search_guide(guide_name:string){
         const query = `
             WITH total_copied AS (

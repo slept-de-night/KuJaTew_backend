@@ -12,10 +12,10 @@ export const SearchUser = asyncHandler(async (req: Request, res: Response) => {
   if(!parsed.success) throw BadRequest("Invalide Request");
   let user_id = parsed.data.user_id;
 
-  const parsedparams = z.object({username:z.string().min(1)}).safeParse(req.params);
+  const parsedparams = z.object({username:z.string().min(1), trip_id:z.coerce.number()}).safeParse(req.params);
   if (!parsedparams.success) throw BadRequest("Invalid Request");
-  const {username} = parsedparams.data;
-  const users = await searchService.search_user(username);
+  const {username, trip_id} = parsedparams.data;
+  const users = await searchService.search_user(username, trip_id);
   return res.status(200).json(users);
 });
 
