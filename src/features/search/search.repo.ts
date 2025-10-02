@@ -7,6 +7,7 @@ export const searchRepo = {
     async search_user(username:string){
         const query = `
             SELECT
+                user_id as user_id,
                 name as username,
                 email as email,
                 phone as phone,
