@@ -22,15 +22,16 @@ export const UsersRepo = {
     },
 
     async update_profile_path(path:string,user_id:string):Promise<string>{
-        await this.delete_profile_path(user_id);
+        
         const {error} = await supabase.from('users').update({'profile_picture_path':path}).eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
         return path;
     },
-    async delete_profile_path(user_id:string){
+    async delete_profile(user_id:string){
         const {data,error} = await supabase.from('users').select('profile_picture_path').eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
         if(data.length>0){
+            console.log(data[0]?.profile_picture_path);
             const {error} = await supabase.storage.from('profiles').remove(data[0]?.profile_picture_path);
             if(error) throw STORAGE_ERR(error);
         }
@@ -65,14 +66,10 @@ export const UsersRepo = {
     },
     async update_user(user_data: User,user_id:string ){
         console.log(user_data);
-        if(user_data.name){
-            const { error } = await supabase.from('users').update({"name":user_data.name}).eq('user_id',user_id);
-            if (error) throw POSTGREST_ERR(error);
-        }
-        if(user_data.phone){
-            const { error } = await supabase.from('users').update({"phone":user_data.phone}).eq('user_id',user_id);
-            if (error) throw POSTGREST_ERR(error);
-        }
+
+        const { error } = await supabase.from('users').update({"name":user_data.name,"phone":user_data.phone}).eq('user_id',user_id);
+        if (error) throw POSTGREST_ERR(error);
+      
     },
     async is_name_exist(name:string):Promise<boolean>{
         const {data , error} = await supabase.from('users').select('name').eq('name',name);

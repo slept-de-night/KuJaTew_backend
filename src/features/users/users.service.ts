@@ -60,6 +60,7 @@ export const UsersService = {
     async update_user(input: User ,user_id:string, profile: ImageFile | null | undefined) {
         await UsersRepo.update_user(input,user_id);
         if (profile) {
+            await UsersRepo.delete_profile(user_id);
             const upload_profile = await etcService.upload_img_storage(profile, user_id+"_profile","profiles");
             await UsersRepo.update_profile_path(upload_profile, user_id);
         }
