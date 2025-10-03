@@ -4,7 +4,7 @@ import { mrSchema, TripSchema, tSchema, BodySchema, cSchema, addtripSchema } fro
 import { ProfileFileSchema } from '../users/users.schema';
 import { asyncHandler } from '../../core/http';
 import { BadRequest, INTERNAL } from '../../core/errors';
-import z from 'zod';
+import z, { any } from 'zod';
 import { title } from 'node:process';
 
 export const User_All_Trip = asyncHandler(async (req: Request, res: Response) => {
@@ -121,4 +121,18 @@ export const Trip_Sum = asyncHandler(async (req: Request, res:Response) =>{
   const tripID = parsed.data;
   const tripinfo = await TripsService.trip_sum(tripID);
   return res.status(200).json(tripinfo);
+});
+
+export const Recommended_trip = asyncHandler(async (req: Request, res:Response) =>{
+  const trips = await TripsService.get_recommended_trip();
+  return res.status(200).json(trips);
+});
+
+export const Invited_Trips = asyncHandler(async (req: Request, res:Response) =>{
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  const { user_id } = parsed.data;
+
+  const trips = await TripsService.get_invited_trips(user_id);
+  return res.status(200).json(trips);
 });

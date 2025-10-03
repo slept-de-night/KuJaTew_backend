@@ -6,12 +6,14 @@ import { env } from "../../config/env";
 import { supabase } from "../../config/db";
 
 export const searchService = {
-    async search_user(username:string){
-        if(!username) throw BadRequest("username is required to search");
+    async search_user(username:string, trip_id:number){
+        if(!username || !trip_id) throw BadRequest("username and trip_id are required to search");
         const results = await searchRepo.search_user(username);
-        
+        const mu = await searchRepo.member_userid(trip_id);
+        const memberID = mu.map(m => m.user_id);
+        const filteredresult = results.filter(r => !memberID.includes(r.user_id));
         const updated = await Promise.all(
-          results.map(async (result) => {
+          filteredresult.map(async (result) => {
             if (!result.profile_picture_link) {
               return result;
             }
@@ -30,11 +32,16 @@ export const searchService = {
 
         const updated = await Promise.all(
           results.map(async (result) => {
-            if (!result.guide_poster_link) {
+            if (result.guide_poster_link) {
+              const trip_pic = await etcService.get_file_link(result.guide_poster_link, "posters", 3600);
+              result.guide_poster_link = trip_pic.signedUrl;
               return result;
             }
-            const trip_pic = await etcService.get_file_link(result.guide_poster_link, "posters", 3600);
-            result.guide_poster_link = trip_pic.signedUrl;
+            if (result.owner_image) {
+              const owner_pic = await etcService.get_file_link(result.owner_image, "profiles", 3600);
+              result.owner_image = owner_pic.signedUrl;
+              return result
+            }
             return result;
           })
         );

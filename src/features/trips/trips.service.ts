@@ -28,7 +28,7 @@ export const TripsService = {
       })
     );
 
-    return updatedTrips;
+    return { trips : updatedTrips};
   },
 
   async get_specific_trip(trip_id: number) {
@@ -214,5 +214,42 @@ export const TripsService = {
       members_detail,
       flight_detail,
     };
+  },
+
+  async get_recommended_trip(){
+    const trips = await TripsRepo.get_recommended_trip();
+    const updatedTrips = await Promise.all(
+      trips.map(async (trip) => {
+        if (trip.owner_image){
+          const owner_pic = await etcService.get_file_link(trip.owner_image, "profiles", 3600);
+          trip.owner_image = owner_pic.signedUrl;
+        }
+        if (trip.guide_image) {
+          const guide_pic = await etcService.get_file_link(trip.guide_image, "posters", 3600);
+          trip.guide_image = guide_pic.signedUrl;
+        }
+        return trip;
+      })
+    );
+    return { guides: updatedTrips};
+  },
+
+  async get_invited_trips(user_id:string){
+    if(!user_id) throw BadRequest("UserID is required");
+    const trips = await TripsRepo.get_invited_trips(user_id);
+    const updatedTrips = await Promise.all(
+      trips.map(async (trip) => {
+        if (trip.owner_image){
+          const owner_pic = await etcService.get_file_link(trip.owner_image, "profiles", 3600);
+          trip.owner_image = owner_pic.signedUrl;
+        }
+        if (trip.guide_image) {
+          const guide_pic = await etcService.get_file_link(trip.guide_image, "posters", 3600);
+          trip.guide_image = guide_pic.signedUrl;
+        }
+        return trip;
+      })
+    );
+    return { trips: updatedTrips};
   },
 };

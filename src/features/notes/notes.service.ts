@@ -22,7 +22,7 @@ export const NoteService = {
                 return note;
               })
             );
-        return updatednotes;
+        return {notes: updatednotes};
     },
 
     async edit_overview_note(user_id:string, trip_id:number, nit_id:number, note:string){

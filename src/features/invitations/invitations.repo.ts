@@ -30,7 +30,7 @@ export async function invite(inviter_user_id: string, trip_id: number, invited_u
 
   const sql = `
     INSERT INTO trip_collaborators (trip_id, user_id, role, accepted)
-    VALUES ($1, $2, 'viewer', false)
+    VALUES ($1, $2, 'Viewer', false)
     ON CONFLICT (trip_id, user_id) DO NOTHING
   `;
   const res = await query(sql, [trip_id, invited_user_id]);
@@ -55,12 +55,15 @@ export async function code_join(user_id: string, trip_code: string, trip_passwor
 
   const sql = `
     INSERT INTO trip_collaborators (trip_id, user_id, role, accepted)
-    VALUES ($1, $2, 'viewer', true)
+    VALUES ($1, $2, 'Viewer', true)
     ON CONFLICT (trip_id, user_id) DO UPDATE
       SET accepted = true
   `;
   const res = await query(sql, [trip_id, user_id]);
-  return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
+  if((res.rowCount ?? 0) <= 0) {
+    return 0;
+  }
+  return trip_id; // Will return 1 if insert successfully | Else return 0
 }
 
 

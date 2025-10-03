@@ -83,6 +83,10 @@ export async function get_guide_bookmark(req: Request, res: Response, next: Next
           const { signedUrl } = await etcService.get_file_link(row.trip_picture_path, "posters", 3600);
           row.trip_picture_path = signedUrl;
         }
+        if (row.trip_owner_picture_path) {
+          const { signedUrl } = await etcService.get_file_link(row.trip_owner_picture_path, "profiles", 3600);
+          row.trip_owner_picture_path = signedUrl;
+        }
         return row;
       })
     );

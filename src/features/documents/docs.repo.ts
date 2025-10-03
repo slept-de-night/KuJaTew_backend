@@ -83,7 +83,7 @@ export const DocsRepo = {
             WHERE doc_id = $1
             RETURNING *
         `;
-        const {rows} = await pool.query(query, [doc_id]);
-        return rows[0];
+        const {rowCount} = await pool.query(query, [doc_id]);
+        return rowCount;
     },
 };

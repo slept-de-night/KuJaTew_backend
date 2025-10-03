@@ -27,7 +27,7 @@ export const ActivityRepo = {
     const sql = `
       SELECT pit.pit_id, pit.place_id, pit.trip_id, pit.date,
             pit.time_start, pit.time_end, pit.is_vote,
-            pit.event_names AS event_name, pit.is_event,
+            pit.event_names AS event_name, pit.event_title As event_title , pit.is_event,
             p.address, p.places_picture_path AS photo_url
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
@@ -50,7 +50,7 @@ export const ActivityRepo = {
     const sql = `
       SELECT pit.pit_id, pit.place_id, pit.trip_id, pit.date,
              pit.time_start, pit.time_end, pit.is_vote,
-             pit.event_names AS event_name, pit.is_event,
+             pit.event_names AS event_name, pit.event_title As event_title, pit.is_event,
              p.address, p.places_picture_path AS photo_url
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
@@ -98,8 +98,8 @@ export const ActivityRepo = {
 export const EventRepo = {
   async create(trip_id: number, dto: any) {
     const sql = `
-      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names, event_title)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `
     const values = [
@@ -111,6 +111,7 @@ export const EventRepo = {
       dto.is_vote,
       dto.is_event,
       dto.event_name,
+      dto.event_title
     ]
     const res = await query(sql, values)
     return res.rows[0]
@@ -119,11 +120,11 @@ export const EventRepo = {
   async update(pit_id: number, dto: any) {
     const sql = `
       UPDATE places_in_trip
-      SET date = $2, time_start = $3, time_end = $4, event_names = $5
+      SET date = $2, time_start = $3, time_end = $4, event_names = $5, event_title = $6
       WHERE pit_id = $1
       RETURNING *
     `
-    const res = await query(sql, [pit_id, dto.date, dto.time_start, dto.time_end, dto.event_name])
+    const res = await query(sql, [pit_id, dto.date, dto.time_start, dto.time_end, dto.event_name, dto.event_title])
     return res.rows[0]
   },
 }
@@ -132,8 +133,8 @@ export const EventRepo = {
 export const PlaceRepo = {
   async add(trip_id: number, dto: any) {
     const sql = `
-      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names, event_title)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `
     const values = [
@@ -145,6 +146,7 @@ export const PlaceRepo = {
       dto.is_vote,
       dto.is_event,
       dto.event_name,
+      dto.event_title
     ]
     const res = await query(sql, values)
     return res.rows[0]
@@ -205,10 +207,12 @@ export const VoteRepo = {
       time_end: string
       is_event: boolean
     }
+    
+    let block_id: number = pit_id;
 
     const candidatesRes = await query(
-      `SELECT pit.pit_id, pit.place_id, pit.event_names, pit.is_event,
-              p.address, p.places_picture_path AS photo_url
+      `SELECT pit.pit_id, pit.place_id, pit.event_names, pit.is_event, pit.event_title,
+              p.address, p.places_picture_path AS photo_url , p.rating, p.rating_count, p.name
        FROM places_in_trip pit
        LEFT JOIN places p ON pit.place_id = p.place_id
        WHERE pit.trip_id=$1
@@ -244,6 +248,7 @@ export const VoteRepo = {
         candidatesRes.rows.map(async (row: any) => {
           const voting_count = votesMap[row.pit_id] || 0
           return {
+            name: row.name,
             pit_id: row.pit_id,
             place_id: row.place_id,
             address: row.address,
@@ -252,11 +257,14 @@ export const VoteRepo = {
               : null,
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
+            rating: row.rating,
+            rating_count: row.rating_count
           }
         })
       )
 
       return {
+        block_id: block_id,
         date,
         time_start,
         time_end,
@@ -271,6 +279,7 @@ export const VoteRepo = {
             place_id: row.place_id,
             address: row.address,
             event_names: row.event_names,
+            event_title: row.event_title,
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
           }
@@ -278,6 +287,7 @@ export const VoteRepo = {
       )
 
       return {
+        block_id: block_id,
         date,
         time_start,
         time_end,
@@ -288,8 +298,8 @@ export const VoteRepo = {
 
   async initVotingBlock(trip_id: number, type: "places"|"events", body: any) {
     const sql = `
-      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names, event_title)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `
     const values = [
@@ -300,7 +310,8 @@ export const VoteRepo = {
       body.time_end,
       true,
       type === "events",
-      type === "events" ? body.event_name : "",
+      "",
+      type === "events" ? body.event_title : ""
     ]
     const res = await query(sql, values)
     return res.rows[0]
@@ -310,7 +321,7 @@ export const VoteRepo = {
   trip_id: number,
   pit_id: number,
   place_id: number,
-  body?: { event_name?: string }
+  body?: { event_name?: string; }
 ) {
   const block = await query(
     `SELECT date, time_start, time_end, is_event
@@ -348,8 +359,8 @@ export const VoteRepo = {
     }
 
     const sql = `
-      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names)
-      VALUES ($1,$2,$3,$4,$5,true,false,'')
+      INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names, event_title)
+      VALUES ($1,$2,$3,$4,$5,true,false,'','')
       RETURNING *
     `
     const res = await query(sql, [trip_id, place_id, date, time_start, time_end])
@@ -361,8 +372,8 @@ export const VoteRepo = {
   }
 
   const sql = `
-    INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names)
-    VALUES ($1,0,$2,$3,$4,true,true,$5)
+    INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names, event_title)
+    VALUES ($1,0,$2,$3,$4,true,true,$5,'')
     RETURNING *
   `
   const res = await query(sql, [trip_id, date, time_start, time_end, body.event_name])

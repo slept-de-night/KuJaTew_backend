@@ -59,6 +59,22 @@ export function registerTrips(registry: OpenAPIRegistry) {
   });
 
   registry.registerPath({
+    method: "get",
+    path: "/api/trips/recommended",
+    operationId: "Get recommended guide",
+    summary: "Returns guide details",
+    responses: {
+      200: {
+        description: "List of guide details",
+        content: { "application/json": { schema: z.array(schema.guidebox) } },
+      },
+      400: { description: "Validation error" },
+    },
+    tags: ["Trips management"],
+    
+  });
+
+  registry.registerPath({
     method: "post",
     path: "/api/trips",
     summary: "Create a new trip",
