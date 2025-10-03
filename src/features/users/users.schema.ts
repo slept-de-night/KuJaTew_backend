@@ -89,9 +89,10 @@ export const UpdateInputSchema = z.object({
 })
 
 export const more_detail = z.object({
-    user_id:z.string(),
-    username:z.string(),
-    role:z.string(),
-    user_image:z.string(),
-    trip_code:z.string(),
+  collab_id:z.coerce.number(),
+  user_id:z.string(),
+  username:z.string(),
+  role:z.string(),
+  user_image:z.string(),
+  trip_code:z.string(),
 });

@@ -89,6 +89,7 @@ export const UsersRepo = {
     async get_user_detail_krub(user_id:string, trip_id:number){
         const query = `
             SELECT 
+                tc.collab_id as collab_id,
                 tc.user_id as user_id,
                 u.name as username,
                 tc.role as role,
