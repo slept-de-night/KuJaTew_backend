@@ -90,15 +90,21 @@ export const UsersService = {
     async get_invited(user_id:string):Promise<z.infer<typeof InvitedSchema>>{
     
       const invited_list = await UsersRepo.get_invited(user_id);
-      await invited_list.forEach(async element => {
-        if(element.trip_path){
-          element.poster_trip_url =( await UsersRepo.get_file_link(element.trip_path,"poster",3600)).signedUrl;
+      for (const el of invited_list) {
+          if (el.trip_path) {
+            try {
+              const { signedUrl } = await UsersRepo.get_file_link(el.trip_path, "posters", 3600);
+              el.poster_trip_url = signedUrl ?? "";
+            } catch (e) {
+              el.poster_trip_url = "";
+              console.error("get_file_link failed:", e);
+            }
+          } else {
+            el.poster_trip_url = "";
+          }
         }
-        else{
-          element.poster_trip_url = "";
-        }
-      });
-      return invited_list;
+
+        return invited_list; 
     },
     async get_user_detail_krub(user_id:string, trip_id:number){
       if(!user_id || !trip_id) throw BadRequest("UserID and TripID are required");
