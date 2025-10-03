@@ -1,6 +1,7 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import * as schema from "./users.schema";
 import { IdTokenSchema } from "./users.schema";
+import {z} from "zod";
 
 export function registerUsers(registry: OpenAPIRegistry) {
   registry.register("AutocompletePathParams", schema.UsersFullOutSchema);
@@ -130,4 +131,22 @@ export function registerUsers(registry: OpenAPIRegistry) {
     tags: ["Users"],
   });
 
+  registry.registerPath({
+    method: "get",
+    path: "/api/users/more_detail/{trip_id}",
+    operationId: "get user more detail by trip_id",
+    summary: "return more user detail",
+    request: {
+      params: z.object({trip_id: z.number()})
+    },
+    responses: {
+      200: {
+        description: "more user detail",
+        content: { "application/json": { schema: schema.more_detail} },
+      },
+      400: { description: "Validation error" },
+     
+    },
+    tags: ["Users"],
+  });
 }

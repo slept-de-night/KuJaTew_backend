@@ -40,3 +40,8 @@ export const TripCodePasswordBodySchema = z.object({
   trip_code: z.string().min(1).openapi({ example: "OSHI_ENCODING" }),
   trip_pass: z.string().min(1).openapi({ example: "OSHI_GOLD_PASS" }),
 });
+
+export const trip_id_return = z.object({
+  message: z.string().min(1).openapi({ example: "join successfully" }),
+  trip_id: z.number().int().openapi({ example: 123 }),
+});

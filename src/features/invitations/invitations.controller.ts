@@ -39,7 +39,7 @@ export async function code_join(req: Request, res: Response, next: NextFunction)
     if (!joined) {
       return res.status(200).json({ message: "user already joined" });
     }
-    return res.status(201).json({ message: "join successfully" });
+    return res.status(201).json({ message: "join successfully", trip_id: joined });
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });

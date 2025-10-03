@@ -33,7 +33,7 @@ export const TripsRepo = {
 				SELECT 1
 				FROM trip_collaborators tc
 				WHERE tc.trip_id = t.trip_id
-					AND tc.user_id = $1
+					AND tc.user_id = $1 AND tc.accepted = true
 			);
 		`;
 		const TripsListSchema = z.array(TripSchema);

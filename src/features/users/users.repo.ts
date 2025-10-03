@@ -1,6 +1,6 @@
 
 import { pool, supabase } from '../../config/db';
-import { UserSchema, ProfileFile, UsersFullSchema,InvitedSchema } from './users.schema';
+import { UserSchema, ProfileFile, UsersFullSchema,InvitedSchema, more_detail } from './users.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
 import crypto from 'crypto';
@@ -22,9 +22,19 @@ export const UsersRepo = {
     },
 
     async update_profile_path(path:string,user_id:string):Promise<string>{
+        
         const {error} = await supabase.from('users').update({'profile_picture_path':path}).eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
         return path;
+    },
+    async delete_profile(user_id:string){
+        const {data,error} = await supabase.from('users').select('profile_picture_path').eq('user_id',user_id);
+        if(error) throw POSTGREST_ERR(error);
+        if(data.length>0){
+            console.log(data[0]?.profile_picture_path);
+            const {error} = await supabase.storage.from('profiles').remove(data[0]?.profile_picture_path);
+            if(error) throw STORAGE_ERR(error);
+        }
     },
     async get_user_details(user_id:string):Promise<z.infer<typeof UsersFullSchema>>{
 
@@ -56,14 +66,10 @@ export const UsersRepo = {
     },
     async update_user(user_data: User,user_id:string ){
         console.log(user_data);
-        if(user_data.name){
-            const { error } = await supabase.from('users').update({"name":user_data.name}).eq('user_id',user_id);
-            if (error) throw POSTGREST_ERR(error);
-        }
-        if(user_data.phone){
-            const { error } = await supabase.from('users').update({"phone":user_data.phone}).eq('user_id',user_id);
-            if (error) throw POSTGREST_ERR(error);
-        }
+
+        const { error } = await supabase.from('users').update({"name":user_data.name,"phone":user_data.phone}).eq('user_id',user_id);
+        if (error) throw POSTGREST_ERR(error);
+      
     },
     async is_name_exist(name:string):Promise<boolean>{
         const {data , error} = await supabase.from('users').select('name').eq('name',name);
@@ -75,14 +81,35 @@ export const UsersRepo = {
     },
     async get_invited(user_id:string):Promise<z.infer<typeof InvitedSchema>>{
         const query = "WITH invited_trip AS (SELECT a.trip_id FROM trip_collaborators a WHERE a.user_id = $1 AND a.accepted = False)\
-            SELECT b.trip_id,b.title,b.start_date,b.end_date,c.name AS owner_name,b.trip_picture_path FROM invited_trip a JOIN trips b \
+            SELECT b.trip_id,b.title as trip_name,b.start_date,b.end_date,c.name AS trip_owner,b.trip_picture_path AS trip_path FROM invited_trip a JOIN trips b \
             ON a.trip_id = b.trip_id JOIN users c ON b.user_id = c.user_id";
         
         const result = await pool.query(query,[user_id]);
+        console.log(result.rows)
         const data = InvitedSchema.safeParse(result.rows);
         
         if(!data.success) throw INTERNAL("Fail to parsed data");
         return data.data;
-    }
+    },
+    // keen adding something good na
 
+    async get_user_detail_krub(user_id:string, trip_id:number){
+        const query = `
+            SELECT 
+                tc.collab_id as collab_id,
+                tc.user_id as user_id,
+                u.name as username,
+                tc.role as role,
+                u.profile_picture_path as user_image,
+                t.trip_code as trip_code
+            FROM trip_collaborators tc
+            JOIN users u ON tc.user_id = u.user_id
+            JOIN trips t ON t.trip_id = tc.trip_id
+            WHERE tc.user_id = $1 AND tc.trip_id = $2
+        `
+        const {rows} = await pool.query(query, [user_id, trip_id]);
+        const parsed = more_detail.safeParse(rows[0]);
+        if(!parsed.success) throw INTERNAL("Fail to parsed query");
+        return parsed.data;
+    },
 }

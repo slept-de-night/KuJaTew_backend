@@ -16,7 +16,14 @@ export const MemberRepo = {
 				tc.role
 			FROM users u
 			JOIN trip_collaborators tc ON u.user_id = tc.user_id
-			WHERE tc.trip_id = $1
+			WHERE tc.trip_id = $1 AND tc.accepted = true
+			ORDER BY
+				CASE tc.role
+					WHEN 'Owner' THEN 1
+					WHEN 'Editor' THEN 2
+					WHEN 'Viewer' THEN 3
+					ELSE 4
+				END
 		`;
 		const mls = z.array(MemberSchema);
 		const {rows} = await pool.query(query, [trip_id]);
@@ -29,7 +36,7 @@ export const MemberRepo = {
 		const query = `
 			SELECT *
 			FROM trip_collaborators
-			WHERE user_id = $1 AND trip_id = $2
+			WHERE user_id = $1 AND trip_id = $2 AND accepted = true
 		`
 		const result = await pool.query(query, [user_id, trip_id]);
 		return result.rowCount; // 1 if in 0 if not

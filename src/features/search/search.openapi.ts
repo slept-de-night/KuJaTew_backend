@@ -6,12 +6,13 @@ export function registerSearch(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "get",
-    path: "/api/search/users/{username}/",
+    path: "/api/search/users/{username}/{trip_id}",
     operationId: "search users by username",
     summary: "Returns user infomation",
     request: {
       params: z.object({
         username:z.string(),
+        trip_id:z.number(),
       }),
     },
     responses: {

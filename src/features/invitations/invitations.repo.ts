@@ -60,7 +60,10 @@ export async function code_join(user_id: string, trip_code: string, trip_passwor
       SET accepted = true
   `;
   const res = await query(sql, [trip_id, user_id]);
-  return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
+  if((res.rowCount ?? 0) <= 0) {
+    return 0;
+  }
+  return trip_id; // Will return 1 if insert successfully | Else return 0
 }
 
 

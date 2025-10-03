@@ -47,8 +47,10 @@ export const NotesRepo = {
                 nt.nit_id as nit_id,
                 nt.note AS note,
                 u.name AS name,
+                u.user_id as user_id,
                 u.profile_picture_path AS profile_picture_path,
-                CASE WHEN u.user_id = $1 THEN 1 ELSE 0 END AS is_editable
+                CASE WHEN u.user_id = $1 THEN 1 ELSE 0 END AS is_editable,
+                nt.note_time as note_time
             FROM note_in_trip nt
             JOIN trip_collaborators tc ON nt.collab_id = tc.collab_id
             JOIN users u ON tc.user_id = u.user_id

@@ -10,7 +10,6 @@ import { ImageFileSchema } from '../../etc/etc.schema';
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
  
-
   const body_parsed = UserSchema.safeParse(req.body);
   if(!body_parsed.success) throw BadRequest("Request Structure is not invalide!")
 
@@ -96,4 +95,15 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const token = await UsersService.gen_jwt(user.user_id);
     res.status(201).json({...user,...token});
   }
+});
+
+export const getmoredetail= asyncHandler(async (req: Request, res: Response) => {
+  const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+  if(!parsed.success) throw BadRequest("Invalide Request");
+  
+  const parsedparams = z.object({trip_id:z.coerce.number()}).safeParse(req.params);
+  if(!parsedparams.success) throw BadRequest("Invalide Request");
+
+  const user_details = await UsersService.get_user_detail_krub(parsed.data.user_id, parsedparams.data.trip_id);
+  res.status(200).json(user_details);
 });

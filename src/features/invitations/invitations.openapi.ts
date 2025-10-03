@@ -44,7 +44,14 @@ export function registerInvitations(registry: OpenAPIRegistry) {
       },
     },
     responses: {
-      201: { description: "Join successfully" },
+      201: {
+        description: "return trip_id if success",
+        content: {
+            "application/json": {
+            schema: schema.trip_id_return,
+          },
+        },
+      },
       200: { description: "User already joined" },
       400: { description: "Validation error" },
       500: { description: "Wrong trip code or password" },
