@@ -219,8 +219,9 @@ export const VoteRepo = {
          AND pit.date=$2
          AND pit.time_start=$3
          AND pit.time_end=$4
-         AND pit.is_vote=true`,
-      [trip_id, date, time_start, time_end]
+         AND pit.is_vote=true
+         AND pit.pit_id<>$5`,
+      [trip_id, date, time_start, time_end, pit_id]
     )
 
     const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
