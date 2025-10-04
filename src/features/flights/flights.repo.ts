@@ -4,12 +4,12 @@ export async function get_flight(trip_id: number) {
   const sql = `
     SELECT 
       f.flight_id, 
-      TO_CHAR(f.depart_date, 'DD/MM/YYYY') AS dep_date,
-      TO_CHAR(f.depart_time, 'HH24:MI') AS dep_time, 
+      f.depart_date,
+      f.depart_time,
       f.origin_country AS dep_country,
       f.origin AS dep_airport_code,
-      TO_CHAR(f.arrive_date, 'DD/MM/YYYY') AS arr_date, 
-      TO_CHAR(f.arrive_time, 'HH24:MI') AS arr_time,
+      f.arrive_date,
+      f.arrive_time,
       f.destination_country AS arr_country,
       f.destination AS arr_airport_code,
       f.airline
