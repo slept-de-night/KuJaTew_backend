@@ -59,6 +59,20 @@ export const ActivityController = {
       next(err)
     }
   },
+
+  dateClean: async (req:any,res:any,next:any) => {
+    try {
+      const { trip_id , date } = S.GetActivitiesByDateParams.parse(req.params)
+      const dateStr = date.toISOString().slice(0,10)
+      await ActivityService.dateClean(trip_id , dateStr)
+      res.status(204).send()
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
+      }
+      next(err)
+    }
+  },
 }
 
 

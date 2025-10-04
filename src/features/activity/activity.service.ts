@@ -26,6 +26,10 @@ export const ActivityService = {
 
   async getPlacesByTripDate(trip_id: number, date: string) {
     return ActivityRepo.findPlacesByTripDate(trip_id, date);
+  },
+
+  async dateClean(trip_id: number, date: string) {
+    return ActivityRepo.dateClean(trip_id, date);
   }
 }
 

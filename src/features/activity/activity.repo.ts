@@ -91,7 +91,12 @@ export const ActivityRepo = {
     const res = await query(sql, [pit_id])
     return res.rows.length > 0
   },
-  
+
+  async dateClean(trip_id: number, date: string) {
+    const sql = `DELETE FROM places_in_trip WHERE trip_id = $1 AND date = $2 RETURNING date`
+    const res = await query(sql, [trip_id, date])
+    return res.rows.length > 0
+  }
 }
 
 // ---------- Events ----------
