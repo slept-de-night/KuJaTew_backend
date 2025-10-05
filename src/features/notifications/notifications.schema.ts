@@ -56,5 +56,6 @@ export const get_noti_schemas = z.object({
 });
 
 export const get_noti_schema = z.object({
+  count: z.number().openapi({ example: 50 }),
   noti: z.array(get_noti_schemas),
 });
