@@ -10,7 +10,18 @@ export async function get_noti(trip_id: number, limit: number) {
     LIMIT $2
   `;
   const res = await query(sql, [trip_id, limit]);
-  return res.rows;
+
+  const countSql = `
+    SELECT COUNT(*) AS total
+    FROM notification
+    WHERE trip_id = $1
+  `;
+  const c = await query(countSql, [trip_id]);
+
+  return {
+    list: res.rows,
+    count: Number(c.rows[0]!.total)
+  };
 }
 
 export async function post_noti(trip_id: number, noti_title: string, noti_text: string, noti_date: string, noti_time: string) {

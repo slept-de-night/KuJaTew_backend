@@ -5,10 +5,14 @@ import { ZodError } from "zod";
 
 export async function get_notifications(req: Request, res: Response, next: NextFunction) {
   try {
-    const {trip_id, limit} = schema.get_notifications_schema.parse(req.params);
+    const { trip_id, limit } = schema.get_notifications_schema.parse(req.params);
 
-    const noti = await service.get_noti(trip_id, limit);
-    return res.status(200).json({ noti });
+    const { list, count } = await service.get_noti(trip_id, limit);
+
+    return res.status(200).json({
+      count,
+      noti: list
+    });
   } catch (err) {
     next(err);
   }
