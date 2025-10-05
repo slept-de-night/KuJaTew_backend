@@ -9,7 +9,8 @@ export const TripSchema = z.object({
     start_date:z.date(),
     end_date:z.date(),
     poster_image_link:z.string().nullable(),
-    planning_status:z.boolean()
+    planning_status:z.boolean(),
+    budget:z.coerce.number()
 });
 
 export const tSchema = z.object({
