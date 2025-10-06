@@ -21,6 +21,9 @@ export const mrSchema = z.object({
     member_id: z.string().trim().min(1, "user_id required"),
     role: z.string().trim().min(1, "role required"),
 });
+const BoolFromString = z
+  .string()
+  .transform((val) => val === "true");
 
 export const BodySchema = z.object({ 
     trip_name:z.string().optional(),
@@ -28,8 +31,8 @@ export const BodySchema = z.object({
     end_date:z.coerce.date().optional(),
     trip_code:z.string().optional(),
     trip_pass:z.string().optional(),
-    planning_status:z.coerce.boolean().optional(),
-    visibility_status:z.coerce.boolean().optional(),
+    planning_status:BoolFromString.optional(),
+    visibility_status:BoolFromString.optional(),
     budget:z.coerce.number().optional(),
     description:z.string().optional()
 });
