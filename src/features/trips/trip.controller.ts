@@ -89,7 +89,7 @@ export const Edit_Trip_Detail = asyncHandler(async (req: Request, res:Response) 
         throw new Error("Only JPEG, JPG, and PNG files are allowed");
       }
     }
-  const result = await TripsService.edit_trip_detail(user_id, trip_id, trip_name, start_date, end_date, trip_code, trip_pass, planning_status, visibility_status, budget, description);
+  const result = await TripsService.edit_trip_detail(user_id, trip_id, trip_name, start_date, end_date, trip_code, trip_pass, planning_status, visibility_status, budget, description, file);
   return res.status(200).json(result);
 });
 
