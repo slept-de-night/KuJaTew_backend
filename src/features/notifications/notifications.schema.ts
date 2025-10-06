@@ -18,14 +18,14 @@ const DateDDMMYYYY = z.string().regex(
 
 // HH:mm 24-hour
 const TimeHHMM = z.string().regex(
-  /^([01]\d|2[0-3]):([0-5]\d)$/,
-  "Expected HH:mm"
+  /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
+  "Expected HH:mm:SS"
 );
 
 export const post_notifications_body_schema = z.object({
   noti_title: z.coerce.string().min(1, "noti_ext is required"),
   noti_text: z.coerce.string().min(1, "noti_ext is required"),
-  noti_date: DateDDMMYYYY,
+  noti_date: z.coerce.date(),
   noti_time: TimeHHMM
 });
 
@@ -43,16 +43,16 @@ export const TripIdParamSchema = z.object({
 export const example_swagger = z.object({
   noti_title: z.string().openapi({ example: "OSHI" }),
   noti_text: z.string().openapi({ example: "WE LOVE OSHI" }),
-  noti_date: z.string().openapi({ example: "06/05/2023" }),
-  noti_time: z.string().openapi({ example: "06:55" }),
+  noti_date: z.string().openapi({ example: "2025-08-31T17:00:00.000Z" }),
+  noti_time: z.string().openapi({ example: "06:55:00" }),
 });
 
 export const get_noti_schemas = z.object({
   noti_id: z.number().openapi({ example: 12345 }),
   noti_title: z.string().openapi({ example: "OSHI" }),
   noti_text: z.string().openapi({ example: "WE LOVE OSHI" }),
-  noti_date: z.string().openapi({ example: "06/05/2023" }),
-  noti_time: z.string().openapi({ example: "06:55" }),
+  noti_date: z.string().openapi({ example: "2025-08-31T17:00:00.000Z" }),
+  noti_time: z.string().openapi({ example: "06:55:00" }),
 });
 
 export const get_noti_schema = z.object({
