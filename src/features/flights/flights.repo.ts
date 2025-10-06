@@ -41,11 +41,11 @@ export async function delete_flight(user_id: string, trip_id: number, flight_id:
 }
 
 export type FlightInsert = {
-  dep_date:string,
+  dep_date:Date,
   dep_time:string,
   dep_country:string,
   dep_airp_code:string,
-  arr_date:string,
+  arr_date:Date,
   arr_time:string,
   arr_country:string,
   arr_airp_code:string,
@@ -79,7 +79,7 @@ export async function post_flight(user_id: string, input: FlightInsert, trip_id:
       destination,
       airline
     )
-    VALUES ($1,TO_DATE($2, 'DD/MM/YYYY'),$3,$4,$5,TO_DATE($6, 'DD/MM/YYYY'),$7,$8,$9,$10)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     ON CONFLICT (trip_id, airline, origin, depart_date, depart_time, destination) DO NOTHING
     RETURNING *;
   `;
@@ -117,11 +117,11 @@ export async function put_flight(user_id: string, input: FlightInsert, trip_id: 
   const sql = `
     UPDATE flights
     SET
-      depart_date = TO_DATE($1, 'DD/MM/YYYY'), 
+      depart_date = $1, 
       depart_time = $2,
       origin_country = $3,
       origin = $4,
-      arrive_date = TO_DATE($5, 'DD/MM/YYYY'),
+      arrive_date = $5,
       arrive_time = $6,
       destination_country = $7,
       destination = $8,
