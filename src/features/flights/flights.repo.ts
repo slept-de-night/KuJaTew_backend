@@ -1,4 +1,5 @@
 import { query, pool } from "../../core/db";
+import { formatDate } from "../../util";
 
 export async function get_flight(trip_id: number) {
   const sql = `
@@ -18,7 +19,13 @@ export async function get_flight(trip_id: number) {
     ORDER BY f.flight_id DESC
   `;
   const res = await query(sql, [trip_id]);
-  return res.rows;
+  const rows = res.rows.map((r) => ({
+    ...r,
+    depart_date: formatDate(r.depart_date),
+    arrive_date: formatDate(r.arrive_date),
+  }));
+  console.log(rows)
+  return rows;
 }
 
 export async function delete_flight(user_id: string, trip_id: number, flight_id: number) {
@@ -41,11 +48,11 @@ export async function delete_flight(user_id: string, trip_id: number, flight_id:
 }
 
 export type FlightInsert = {
-  dep_date:Date,
+  dep_date:string,
   dep_time:string,
   dep_country:string,
   dep_airp_code:string,
-  arr_date:Date,
+  arr_date:string,
   arr_time:string,
   arr_country:string,
   arr_airp_code:string,

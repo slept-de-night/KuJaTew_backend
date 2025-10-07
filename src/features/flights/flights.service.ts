@@ -9,11 +9,11 @@ export async function delete_flight(user_id: string, trip_id: number, flight_id:
 }
 
 export type FlightInsert = {
-  dep_date:Date,
+  dep_date:string,
   dep_time:string,
   dep_country:string,
   dep_airp_code:string,
-  arr_date:Date,
+  arr_date:string,
   arr_time:string,
   arr_country:string,
   arr_airp_code:string,

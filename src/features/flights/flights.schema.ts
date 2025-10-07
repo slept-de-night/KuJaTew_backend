@@ -18,10 +18,10 @@ export const TripParamsSchema = z.object({
 });
 export type TripParams = z.infer<typeof TripParamsSchema>;
 
-// DD/MM/YYYY
-const DateDDMMYYYY = z.string().regex(
-  /^([0-2]\d|3[01])\/(0\d|1[0-2])\/\d{4}$/,
-  "Expected DD/MM/YYYY"
+// YYYY-MM-DD
+const DateYYYYMMDD = z.string().regex(
+  /^\d{4}-\d{2}-\d{2}$/,
+  "Expected YYYY-MM-DD"
 );
 
 // HH:mm 24-hour
@@ -34,12 +34,12 @@ const IATA = z.string().length(3, "3-letter IATA code");
 const CountryFull = z.string().min(2).max(56);
 
 export const CreateFlightBodySchema = z.object({
-  dep_date: z.coerce.date(),
+  dep_date: DateYYYYMMDD,
   dep_time: TimeHHMM,
   dep_country: CountryFull,
   dep_airp_code: IATA,
 
-  arr_date: z.coerce.date(),
+  arr_date: DateYYYYMMDD,
   arr_time: TimeHHMM,
   arr_country: CountryFull,
   arr_airp_code: IATA,
