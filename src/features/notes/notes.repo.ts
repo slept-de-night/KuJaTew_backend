@@ -110,7 +110,7 @@ export const NotesRepo = {
     },
 
 // activity note part
-    async get_activity_notes(trip_id:number, collab_id:number, pit_id:number){
+    async get_activity_notes(trip_id:number, collab_id:number){
         const query = `
             SELECT
                 n.pnote_id as pnote_id,
@@ -122,10 +122,10 @@ export const NotesRepo = {
             FROM note n
             JOIN trip_collaborators tc ON n.collab_id = tc.collab_id
             JOIN users u ON u.user_id = tc.user_id
-            WHERE n.trip_id = $2 AND n.pit_id = $3
+            WHERE n.trip_id = $2
         `;
         const listscheme = z.array(noteactivityschema);
-        const {rows} = await pool.query(query, [collab_id, trip_id, pit_id]);
+        const {rows} = await pool.query(query, [collab_id, trip_id]);
         const parsed = listscheme.safeParse(rows);
         if(!parsed.success) throw INTERNAL("Fail to parsed query");
         return parsed.data;
@@ -163,7 +163,7 @@ export const NotesRepo = {
             RETURNING *
         `
         const {rows} = await pool.query(query, [trip_id, collab_id, pit_id, note, new Date()]);
-        return rows;
+        return rows[0];
     },
 
     async delete_activity_note(collab_id:number, pnote_id:number){
@@ -174,6 +174,6 @@ export const NotesRepo = {
             RETURNING *
         `;
         const {rows} = await pool.query(del,[pnote_id, collab_id]);
-        return rows;
+        return rows[0];
     },
 }

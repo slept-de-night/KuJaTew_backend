@@ -12,7 +12,7 @@ export function registerNotes(registry: OpenAPIRegistry) {
     summary: "Get all overview notes for a trip",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
+        trip_id: z.number().int(),
         }),
     },
     responses: {
@@ -36,7 +36,7 @@ export function registerNotes(registry: OpenAPIRegistry) {
     summary: "Create a new overview note in a trip",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
+        trip_id: z.number().int(),
         }),
         body: {
         content: {
@@ -67,8 +67,8 @@ export function registerNotes(registry: OpenAPIRegistry) {
     summary: "Edit a specific overview note",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
-        nit_id: z.coerce.number().int(),
+            trip_id: z.number().int(),
+            nit_id: z.number().int(),
         }),
         body: {
         content: {
@@ -101,8 +101,8 @@ export function registerNotes(registry: OpenAPIRegistry) {
     summary: "Delete an overview note",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
-        nit_id: z.coerce.number().int(),
+            trip_id: z.number().int(),
+            nit_id: z.number().int(),
         }),
     },
     responses: {
@@ -123,7 +123,7 @@ export function registerNotes(registry: OpenAPIRegistry) {
     summary: "Get all activity notes for a trip",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
+            trip_id: z.number().int(),
         }),
     },
     responses: {
@@ -142,17 +142,20 @@ export function registerNotes(registry: OpenAPIRegistry) {
     // Create an activity note
     registry.registerPath({
     method: "post",
-    path: "/api/trips/{trip_id}/act_notes",
+    path: "/api/trips/{trip_id}/{pit_id}/act_notes",
     operationId: "CreateActivityNote",
     summary: "Create a new activity note in a trip",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
+            trip_id: z.number().int(),
+            pit_id: z.number().int(),
         }),
         body: {
         content: {
             "application/json": {
-            schema: schema.noteactivityschema,
+                schema: z.object({
+                    note: z.string(),
+                }),
             },
         },
         },
@@ -173,18 +176,20 @@ export function registerNotes(registry: OpenAPIRegistry) {
     // Edit an activity note
     registry.registerPath({
     method: "patch",
-    path: "/api/trips/{trip_id}/{nit_id}/act_notes",
+    path: "/api/trips/{trip_id}/{pnote_id}/act_notes",
     operationId: "EditActivityNote",
     summary: "Edit a specific activity note",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
-        nit_id: z.coerce.number().int(),
+            trip_id: z.number().int(),
+            pnote_id: z.number().int(),
         }),
         body: {
         content: {
             "application/json": {
-            schema: schema.noteactivityschema,
+            schema: z.object({
+                    note: z.string(),
+                }),
             },
         },
         },
@@ -205,13 +210,13 @@ export function registerNotes(registry: OpenAPIRegistry) {
     // Delete an activity note
     registry.registerPath({
     method: "delete",
-    path: "/api/trips/{trip_id}/{nit_id}/act_notes",
+    path: "/api/trips/{trip_id}/{pnote_id}/act_notes",
     operationId: "DeleteActivityNote",
     summary: "Delete an activity note",
     request: {
         params: z.object({
-        trip_id: z.coerce.number().int(),
-        nit_id: z.coerce.number().int(),
+            trip_id: z.number().int(),
+            pnote_id: z.number().int(),
         }),
     },
     responses: {

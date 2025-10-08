@@ -79,12 +79,11 @@ export const Get_Activity_Notes = asyncHandler(async (req: Request, res: Respons
 
     const parseparams = z.object({
         trip_id: z.coerce.number().int(),
-        pit_id: z.coerce.number().int(),
     }).safeParse(req.params);
     if(!parseparams.success) throw INTERNAL("Fail to parse params"); 
-    const {trip_id, pit_id} = parseparams.data;
+    const {trip_id} = parseparams.data;
 
-    const notes_data = await NoteService.get_activity_notes(user_id, trip_id, pit_id);
+    const notes_data = await NoteService.get_activity_notes(user_id, trip_id);
     res.status(200).json(notes_data);
 });
 
@@ -92,7 +91,7 @@ export const Edit_Activity_Note = asyncHandler(async (req: Request, res: Respons
     const parseduser = z.object({user_id:z.string()}).safeParse((req as any).user); 
     if(!parseduser.success) throw BadRequest("Invalide Request");
     let user_id = parseduser.data.user_id;
-
+    console.log(req.params)
     const parseparams = z.object({
         trip_id: z.coerce.number().int(), 
         pnote_id:z.coerce.number().int()})
