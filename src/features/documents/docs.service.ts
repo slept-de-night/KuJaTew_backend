@@ -36,7 +36,7 @@ export const DocService = {
         if (uploadErr) throw new Error(`Upload failed: ${uploadErr.message}`);
 
         //insert db
-        return await DocsRepo.insertDocument(file.originalname, filePath, file.size, file.mimetype, trip_id);
+        return await DocsRepo.insertDocument(file.originalname, filePath, file.size, file.mimetype, trip_id, user_id);
     },
 
     async get_all_docs(user_id:string, trip_id:number){
@@ -45,7 +45,7 @@ export const DocService = {
         if (!iit) throw new Error("User not in trip");
 
         const result = await DocsRepo.get_all_docs(trip_id);
-        return result;
+        return {files : result};
     },
 
     async get_spec_doc(user_id:string, trip_id:number, doc_id:number){

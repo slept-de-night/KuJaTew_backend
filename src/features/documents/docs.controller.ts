@@ -65,5 +65,5 @@ export const Delete_Doc = asyncHandler(async (req: Request, res: Response) => {
     const {trip_id, doc_id} = parseparams.data;
 
     const result = await DocService.delete_doc(user_id, trip_id, doc_id);
-    res.status(204).json(result);
+    res.status(204).json({"success":"File has been deleted"});
 });
