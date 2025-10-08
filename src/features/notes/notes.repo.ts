@@ -115,7 +115,7 @@ export const NotesRepo = {
             SELECT
                 n.pnote_id as pnote_id,
                 n.note as note,
-                n.pit_id as pit_id
+                n.pit_id as pit_id,
                 u.name AS name,
                 u.profile_picture_path AS profile_picture_path,
                 CASE WHEN n.collab_id = $1 THEN 1 ELSE 0 END AS is_editable
