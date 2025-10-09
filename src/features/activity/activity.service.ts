@@ -38,14 +38,14 @@ export const EventService = {
     const overlaps = await VoteRepo.checkTimeOverlap(
       trip_id, null, dto.date, dto.time_start, dto.time_end
     )
-    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    if (overlaps.length > 0) return("Time overlap detected")
     return EventRepo.create(trip_id, dto)
   },
   update: async (pit_id:number, dto:any) => {
     const overlaps = await VoteRepo.checkTimeOverlap(
       dto.trip_id, pit_id, dto.date, dto.time_start, dto.time_end
     )
-    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    if (overlaps.length > 0) return("Time overlap detected")
     return EventRepo.update(pit_id, dto)
   },
 }
@@ -55,14 +55,14 @@ export const PlaceService = {
     const overlaps = await VoteRepo.checkTimeOverlap(
       trip_id, null, dto.date, dto.time_start, dto.time_end
     )
-    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    if (overlaps.length > 0) return("Time overlap detected")
     return PlaceRepo.add(trip_id, dto)
   },
   update: async (pit_id:number, dto:any) => {
     const overlaps = await VoteRepo.checkTimeOverlap(
       dto.trip_id, pit_id, dto.date, dto.time_start, dto.time_end
     )
-    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    if (overlaps.length > 0) return("Time overlap detected")
     return PlaceRepo.update(pit_id, dto)
   },
 }
@@ -77,7 +77,7 @@ export const VoteService = {
     const overlaps = await VoteRepo.checkTimeOverlap(
       trip_id, null, body.date, body.time_start, body.time_end
     )
-    if (overlaps.length > 0) throw new Error("Time overlap detected")
+    if (overlaps.length > 0) return("Time overlap detected")
     return VoteRepo.initVotingBlock(trip_id, type, body)
   },
 
@@ -99,7 +99,7 @@ export const VoteService = {
       trip_id, pit_id, patch.date, patch.start_time, patch.end_time
     )
     if (overlaps.length > 0) {
-      throw new Error("Time overlap detected")
+      return("Time overlap detected")
     }
     return VoteRepo.patchVote(trip_id, pit_id, patch)
   },

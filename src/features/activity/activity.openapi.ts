@@ -20,15 +20,6 @@ export function registerActivity(registry: OpenAPIRegistry) {
   registry.register("GetUserVotedResponse", schema.GetUserVotedResponse);
   registry.register("PlaceItem", schema.PlaceItem);
   registry.register("PlaceResponse", schema.PlaceResponse);
-  registry.register("ParamsTrip", schema.ParamsTrip);
-  registry.register("GetActivitiesByDateParams", schema.GetActivitiesByDateParams);
-  registry.register("DeleteActivityParams", schema.DeleteActivityParams);
-  registry.register("PostVoteTypeParams", schema.PostVoteTypeParams);
-  registry.register("PostVoteByPlaceParams", schema.PostVoteByPlaceParams);
-  registry.register("PatchVoteParams", schema.PatchVoteParams);
-  registry.register("DeleteVoteParams", schema.DeleteVoteParams);
-  registry.register("GetUserVotedParams", schema.GetUserVotedParams);
-  registry.register("PostVoteEndOwnerParams", schema.PostVoteEndOwnerParams);
 
   // ---------- Activities ----------
   registry.registerPath({

@@ -39,7 +39,7 @@ export const ActivityRepo = {
 
     const rows = res.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }))
 
     return await Promise.all(
@@ -67,7 +67,7 @@ export const ActivityRepo = {
 
     const rows = res.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }))
 
     return await Promise.all(
@@ -144,7 +144,7 @@ export const EventRepo = {
     const res = await query(sql, [pit_id, dto.date, dto.time_start, dto.time_end, dto.event_name, dto.event_title])
     const rows = res.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }));
     return rows[0];
   },
@@ -183,7 +183,7 @@ export const PlaceRepo = {
     const res = await query(sql, [pit_id, dto.date, dto.time_start, dto.time_end])
     const rows = res.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }));
     return rows[0];
   },
@@ -233,7 +233,7 @@ export const VoteRepo = {
       is_event: boolean
     }
     
-    const formattedDate = formatDate(date);
+    const formattedDate = formatDate(new Date(date));
     let block_id: number = pit_id;
 
     const candidatesRes = await query(
@@ -393,7 +393,7 @@ export const VoteRepo = {
     const res = await query(sql, [trip_id, place_id, date, time_start, time_end])
     const rows = res.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }));
 
     return rows[0];
@@ -412,7 +412,7 @@ export const VoteRepo = {
   const res = await query(sql, [trip_id, date, time_start, time_end, body.event_name])
   const rows = res.rows.map((r: any) => ({
     ...r,
-    date: formatDate(r.date),
+    date: formatDate(new Date(r.date)),
   }));
 
   return rows[0];
@@ -504,7 +504,7 @@ export const VoteRepo = {
 
     const rows = updateBlock.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }));
 
     return rows[0];
@@ -767,7 +767,7 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
     )
     const rows = updateRes.rows.map((r: any) => ({
       ...r,
-      date: formatDate(r.date),
+      date: formatDate(new Date(r.date)),
     }));
 
     return rows[0]
@@ -783,7 +783,7 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
 
   const rows = updateRes.rows.map((r: any) => ({
     ...r,
-    date: formatDate(r.date),
+    date: formatDate(new Date(r.date)),
   }));
   
   return rows[0]
