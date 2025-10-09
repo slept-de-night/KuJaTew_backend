@@ -194,14 +194,14 @@ export const TripsService = {
     const flight_detail = flight.map((f: any) => ({
       flight_id: f.flight_id,
       depart: {
-        dep_date: f.dep_date,
-        dep_time: f.dep_time,
+        dep_date: f.depart_date,
+        dep_time: f.depart_time,
         dep_country: f.dep_country,
         dep_airp_code: f.dep_airport_code,
       },
       arrive: {
-        arr_date: f.arr_date,
-        arr_time: f.arr_time,
+        arr_date: f.arrive_date,
+        arr_time: f.arrive_time,
         arr_country: f.arr_country,
         arr_airp_code: f.arr_airport_code,
       },

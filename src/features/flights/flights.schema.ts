@@ -18,28 +18,28 @@ export const TripParamsSchema = z.object({
 });
 export type TripParams = z.infer<typeof TripParamsSchema>;
 
-// DD/MM/YYYY
-const DateDDMMYYYY = z.string().regex(
-  /^([0-2]\d|3[01])\/(0\d|1[0-2])\/\d{4}$/,
-  "Expected DD/MM/YYYY"
+// YYYY-MM-DD
+const DateYYYYMMDD = z.string().regex(
+  /^\d{4}-\d{2}-\d{2}$/,
+  "Expected YYYY-MM-DD"
 );
 
 // HH:mm 24-hour
 const TimeHHMM = z.string().regex(
-  /^([01]\d|2[0-3]):([0-5]\d)$/,
-  "Expected HH:mm"
+  /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
+  "Expected HH:mm:SS"
 );
 
 const IATA = z.string().length(3, "3-letter IATA code");
 const CountryFull = z.string().min(2).max(56);
 
 export const CreateFlightBodySchema = z.object({
-  dep_date: DateDDMMYYYY,
+  dep_date: DateYYYYMMDD,
   dep_time: TimeHHMM,
   dep_country: CountryFull,
   dep_airp_code: IATA,
 
-  arr_date: DateDDMMYYYY,
+  arr_date: DateYYYYMMDD,
   arr_time: TimeHHMM,
   arr_country: CountryFull,
   arr_airp_code: IATA,
@@ -51,13 +51,13 @@ export type CreateFlightBody = z.infer<typeof CreateFlightBodySchema>;
 //swagger
 export const FlightItemSchema = z.object({
   flight_id: z.number().int().openapi({ example: 123 }),
-  dep_date: z.string().openapi({ example: "01/09/2025" }),
-  dep_time: z.string().openapi({ example: "08:45" }),
+  dep_date: z.string().openapi({ example: "2025-08-31T17:00:00.000Z" }),
+  dep_time: z.string().openapi({ example: "08:45:00" }),
   dep_country: z.string().openapi({ example: "Thailand" }),
   dep_airp_code: z.string().openapi({ example: "BKK" }),
 
-  arr_date: z.string().openapi({ example: "02/09/2025" }),
-  arr_time: z.string().openapi({ example: "12:30" }),
+  arr_date: z.string().openapi({ example: "2025-09-01T17:00:00.000Z" }),
+  arr_time: z.string().openapi({ example: "12:30:00" }),
   arr_country: z.string().openapi({ example: "Japan" }),
   arr_airp_code: z.string().openapi({ example: "HND" }),
 
@@ -65,13 +65,13 @@ export const FlightItemSchema = z.object({
 });
 
 export const PostFlightSchema = z.object({
-  dep_date: z.string().openapi({ example: "01/09/2025" }),
-  dep_time: z.string().openapi({ example: "08:45" }),
+  dep_date: z.string().openapi({ example: "2025-09-29T17:00:00.000Z" }),
+  dep_time: z.string().openapi({ example: "08:45:00" }),
   dep_country: z.string().openapi({ example: "Thailand" }),
   dep_airp_code: z.string().openapi({ example: "BKK" }),
 
-  arr_date: z.string().openapi({ example: "02/09/2025" }),
-  arr_time: z.string().openapi({ example: "12:30" }),
+  arr_date: z.string().openapi({ example: "2025-09-30T17:00:00.000Z" }),
+  arr_time: z.string().openapi({ example: "12:30:00" }),
   arr_country: z.string().openapi({ example: "Uganda" }),
   arr_airp_code: z.string().openapi({ example: "UGD" }),
 
@@ -104,3 +104,17 @@ export const FlightIdParamSchema = z.object({
 });
 
 export const TripFlightParamSchema = TripIdParamSchema.merge(FlightIdParamSchema);
+
+export const putflightitemschema = z.object({
+  dep_date: z.string().openapi({ example: "2025-09-29T17:00:00.000Z" }),
+  dep_time: z.string().openapi({ example: "08:45:00" }),
+  dep_country: z.string().openapi({ example: "Thailand" }),
+  dep_airp_code: z.string().openapi({ example: "BKK" }),
+
+  arr_date: z.string().openapi({ example: "2025-09-30T17:00:00.000Z" }),
+  arr_time: z.string().openapi({ example: "12:30:00" }),
+  arr_country: z.string().openapi({ example: "Moon" }),
+  arr_airp_code: z.string().openapi({ example: "MON" }),
+
+  airl_name: z.string().openapi({ example: "ไปช่วยกัปตัน American Airline" }),
+});

@@ -76,7 +76,7 @@ export function registerFlights(registry: OpenAPIRegistry) {
       body: {
         content: {
           "application/json": {
-            schema: schema.CreateFlightBodySchema,
+            schema: schema.putflightitemschema,
           },
         },
       },

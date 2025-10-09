@@ -1,15 +1,16 @@
 import { query, pool } from "../../core/db";
+import { formatDate } from "../../util";
 
 export async function get_flight(trip_id: number) {
   const sql = `
     SELECT 
       f.flight_id, 
-      TO_CHAR(f.depart_date, 'DD/MM/YYYY') AS dep_date,
-      TO_CHAR(f.depart_time, 'HH24:MI') AS dep_time, 
+      f.depart_date,
+      f.depart_time,
       f.origin_country AS dep_country,
       f.origin AS dep_airport_code,
-      TO_CHAR(f.arrive_date, 'DD/MM/YYYY') AS arr_date, 
-      TO_CHAR(f.arrive_time, 'HH24:MI') AS arr_time,
+      f.arrive_date,
+      f.arrive_time,
       f.destination_country AS arr_country,
       f.destination AS arr_airport_code,
       f.airline
@@ -18,7 +19,13 @@ export async function get_flight(trip_id: number) {
     ORDER BY f.flight_id DESC
   `;
   const res = await query(sql, [trip_id]);
-  return res.rows;
+  const rows = res.rows.map((r) => ({
+    ...r,
+    depart_date: formatDate(r.depart_date),
+    arrive_date: formatDate(r.arrive_date),
+  }));
+  console.log(rows)
+  return rows;
 }
 
 export async function delete_flight(user_id: string, trip_id: number, flight_id: number) {
@@ -79,7 +86,7 @@ export async function post_flight(user_id: string, input: FlightInsert, trip_id:
       destination,
       airline
     )
-    VALUES ($1,TO_DATE($2, 'DD/MM/YYYY'),$3,$4,$5,TO_DATE($6, 'DD/MM/YYYY'),$7,$8,$9,$10)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     ON CONFLICT (trip_id, airline, origin, depart_date, depart_time, destination) DO NOTHING
     RETURNING *;
   `;
@@ -117,11 +124,11 @@ export async function put_flight(user_id: string, input: FlightInsert, trip_id: 
   const sql = `
     UPDATE flights
     SET
-      depart_date = TO_DATE($1, 'DD/MM/YYYY'), 
+      depart_date = $1, 
       depart_time = $2,
       origin_country = $3,
       origin = $4,
-      arrive_date = TO_DATE($5, 'DD/MM/YYYY'),
+      arrive_date = $5,
       arrive_time = $6,
       destination_country = $7,
       destination = $8,

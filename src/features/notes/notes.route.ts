@@ -11,7 +11,7 @@ notesRouter.patch('/:trip_id/:nit_id/notes', controler.Edit_Overview_Note);
 notesRouter.delete('/:trip_id/:nit_id/notes', controler.Delete_Overview_Note);
 
 //activity part
-notesRouter.get('/:trip_id/:pit_id/act_notes', controler.Get_Activity_Notes);
+notesRouter.get('/:trip_id/act_notes', controler.Get_Activity_Notes);
 notesRouter.post('/:trip_id/:pit_id/act_notes', controler.Add_Activity_Note);
 notesRouter.patch('/:trip_id/:pnote_id/act_notes', controler.Edit_Activity_Note);
 notesRouter.delete('/:trip_id/:pnote_id/act_notes', controler.Delete_Activity_note);

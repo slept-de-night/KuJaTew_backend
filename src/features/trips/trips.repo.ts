@@ -25,7 +25,8 @@ export const TripsRepo = {
 				t.start_date,
 				t.end_date,
 				t.trip_picture_path AS poster_image_link,
-				t.planning_status
+				t.planning_status,
+				t.budget
 			FROM trips t
 			JOIN joinedP jp ON jp.trip_id = t.trip_id
 			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id
@@ -64,7 +65,8 @@ export const TripsRepo = {
 				t.start_date,
 				t.end_date,
 				t.trip_picture_path AS poster_image_link,
-				t.planning_status
+				t.planning_status,
+				t.budget
 			FROM trips t
 			JOIN joinedP jp ON jp.trip_id = t.trip_id
 			LEFT JOIN total_copied ttcp ON t.trip_id = ttcp.trip_id

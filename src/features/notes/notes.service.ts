@@ -64,13 +64,13 @@ export const NoteService = {
       return result;
     },
   //activity part
-    async get_activity_notes(user_id:string, trip_id:number, pit_id:number){
-        if (!user_id || !trip_id || !pit_id) throw INTERNAL("UserID, TripID and pitID required");
+    async get_activity_notes(user_id:string, trip_id:number){
+        if (!user_id || !trip_id) throw INTERNAL("UserID, TripID and pitID required");
         const iit = await MemberRepo.is_in_trip(user_id, trip_id);
         if (!iit) throw Error("User not in trip");
 
         const {collab_id} = await NotesRepo.get_collabID(user_id, trip_id);
-        const notes = await NotesRepo.get_activity_notes(trip_id, collab_id, pit_id);
+        const notes = await NotesRepo.get_activity_notes(trip_id, collab_id);
         const updatednotes = await Promise.all(
               notes.map(async (note) => {
                 if (!note.profile_picture_path) {

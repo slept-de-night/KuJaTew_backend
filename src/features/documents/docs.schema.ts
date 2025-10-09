@@ -17,6 +17,7 @@ export const DocumentDBSchema = z.object({
     mem_type: z.string(),
     modified: z.date(),
     trip_id: z.coerce.number(),
+    user_id: z.string(),
 });
 
 export const getalldoc = z.object({
@@ -24,5 +25,6 @@ export const getalldoc = z.object({
     doc_name: z.string(),
     doc_size: z.coerce.number(),
     mimetype: z.string(),
-    modified: z.date(),
+    modified: z.string(),
+    uploaded_by: z.string(),
 })
