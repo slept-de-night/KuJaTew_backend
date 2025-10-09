@@ -1,6 +1,7 @@
 import { query } from "../../core/db"
 import { pool } from '../../config/db';
 import { UsersRepo } from "../users/users.repo"
+import { formatDate } from '../../util';
 
 
 // ---------- Activities ----------
@@ -36,8 +37,13 @@ export const ActivityRepo = {
     `
     const res = await query(sql, [trip_id])
 
+    const rows = res.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }))
+
     return await Promise.all(
-      res.rows.map(async (row: any) => ({
+      rows.map(async (row: any) => ({
         ...row,
         photo_url: row.photo_url
           ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
@@ -59,8 +65,13 @@ export const ActivityRepo = {
     `
     const res = await query(sql, [trip_id, date])
 
+    const rows = res.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }))
+
     return await Promise.all(
-      res.rows.map(async (row: any) => ({
+      rows.map(async (row: any) => ({
         ...row,
         photo_url: row.photo_url
           ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
@@ -129,8 +140,13 @@ export const EventRepo = {
       WHERE pit_id = $1
       RETURNING *
     `
+    
     const res = await query(sql, [pit_id, dto.date, dto.time_start, dto.time_end, dto.event_name, dto.event_title])
-    return res.rows[0]
+    const rows = res.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }));
+    return rows[0];
   },
 }
 
@@ -165,7 +181,11 @@ export const PlaceRepo = {
       RETURNING *
     `
     const res = await query(sql, [pit_id, dto.date, dto.time_start, dto.time_end])
-    return res.rows[0]
+    const rows = res.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }));
+    return rows[0];
   },
 }
 
@@ -213,6 +233,7 @@ export const VoteRepo = {
       is_event: boolean
     }
     
+    const formattedDate = formatDate(date);
     let block_id: number = pit_id;
 
     const candidatesRes = await query(
@@ -271,7 +292,7 @@ export const VoteRepo = {
 
       return {
         block_id: block_id,
-        date,
+        formattedDate ,
         time_start,
         time_end,
         places_voting,
@@ -294,7 +315,7 @@ export const VoteRepo = {
 
       return {
         block_id: block_id,
-        date,
+        formattedDate ,
         time_start,
         time_end,
         event_voting,
@@ -370,7 +391,12 @@ export const VoteRepo = {
       RETURNING *
     `
     const res = await query(sql, [trip_id, place_id, date, time_start, time_end])
-    return res.rows[0]
+    const rows = res.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }));
+
+    return rows[0];
   }
 
   if (!body?.event_name) {
@@ -382,8 +408,14 @@ export const VoteRepo = {
     VALUES ($1,0,$2,$3,$4,true,true,$5,'')
     RETURNING *
   `
+  
   const res = await query(sql, [trip_id, date, time_start, time_end, body.event_name])
-  return res.rows[0]
+  const rows = res.rows.map((r: any) => ({
+    ...r,
+    date: formatDate(r.date),
+  }));
+
+  return rows[0];
 },
 
   async votedPlaces(trip_id: number, pit_id: number, user_id: string) {
@@ -470,7 +502,12 @@ export const VoteRepo = {
       [trip_id, oldRow.date, oldRow.time_start, patch.date, patch.start_time, patch.end_time, pit_id]
     )
 
-    return updateBlock.rows[0]
+    const rows = updateBlock.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }));
+
+    return rows[0];
   },
 
 
@@ -728,7 +765,12 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
       RETURNING *`,
       [trip_id, blockPitId, cand.place_id, cand.event_names]
     )
-    return updateRes.rows[0]
+    const rows = updateRes.rows.map((r: any) => ({
+      ...r,
+      date: formatDate(r.date),
+    }));
+
+    return rows[0]
   }
   
   const updateRes = await query(
@@ -738,8 +780,13 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
     RETURNING *`,
     [trip_id, blockPitId, cand.place_id, cand.event_names]
   )
-  return updateRes.rows[0]
 
+  const rows = updateRes.rows.map((r: any) => ({
+    ...r,
+    date: formatDate(r.date),
+  }));
+  
+  return rows[0]
 }
 }
 
