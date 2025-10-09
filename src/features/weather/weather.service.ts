@@ -91,7 +91,12 @@ async function getWeatherApiCodeForDate(lat: number, lon: number, dateISO: strin
 export const WeatherService = {
   async getByTripDate(trip_id: number, date: string): Promise<TWeatherItem[] | Record<string, never>> {
     const d = diffDaysUtc(date);
-    if (d < 0 || d > 2) {
+    if ( d < 0 ){
+      const cached = await WeatherRepo.findByTripDate(trip_id, date);
+      if (cached.length > 0) return cached; 
+    }
+
+    if ( d > 2 ) {
       return {};
     }
 
