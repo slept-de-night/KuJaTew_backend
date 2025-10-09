@@ -100,6 +100,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
     operationId: "createEvent",
     summary: "Create a new event",
     request: {
+      params: schema.ParamsTrip,
       body: {
         content: { "application/json": { schema: schema.CreateEventBody } },
       },
@@ -117,6 +118,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
     operationId: "updateEvent",
     summary: "Update event by pit_id",
     request: {
+      params: schema.DeleteActivityParams,
       body: {
         content: { "application/json": { schema: schema.UpdateEventBody } },
       },
@@ -135,6 +137,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
     operationId: "addPlace",
     summary: "Add place to trip",
     request: {
+      params: schema.ParamsTrip, 
       body: {
         content: { "application/json": { schema: schema.AddPlaceBody } },
       },
@@ -152,6 +155,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
     operationId: "updatePlace",
     summary: "Update place by pit_id",
     request: {
+      params: schema.DeleteActivityParams ,
       body: {
         content: { "application/json": { schema: schema.UpdatePlaceBody } },
       },
