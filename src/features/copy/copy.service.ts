@@ -4,6 +4,7 @@ import { env } from "../../config/env";
 import { supabase } from "../../config/db";
 import { Result } from "pg";
 import { copySchema } from "./copy.schema";
+import * as repo from "./copy.repo";
 
 export const CopyService = {
     async get_copy(trip_id:number){
@@ -21,4 +22,8 @@ export const CopyService = {
         const result = await CopyRepo.add_copy(user_id, trip_id);
         return result;
     },
+}
+
+export async function copy_trip(userId: string, trip_id: number, trip_code: string) {
+  return repo.copy_trip(userId, trip_id, trip_code);
 }

@@ -15,6 +15,7 @@ import { registerNotes } from "../features/notes/notes.openapi";
 import { registerNotifications } from "../features/notifications/notifications.openapi";
 import { registerSearch } from "../features/search/search.openapi";
 import { registerDocs } from "../features/documents/docs.openapi";
+import { registerCopy } from "../features/copy/copy.openapi";
 
 export function buildOpenApiDoc() {
   const registry = new OpenAPIRegistry();
@@ -43,6 +44,7 @@ export function buildOpenApiDoc() {
   registerNotifications(registry);
   registerSearch(registry);
   registerDocs(registry);
+  registerCopy(registry);
   // registerUser(registry);
 
   const generator = new OpenApiGeneratorV31(registry.definitions);
