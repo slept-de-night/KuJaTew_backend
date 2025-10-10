@@ -44,11 +44,7 @@ export const CopyRepo = {
     },
 }
 
-export async function copy_trip(
-  userId: string,
-  trip_id: number,      
-  trip_code: string
-) {
+export async function copy_trip(userId: string,trip_id: number, trip_code: string) {
   const sql = `
     WITH new_trip AS (
       INSERT INTO trips (
@@ -85,12 +81,16 @@ export async function copy_trip(
       FROM places_in_trip pit
       WHERE pit.trip_id = $2
       RETURNING 1
+    ),
+    added_collab AS (
+      INSERT INTO trip_collaborators (user_id, trip_id, role, accepted)
+      VALUES ($1, (SELECT trip_id FROM new_trip), 'Owner', TRUE)
+      RETURNING 1
     )
-    SELECT
-      (SELECT trip_id FROM new_trip) AS new_trip_id,
-      COALESCE((SELECT COUNT(*)::int FROM copied), 0) AS activities_copied;
+    SELECT trip_id
+    FROM new_trip;
   `;
 
   const res = await query(sql, [userId, trip_id, trip_code]);
-  return Boolean(res.rows?.[0]?.new_trip_id);
+  return res.rows?.[0]?.trip_id ?? 0;
 }

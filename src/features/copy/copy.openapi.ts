@@ -19,7 +19,14 @@ export function registerCopy(registry: OpenAPIRegistry) {
       },
     },
     responses: {
-      201: { description: "Trip Copied" },
+      201: {
+        description: "Trip Copied",
+        content: {
+          "application/json": {
+            schema: schema.trip_copied_schema,
+          },
+        },
+      },
       500: { description: "Copy Failed" },
       400: { description: "Invalid Input" },
     },

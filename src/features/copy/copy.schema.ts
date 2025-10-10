@@ -19,3 +19,8 @@ export const trip_id_schema_swag = z.object({
 export const trip_code_schema_swag = z.object({
   trip_code: z.number().int().openapi({ example: "54awdxk78" }),
 });
+
+export const trip_copied_schema = z.object({
+  message: z.string().openapi({ example: "Trip Copied" }),
+  trip_id: z.number().int().openapi({ example: 123 }),
+});
