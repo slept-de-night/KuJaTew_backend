@@ -42,10 +42,10 @@ export async function copy_trip(req: Request, res: Response, next: NextFunction)
     const { trip_code } = schema.trip_code_schema.parse(req.body);
 
     const inserted = await service.copy_trip(user_id, trip_id, trip_code);
-    if (!inserted) {
+    if (inserted == 0) {
       return res.status(500).json({ message: "Copy Failed" });
     }
-    return res.status(201).json({ message: "Trip Copied" });
+    return res.status(201).json({ message: "Trip Copied", trip_id: inserted });
   } catch (err) {
     if (err instanceof ZodError) {
       return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
