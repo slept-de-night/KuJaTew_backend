@@ -2,6 +2,7 @@ import { pool } from '../../config/db';
 import { copySchema } from './copy.schema';
 import { INTERNAL, POSTGREST_ERR, STORAGE_ERR } from '../../core/errors';
 import z from 'zod';
+import { query } from "../../core/db";
 
 export const CopyRepo = {
     async get_trip_copy(trip_id:number){
@@ -41,4 +42,55 @@ export const CopyRepo = {
         const {rowCount} = await pool.query(query, [trip_id, user_id]);
         return rowCount; //1 if already copy 0 if no copy yet
     },
+}
+
+export async function copy_trip(userId: string,trip_id: number, trip_code: string) {
+  const sql = `
+    WITH new_trip AS (
+      INSERT INTO trips (
+        user_id, title, description, start_date, end_date, visibility_status,
+        budget, trip_url, trip_code, trip_pass, trip_picture_path, planning_status
+      )
+      SELECT
+        $1 AS user_id,
+        'copy ' || t.title AS title,
+        t.description,
+        t.start_date,
+        t.end_date,
+        t.visibility_status,
+        t.budget,
+        t.trip_url,
+        $3 AS trip_code,
+        NULL::text AS trip_pass,
+        t.trip_picture_path,
+        t.planning_status
+      FROM trips t
+      WHERE t.trip_id = $2
+      RETURNING trip_id
+    ),
+    copied AS (
+      INSERT INTO places_in_trip (
+        place_id, trip_id, "date", time_start, time_end, is_vote,
+        event_names, is_event, event_title
+      )
+      SELECT
+        pit.place_id,
+        (SELECT trip_id FROM new_trip) AS trip_id,
+        pit."date", pit.time_start, pit.time_end, pit.is_vote,
+        pit.event_names, pit.is_event, pit.event_title
+      FROM places_in_trip pit
+      WHERE pit.trip_id = $2
+      RETURNING 1
+    ),
+    added_collab AS (
+      INSERT INTO trip_collaborators (user_id, trip_id, role, accepted)
+      VALUES ($1, (SELECT trip_id FROM new_trip), 'Owner', TRUE)
+      RETURNING 1
+    )
+    SELECT trip_id
+    FROM new_trip;
+  `;
+
+  const res = await query(sql, [userId, trip_id, trip_code]);
+  return res.rows?.[0]?.trip_id ?? 0;
 }

@@ -93,5 +93,5 @@ export const guidebox = z.object({
     total_copied: z.coerce.number(),
     owner_name: z.string(),
     owner_image: z.string(),
-    description: z.string().nullable(),
+    description: z.string(),
 });
