@@ -34,6 +34,7 @@ export const CreateEventBody = z.object({
 
 export const UpdateEventBody = z.object({
   date: isoDate,
+  place_id: z.literal(0),
   time_start: isoTime,
   time_end: isoTime,
   event_name: z.string().min(1),
@@ -53,6 +54,7 @@ export const AddPlaceBody = z.object({
 })
 
 export const UpdatePlaceBody = z.object({
+  place_id: z.number().int().positive(),
   date: isoDate,
   time_start: isoTime,
   time_end: isoTime,
