@@ -38,7 +38,8 @@ export const UpdateEventBody = z.object({
   time_start: isoTime,
   time_end: isoTime,
   event_name: z.string().min(1),
-  event_title: z.string().min(1)
+  event_title: z.string().min(1),
+  is_event: z.literal(true),
 })
 
 // ---------- Places ----------
@@ -58,6 +59,7 @@ export const UpdatePlaceBody = z.object({
   date: isoDate,
   time_start: isoTime,
   time_end: isoTime,
+  is_event: z.literal(false),
 })
 
 // ---------- Voting ----------
