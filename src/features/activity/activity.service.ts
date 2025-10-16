@@ -44,7 +44,7 @@ export const EventService = {
     return EventRepo.create(trip_id, dto)
   },
   update: async (pit_id:number, dto:any) => {
-    const overlaps = await VoteRepo.checkTimeOverlap(
+    const overlaps = await VoteRepo.checkTimeOverlap2(
       dto.trip_id, pit_id, dto.date, dto.time_start, dto.time_end
     )
     if (overlaps.length > 0) return("Time overlap detected")
@@ -61,7 +61,7 @@ export const PlaceService = {
     return PlaceRepo.add(trip_id, dto)
   },
   update: async (pit_id:number, dto:any) => {
-    const overlaps = await VoteRepo.checkTimeOverlap(
+    const overlaps = await VoteRepo.checkTimeOverlap2(
       dto.trip_id, pit_id, dto.date, dto.time_start, dto.time_end
     )
     if (overlaps.length > 0) return("Time overlap detected")

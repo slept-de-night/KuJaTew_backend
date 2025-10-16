@@ -744,8 +744,8 @@ async checkTimeOverlap(
   time_start: string,
   time_end: string
 ) {
-  let sql = `
-    SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
+  const res = await query(
+    `SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
     FROM places_in_trip
     WHERE trip_id = $1
       AND date = $2
@@ -753,18 +753,32 @@ async checkTimeOverlap(
         (place_id > 0 AND is_vote = true AND is_event = false) OR
         (place_id = 0 AND is_vote = true AND is_event = true)
       )
-      AND ($3 < time_end AND $4 > time_start)
-  `;
+      ${pit_id ? "AND pit_id <> $5" : ""}
+      AND ($3 < time_end AND $4 > time_start)`
+    ,pit_id ? [trip_id, date, time_start, time_end, pit_id] : [trip_id, date, time_start, time_end]
+  )
 
-  const params: any[] = [trip_id, date, time_start, time_end];
+  return res.rows
+},
 
-  if (pit_id !== null) {
-    sql += ` AND pit_id <> $5`;
-    params.push(pit_id);
-  }
-
-  const res = await query(sql, params);
-  return res.rows;
+async checkTimeOverlap2(
+  trip_id: number,
+  pit_id: number ,
+  date: string,
+  time_start: string,
+  time_end: string
+) {
+  const res = await query(
+    `SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
+    FROM places_in_trip
+    WHERE trip_id = $1 AND date = $2 AND pit_id <> $5 AND ($3 < time_end AND $4 > time_start)
+      AND NOT (
+        (place_id > 0 AND is_vote = true AND is_event = false) OR
+        (place_id = 0 AND is_vote = true AND is_event = true)
+      )`
+    ,[trip_id, date, time_start, time_end, pit_id]
+  )
+  return res.rows
 },
 
 async checkUserVoted(trip_id: number, pit_id: number, user_id: string) {
