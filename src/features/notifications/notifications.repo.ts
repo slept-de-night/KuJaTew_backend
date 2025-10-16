@@ -43,7 +43,7 @@ export async function post_noti(trip_id: number, noti_title: string, noti_text: 
 export async function current_noti(userId: string, trip_id: number) {
   const sql = `
     SELECT COUNT(tc.user_id) - tc.seen_noti AS unseen_noti_count
-    FROM trip_collaborators tc
+    FROM trip_collaborators tc 
     JOIN notification n ON n.trip_id = tc.trip_id
     WHERE tc.user_id = $1 AND tc.trip_id = $2
     GROUP BY tc.seen_noti;
@@ -51,4 +51,4 @@ export async function current_noti(userId: string, trip_id: number) {
   const res = await query(sql, [userId, trip_id]);
   const count = res.rows[0]?.unseen_noti_count ?? 0;
   return Number(count);
-} 
+}  
