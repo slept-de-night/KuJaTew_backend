@@ -15,6 +15,8 @@ export const noteactivityschema = z.object({
   pit_id: z.coerce.number().int(),
   note: z.string(),
   name: z.string(),
+  user_id: z.string(),
+  note_time: z.coerce.date(),
   profile_picture_path: z.string().nullable(),
   is_editable: z.coerce.number().int()
 });
