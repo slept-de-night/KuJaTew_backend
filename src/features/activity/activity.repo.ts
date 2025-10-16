@@ -296,7 +296,7 @@ export const VoteRepo = {
           formattedDate ,
           time_start,
           time_end,
-          voting : {},
+          voting : [],
       }
     }
 
