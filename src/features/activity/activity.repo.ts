@@ -431,8 +431,8 @@ export const VoteRepo = {
     }
 
     const checkPlaceALready = await query(
-      `SELECT place_id FROM places_in_trip WHERE trip_id=$1 AND place_id=$2`,
-      [trip_id,place_id]
+      `SELECT place_id FROM places_in_trip WHERE trip_id=$1 AND place_id=$2 AND time_start=$3`,
+      [trip_id,place_id,time_start]
     )
     if (checkPlaceALready.rows.length !== 0) {
       throw new Error(`This candidate has been added`)
@@ -457,8 +457,8 @@ export const VoteRepo = {
   }
 
   const checkEventALready = await query(
-    `SELECT event_names FROM places_in_trip WHERE trip_id=$1 AND event_names=$2`,
-    [trip_id,body.event_name]
+    `SELECT event_names FROM places_in_trip WHERE trip_id=$1 AND event_names=$2 AND time_start=$3`,
+    [trip_id,body.event_name,time_start]
   )
 
   if ( checkEventALready.rows.length !== 0) {
