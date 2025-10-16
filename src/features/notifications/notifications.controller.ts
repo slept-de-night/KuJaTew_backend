@@ -6,9 +6,13 @@ import { BadRequest } from '../../core/errors';
 
 export async function get_notifications(req: Request, res: Response, next: NextFunction) {
   try {
-    const { trip_id, limit } = schema.get_notifications_schema.parse(req.params);
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+    if(!parsed.success) throw BadRequest("Invalide Request");
+    const { user_id } = parsed.data;
 
-    const { list, count } = await service.get_noti(trip_id, limit);
+    const { trip_id } = schema.get_notifications_schema.parse(req.params);
+
+    const { list, count } = await service.get_noti(trip_id, user_id);
 
     return res.status(200).json({
       count,
