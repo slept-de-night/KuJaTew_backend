@@ -51,4 +51,4 @@ export async function current_noti(userId: string, trip_id: number) {
   const res = await query(sql, [userId, trip_id]);
   const count = res.rows[0]?.unseen_noti_count ?? 0;
   return Number(count);
-}
+} 
