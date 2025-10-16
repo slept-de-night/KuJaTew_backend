@@ -156,8 +156,11 @@ const getUserId = (req:any) => req.user?.id || req.headers["user_id"]
 export const VoteController = {
   list: async (req: any, res: any, next: any) => {
     try {
+      const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+        if(!parsed.success) throw new Error("Missing user");
+      let user_id = parsed.data.user_id;
       const { trip_id, pit_id } = S.GetVotesParams.parse(req.params)
-      const result = await VoteService.list(trip_id, pit_id)
+      const result = await VoteService.list(trip_id, pit_id, user_id)
       res.status(200).json(result)
     } catch (err) {
       if (err instanceof z.ZodError) {

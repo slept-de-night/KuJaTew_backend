@@ -253,7 +253,18 @@ function normalizeTime(val: any): string {
 }
 
 export const VoteRepo = {
-  async list(trip_id: number, pit_id: number) {
+  async list(trip_id: number, pit_id: number, user_id: string) {
+    const res = await query(
+      `SELECT pit_id
+      FROM vote
+      WHERE trip_id=$1 AND pit_id=$2 AND user_id=$3`,
+      [trip_id, pit_id, user_id]
+    )
+
+    const { pit_idUser } = res.rows[0] as {
+      pit_idUser: string
+    }
+    
     const blockRes = await query(
       `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
        FROM places_in_trip
@@ -330,7 +341,8 @@ export const VoteRepo = {
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
             rating: row.rating,
-            rating_count: row.rating_count
+            rating_count: row.rating_count,
+            is_voted: row.pit_id === pit_idUser
           }
         })
       )
@@ -354,6 +366,7 @@ export const VoteRepo = {
             event_title: row.event_title,
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
+            is_voted: row.pit_id === pit_idUser
           }
         })
       )
