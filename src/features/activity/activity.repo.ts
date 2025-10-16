@@ -255,15 +255,13 @@ function normalizeTime(val: any): string {
 export const VoteRepo = {
   async list(trip_id: number, pit_id: number, user_id: string) {
     const res = await query(
-      `SELECT pit_id
+      `SELECT pit_id AS pit_idUser
       FROM vote
       WHERE trip_id=$1 AND pit_id=$2 AND user_id=$3`,
       [trip_id, pit_id, user_id]
     )
 
-    const { pit_idUser } = res.rows[0] as {
-      pit_idUser: string
-    }
+    const pit_idUser = res.rows[0]?.pit_id_user ?? null;
     
     const blockRes = await query(
       `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
