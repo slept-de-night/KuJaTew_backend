@@ -39,9 +39,9 @@ export async function copy_trip(req: Request, res: Response, next: NextFunction)
 
     const { trip_id } = schema.trip_id_schema.parse(req.params);
 
-    const { trip_code } = schema.trip_code_schema.parse(req.body);
+    const { trips_name, start_date, trip_code, trip_password } = schema.trip_code_schema.parse(req.body);
 
-    const inserted = await service.copy_trip(user_id, trip_id, trip_code);
+    const inserted = await service.copy_trip(trips_name, start_date, user_id, trip_id, trip_code, trip_password);
     if (inserted == 0) {
       return res.status(500).json({ message: "Copy Failed" });
     }
