@@ -293,7 +293,7 @@ export const VoteRepo = {
     if (candidatePitIds.length === 0) {
         return {
           block_id: block_id,
-          formattedDate ,
+          date : formattedDate ,
           time_start,
           time_end,
           voting : [],
@@ -337,7 +337,7 @@ export const VoteRepo = {
 
       return {
         block_id: block_id,
-        formattedDate ,
+        date : formattedDate ,
         time_start,
         time_end,
         places_voting,
@@ -360,7 +360,7 @@ export const VoteRepo = {
 
       return {
         block_id: block_id,
-        formattedDate ,
+        date : formattedDate ,
         time_start,
         time_end,
         event_voting,
