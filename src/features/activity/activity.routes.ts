@@ -46,5 +46,6 @@ activityRouter.delete("/:pit_id/votes", withRole("Owner", VoteController.cleanVo
 activityRouter.delete("/:pit_id/voted", withRole("Viewer", VoteController.deleteVote))
 activityRouter.get("/:pit_id/votes/:type/end", withRole("Viewer", VoteController.getWinners))
 activityRouter.get("/:pit_id/voted", withRole("Viewer", VoteController.getUserVoted))
+activityRouter.get("/:pit_id/changeVote", withRole("Viewer", VoteController.changeVote))
 activityRouter.post("/:pit_id/votes/:type/endOwner", withRole("Owner", VoteController.endOwner))
 
