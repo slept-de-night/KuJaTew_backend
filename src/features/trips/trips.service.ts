@@ -156,7 +156,9 @@ export const TripsService = {
     const daysToRemove: string[] = [];
     for (let d = new Date(oldStart); d <= oldEnd; d.setDate(d.getDate() + 1)) {
       if (d < newStart || d > newEnd) {
-        const dateStr = d.toISOString().split("T")[0];
+        const utc = d.getTime() + 7 * 60 * 60 * 1000;
+        const local = new Date(utc);
+        const dateStr = local.toISOString().split("T")[0];
         if (typeof dateStr === "string") {
           daysToRemove.push(dateStr);
         }
