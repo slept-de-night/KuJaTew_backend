@@ -22,7 +22,7 @@ export async function get_noti(trip_id: number, user_id: string) {
     SET seen_noti = $1
     WHERE user_id = $2
   `
-  const update = await query(updateSql, [c, user_id])
+  const update = await query(updateSql, [Number(c.rows[0]?.total), user_id])
 
   return {
     list: res.rows,
@@ -42,7 +42,7 @@ export async function post_noti(trip_id: number, noti_title: string, noti_text: 
 
 export async function current_noti(userId: string, trip_id: number) {
   const sql = `
-    SELECT COUNT(n.id) - tc.seen_noti AS unseen_noti_count
+    SELECT COUNT(tc.user_id) - tc.seen_noti AS unseen_noti_count
     FROM trip_collaborators tc
     JOIN notification n ON n.trip_id = tc.trip_id
     WHERE tc.user_id = $1 AND tc.trip_id = $2
