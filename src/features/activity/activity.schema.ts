@@ -146,11 +146,6 @@ export const PostVoteEndOwnerParams = z.object({
   type: z.enum(["places","events"]),
 })
 
-export const ChangeVote = z.object({
-  trip_id: z.coerce.number().int().positive(),
-  pit_id1: z.coerce.number().int().positive(),
-  pit_id2: z.coerce.number().int().positive(),
-})
 
 
 // ---------- Response Schemas ----------

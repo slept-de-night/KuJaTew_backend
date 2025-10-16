@@ -235,9 +235,6 @@ addCandidate: async (req:any,res:any,next:any) => {
         if (err instanceof z.ZodError) {
           return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
         }
-        if (err instanceof Error && err.message.includes("Time overlap")) {
-          return res.status(400).json({ message: err.message })
-        }
         next(err)
       } 
   },
@@ -307,22 +304,26 @@ addCandidate: async (req:any,res:any,next:any) => {
       next(err)
     }
   },
+  changeVote: async (req: any, res: any, next: any) => {
+  try {
+    const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
+      if(!parsed.success) throw new Error("Missing user");
+    let user_id = parsed.data.user_id;
 
-  changeVote: async (req:any, res:any, next:any) => {
-    try {
-      const { trip_id, pit_id1 , pit_id2 } = S.ChangeVote.parse(req.params)
-      const parsed = z.object({user_id:z.string()}).safeParse((req as any).user);
-        if(!parsed.success) throw new Error("Missing user");
-      let user_id = parsed.data.user_id;
-      if (!user_id) return res.status(400).json({ message: "Missing user_id" })
+    const { trip_id } = S.ParamsTrip.parse(req.params);
+    const body = z.object({
+      old_pit_id: z.number().int().positive(),
+      new_pit_id: z.number().int().positive(),
+    }).parse(req.body);
 
-      await VoteService.deleteVote(trip_id, pit_id1, String(user_id))
-      const result = await VoteService.checkUserVoted(trip_id, pit_id2, String(user_id))
-      res.status(200).json(result)
-    } catch (err) {
-      if (err instanceof z.ZodError) return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" })
-      next(err)
-    }
-  },
+    const result = await VoteService.changeVote(trip_id, user_id, body.old_pit_id, body.new_pit_id);
+    res.status(200).json(result);
+  } catch (err) {
+    if (err instanceof z.ZodError)
+      return res.status(400).json({ message: err.issues?.[0]?.message || "Invalid input" });
+    next(err);
+  }
+},
+
 
 }

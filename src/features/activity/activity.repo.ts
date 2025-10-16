@@ -812,6 +812,57 @@ async checkUserVoted(trip_id: number, pit_id: number, user_id: string) {
   }
 },  
 
+async FindVote(trip_id: number, block_pit_id: number, user_id: string) {
+  const blockRes = await query(
+    `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end
+     FROM places_in_trip
+     WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
+    [trip_id, block_pit_id]
+  );
+
+  if (blockRes.rows.length === 0) {
+    throw new Error(`Voting block ${block_pit_id} not found or inactive`);
+  }
+
+  const row = blockRes.rows[0] as {
+    date: string
+    time_start: string
+    time_end: string
+  }
+
+  const candidateRes = await query(
+    `SELECT pit_id
+     FROM places_in_trip
+     WHERE trip_id=$1
+       AND date=$2
+       AND time_start=$3
+       AND time_end=$4
+       AND is_vote=true
+       AND pit_id <> $5`,
+    [trip_id, row.date, row.time_start, row.time_end, block_pit_id]
+  );
+
+  const candidatePitIds = candidateRes.rows.map((r: any) => r.pit_id);
+  if (candidatePitIds.length === 0) {
+    return null; 
+  }
+
+  const voteRes = await query(
+    `SELECT pit_id
+     FROM vote
+     WHERE trip_id=$1
+       AND user_id=$2
+       AND pit_id = ANY($3)`,
+    [trip_id, user_id, candidatePitIds]
+  );
+
+  const ans = voteRes.rows[0] as {
+    pit_id: number
+  }
+
+  return voteRes.rows.length > 0 ? ans.pit_id : null;
+},
+
 async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
   const candidateRes = await query(
     `SELECT pit_id, date::text AS date, time_start::text AS time_start, time_end::text AS time_end, place_id, event_names
@@ -879,6 +930,46 @@ async endOwner(trip_id:number, pit_id:number, type:"places"|"events") {
   }));
   
   return rows[0]
+}, 
+
+async changeVote(trip_id: number, user_id: string, old_pit_id: number, new_pit_id: number) {
+  const checkCandidate = await query(
+    `SELECT pit_id FROM places_in_trip WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
+    [trip_id, new_pit_id]
+  );
+  if (checkCandidate.rows.length === 0) {
+    throw new Error(`Invalid candidate pit_id: ${new_pit_id}`);
+  }
+
+  const checkOldVote = await query(
+    `SELECT v.pit_id 
+     FROM vote v 
+     JOIN places_in_trip pit ON v.pit_id = pit.pit_id 
+     WHERE v.trip_id=$1 AND v.user_id=$2 
+       AND pit.date = (SELECT date FROM places_in_trip WHERE pit_id=$3)
+       AND pit.time_start = (SELECT time_start FROM places_in_trip WHERE pit_id=$3)
+       AND pit.time_end = (SELECT time_end FROM places_in_trip WHERE pit_id=$3)`,
+    [trip_id, user_id, old_pit_id]
+  );
+
+  if (checkOldVote.rows.length === 0) {
+    throw new Error(`No existing vote found for this block`);
+  }
+
+  await query(
+    `DELETE FROM vote WHERE trip_id=$1 AND user_id=$2 AND pit_id=$3`,
+    [trip_id, user_id, old_pit_id]
+  );
+
+  const res = await query(
+    `INSERT INTO vote (trip_id, pit_id, user_id, time_start, event_name)
+     VALUES ($1, $2, $3, NOW()::text, '')
+     RETURNING *`,
+    [trip_id, new_pit_id, user_id]
+  );
+
+  return res.rows[0];
 }
+
 }
 

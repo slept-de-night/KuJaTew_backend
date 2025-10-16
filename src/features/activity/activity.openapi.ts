@@ -348,4 +348,30 @@ export function registerActivity(registry: OpenAPIRegistry) {
     },
     tags: ["Voting"],
   });
+
+  registry.registerPath({
+  method: "post",
+  path: "/api/trips/{trip_id}/activities/votes/change",
+  operationId: "changeVote",
+  summary: "Change user's vote to a new candidate",
+  request: {
+    params: schema.ParamsTrip,
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            old_pit_id: z.number().int().positive(),
+            new_pit_id: z.number().int().positive(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: { description: "Vote changed successfully" },
+    400: { description: "Validation error or invalid candidate" },
+  },
+  tags: ["Voting"],
+});
+
 }
