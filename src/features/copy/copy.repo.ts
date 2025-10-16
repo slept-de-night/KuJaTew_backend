@@ -44,28 +44,32 @@ export const CopyRepo = {
     },
 }
 
-export async function copy_trip(userId: string,trip_id: number, trip_code: string) {
+export async function copy_trip(trip_name: string, start_date: string, userId: string,trip_id: number, trip_code: string, trip_password: string) {
   const sql = `
-    WITH new_trip AS (
+    WITH src AS (
+      SELECT t.*
+      FROM trips t
+      WHERE t.trip_id = $2
+    ),
+    new_trip AS (
       INSERT INTO trips (
         user_id, title, description, start_date, end_date, visibility_status,
         budget, trip_url, trip_code, trip_pass, trip_picture_path, planning_status
       )
       SELECT
         $1 AS user_id,
-        'copy ' || t.title AS title,
-        t.description,
-        t.start_date,
-        t.end_date,
-        t.visibility_status,
-        t.budget,
-        t.trip_url,
+        $4 AS title,
+        s.description,
+        $5::date AS start_date,
+        (s.end_date + (($5::date - s.start_date)))::date AS end_date,
+        s.visibility_status,
+        s.budget,
+        s.trip_url,
         $3 AS trip_code,
-        NULL::text AS trip_pass,
-        t.trip_picture_path,
-        t.planning_status
-      FROM trips t
-      WHERE t.trip_id = $2
+        $6 AS trip_pass,
+        NULL::text AS trip_picture_path,
+        s.planning_status
+      FROM src s
       RETURNING trip_id
     ),
     copied AS (
@@ -76,9 +80,11 @@ export async function copy_trip(userId: string,trip_id: number, trip_code: strin
       SELECT
         pit.place_id,
         (SELECT trip_id FROM new_trip) AS trip_id,
-        pit."date", pit.time_start, pit.time_end, pit.is_vote,
+        (pit."date" + (($5::date - s.start_date)))::date AS "date",
+        pit.time_start, pit.time_end, pit.is_vote,
         pit.event_names, pit.is_event, pit.event_title
       FROM places_in_trip pit
+      JOIN src s ON s.trip_id = pit.trip_id
       WHERE pit.trip_id = $2
       RETURNING 1
     ),
@@ -91,6 +97,6 @@ export async function copy_trip(userId: string,trip_id: number, trip_code: strin
     FROM new_trip;
   `;
 
-  const res = await query(sql, [userId, trip_id, trip_code]);
+  const res = await query(sql, [userId, trip_id, trip_code, trip_name, start_date, trip_password]);
   return res.rows?.[0]?.trip_id ?? 0;
 }
