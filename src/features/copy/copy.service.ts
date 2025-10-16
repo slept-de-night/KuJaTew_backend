@@ -24,6 +24,6 @@ export const CopyService = {
     },
 }
 
-export async function copy_trip(userId: string, trip_id: number, trip_code: string) {
-  return repo.copy_trip(userId, trip_id, trip_code);
+export async function copy_trip(trips_name: string, start_date: string, user_id: string, trip_id: number, trip_code: string, trip_password: string) {
+  return repo.copy_trip(trips_name, start_date, user_id, trip_id, trip_code, trip_password);
 }

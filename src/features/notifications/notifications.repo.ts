@@ -33,3 +33,15 @@ export async function post_noti(trip_id: number, noti_title: string, noti_text: 
   const res = await query(sql, [trip_id, noti_title, noti_text, noti_date, noti_time]);
   return (res.rowCount ?? 0) > 0; // Will return 1 if insert successfully | Else return 0
 }
+
+export async function current_noti(userId: string, trip_id: number) {
+  const sql = `
+    SELECT count(n.trip_id) - tc.seen_noti_count
+    FROM trip_collaborators tc
+    JOIN notification n ON n.trip_id = tc.trip_id
+    WHERE tc.user_id = $1 AND tc.trip_id = $2
+    GROUP BY tc.seen_noti_count
+  `;
+  const res = await query(sql, [userId, trip_id]);
+  return res.rows;
+}
