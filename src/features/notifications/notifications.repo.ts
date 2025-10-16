@@ -1,15 +1,14 @@
 import { query } from "../../core/db";
 
-export async function get_noti(trip_id: number, limit: number) {
+export async function get_noti(trip_id: number, user_id: string) {
   const sql = `
     SELECT n.noti_id, n.noti_title, n.noti_text, n.noti_date, n.noti_time  
     FROM notification n
     JOIN trips t ON t.trip_id = n.trip_id
     WHERE n.trip_id = $1
     ORDER BY n.noti_time DESC
-    LIMIT $2
   `;
-  const res = await query(sql, [trip_id, limit]);
+  const res = await query(sql, [trip_id]);
 
   const countSql = `
     SELECT COUNT(*) AS total
@@ -17,6 +16,13 @@ export async function get_noti(trip_id: number, limit: number) {
     WHERE trip_id = $1
   `;
   const c = await query(countSql, [trip_id]);
+
+  const updateSql = `
+    UPDATE trip_collaborators
+    SET seen_noti = $1
+    WHERE user_id = $2
+  `
+  const update = await query(updateSql, [c, user_id])
 
   return {
     list: res.rows,
@@ -36,12 +42,13 @@ export async function post_noti(trip_id: number, noti_title: string, noti_text: 
 
 export async function current_noti(userId: string, trip_id: number) {
   const sql = `
-    SELECT count(n.trip_id) - tc.seen_noti_count
+    SELECT COUNT(n.id) - tc.seen_noti AS unseen_noti_count
     FROM trip_collaborators tc
     JOIN notification n ON n.trip_id = tc.trip_id
     WHERE tc.user_id = $1 AND tc.trip_id = $2
-    GROUP BY tc.seen_noti_count
+    GROUP BY tc.seen_noti;
   `;
   const res = await query(sql, [userId, trip_id]);
-  return res.rows;
+  const count = res.rows[0]?.unseen_noti_count ?? 0;
+  return Number(count);
 }

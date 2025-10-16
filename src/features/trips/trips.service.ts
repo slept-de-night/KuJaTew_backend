@@ -11,6 +11,7 @@ import * as Flightservice from "../flights/flights.service";
 import { promise } from "zod";
 import { all } from "axios";
 import { etcService } from "../../etc/etc.service";
+import { ActivityRepo } from "../activity/activity.repo";
 
 export const TripsService = {
   async get_user_trips(user_id: string) {
@@ -127,6 +128,13 @@ export const TripsService = {
       throw new Error("Only Owner can edit trip detail");
     }
 
+    const oldTrip = await TripsRepo.get_specific_trip(trip_id);
+    const oldStart = new Date(oldTrip.start_date);
+    const oldEnd = new Date(oldTrip.end_date);
+
+    const newStart = start_date ? new Date(start_date) : oldStart;
+    const newEnd = end_date ? new Date(end_date) : oldEnd;
+
     const get_pic_path = await TripsRepo.get_trip_pic(trip_id);
     const old_pic_path = get_pic_path?.trip_picture_path ?? null;
     let trip_picture_path = old_pic_path;
@@ -144,6 +152,21 @@ export const TripsService = {
         if (error) {console.error("Failed to delete:", error.message);}
       }
     }
+
+    const daysToRemove: string[] = [];
+    for (let d = new Date(oldStart); d <= oldEnd; d.setDate(d.getDate() + 1)) {
+      if (d < newStart || d > newEnd) {
+        const dateStr = d.toISOString().split("T")[0];
+        if (typeof dateStr === "string") {
+          daysToRemove.push(dateStr);
+        }
+      }
+    }
+
+    for (const day of daysToRemove) {
+      await ActivityRepo.dateClean(trip_id, day);
+    }
+
     return await TripsRepo.edit_trip_detail(trip_id,title,start_date,end_date,trip_code,trip_pass,trip_picture_path,planning_status, visibility_status, budget, description);
   },
 
