@@ -53,8 +53,8 @@ export function registerNotifications(registry: OpenAPIRegistry) {
 registry.registerPath({
     method: "get",
     path: "/api/trips/notifications/{trip_id}/peruser",
-    operationId: "GetTripNotifications",
-    summary: "Get notifications inside a trip",
+    operationId: "GetPerUserNotifications",
+    summary: "get unseen count for each user",
     tags: ["Notifications"],
     request: {
       params: schema.get_notifications_schema,
