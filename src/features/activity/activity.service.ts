@@ -21,6 +21,8 @@ export const ActivityService = {
     const rows = await ActivityRepo.listByDate(trip_id,date)
     return ActivitiesResponse.parse({ activities: rows })
   },
+
+  pit_idDetail:(pit_id:number)=>ActivityRepo.pit_idDetail(pit_id),
   
   remove:(pit_id:number)=>ActivityRepo.remove(pit_id),
 

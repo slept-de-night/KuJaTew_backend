@@ -55,6 +55,22 @@ export function registerActivity(registry: OpenAPIRegistry) {
   });
 
   registry.registerPath({
+    method: "get",
+    path: "/api/trips/{trip_id}/activities/{pit_id}",
+    operationId: "pit_idDetail",
+    summary: "Detail of pit_id",
+    request: { params: schema.DeleteActivityParams },
+    responses: {
+      200: {
+        description: "Activities of given date",
+        content: { "application/json": { schema: schema.ActivitiesResponse } },
+      },
+      400: { description: "Validation error" },
+    },
+    tags: ["Activities"],
+  });
+
+  registry.registerPath({
     method: "delete",
     path: "/api/trips/{trip_id}/activities/{pit_id}",
     operationId: "deleteActivity",
