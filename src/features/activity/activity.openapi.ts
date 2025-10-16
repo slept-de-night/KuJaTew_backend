@@ -56,7 +56,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "get",
-    path: "/api/trips/{trip_id}/activities/{pit_id}",
+    path: "/api/trips/{trip_id}/activities/{pit_id}/detail",
     operationId: "pit_idDetail",
     summary: "Detail of pit_id",
     request: { params: schema.DeleteActivityParams },
