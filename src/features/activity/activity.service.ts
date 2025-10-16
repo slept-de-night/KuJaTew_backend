@@ -123,4 +123,9 @@ export const VoteService = {
 
   endOwner: (trip_id:number, pit_id:number, type:"places"|"events") =>
   VoteRepo.endOwner(trip_id, pit_id, type),
+
+  changeVote: async (trip_id: number, user_id: string, old_pit_id: number, new_pit_id: number) => {
+  return await VoteRepo.changeVote(trip_id, user_id, old_pit_id, new_pit_id);
+},
+  
 }

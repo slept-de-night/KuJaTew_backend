@@ -147,6 +147,7 @@ export const PostVoteEndOwnerParams = z.object({
 })
 
 
+
 // ---------- Response Schemas ----------
 export const PlaceItem = z.object({
   title: z.string(),
