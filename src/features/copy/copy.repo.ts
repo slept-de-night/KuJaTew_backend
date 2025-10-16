@@ -67,7 +67,7 @@ export async function copy_trip(trip_name: string, start_date: string, userId: s
         s.trip_url,
         $3 AS trip_code,
         $6 AS trip_pass,
-        ""::text AS trip_picture_path,
+        ''::text AS trip_picture_path,
         s.planning_status
       FROM src s
       RETURNING trip_id
