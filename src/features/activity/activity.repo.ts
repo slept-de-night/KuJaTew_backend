@@ -33,6 +33,10 @@ export const ActivityRepo = {
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
       WHERE pit.trip_id = $1
+      AND NOT (
+        (pit.is_vote = true  AND pit.is_event = false AND pit.place_id > 0) OR
+        (pit.is_vote = true  AND pit.is_event = true  AND pit.place_id = 0)
+      )
       ORDER BY pit.date, pit.time_start
     `
     const res = await query(sql, [trip_id])
@@ -61,6 +65,10 @@ export const ActivityRepo = {
       FROM places_in_trip pit
       LEFT JOIN places p ON pit.place_id = p.place_id
       WHERE pit.trip_id = $1 AND pit.date = $2
+      AND NOT (
+        (pit.is_vote = true  AND pit.is_event = false AND pit.place_id > 0) OR
+        (pit.is_vote = true  AND pit.is_event = true  AND pit.place_id = 0)
+      )
       ORDER BY pit.time_start
     `
     const res = await query(sql, [trip_id, date])
@@ -252,7 +260,13 @@ export const VoteRepo = {
 
     const candidatePitIds = candidatesRes.rows.map((r: any) => r.pit_id)
     if (candidatePitIds.length === 0) {
-      throw new Error(`No candidates found for block ${pit_id}`)
+        return {
+          block_id: block_id,
+          formattedDate ,
+          time_start,
+          time_end,
+          voting : {},
+      }
     }
 
     const votesRes = await query(
@@ -385,6 +399,14 @@ export const VoteRepo = {
       throw new Error(`Place ${place_id} not found`)
     }
 
+    const checkPlaceALready = await query(
+      `SELECT place_id FROM places_in_trip WHERE trip_id=$1 AND place_id=$2`,
+      [trip_id,place_id]
+    )
+    if (checkPlaceALready.rows.length !== 0) {
+      throw new Error(`This candidate has been added`)
+    }
+
     const sql = `
       INSERT INTO places_in_trip (trip_id, place_id, date, time_start, time_end, is_vote, is_event, event_names, event_title)
       VALUES ($1,$2,$3,$4,$5,true,false,'','')
@@ -401,6 +423,15 @@ export const VoteRepo = {
 
   if (!body?.event_name) {
     throw new Error(`event_name is required when place_id=0`)
+  }
+
+  const checkEventALready = await query(
+    `SELECT event_names FROM places_in_trip WHERE trip_id=$1 AND event_names=$2`,
+    [trip_id,body.event_name]
+  )
+
+  if ( checkEventALready.rows.length !== 0) {
+    throw new Error(`This candidate has been added`)
   }
 
   const sql = `
@@ -682,8 +713,7 @@ async checkTimeOverlap(
   time_start: string,
   time_end: string
 ) {
-  const res = await query(
-    `
+  let sql = `
     SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
     FROM places_in_trip
     WHERE trip_id = $1
@@ -692,13 +722,18 @@ async checkTimeOverlap(
         (place_id > 0 AND is_vote = true AND is_event = false) OR
         (place_id = 0 AND is_vote = true AND is_event = true)
       )
-      ${pit_id ? "AND pit_id <> $5" : ""}
       AND ($3 < time_end AND $4 > time_start)
-    `,
-    pit_id ? [trip_id, date, time_start, time_end, pit_id] : [trip_id, date, time_start, time_end]
-  )
+  `;
 
-  return res.rows
+  const params: any[] = [trip_id, date, time_start, time_end];
+
+  if (pit_id !== null) {
+    sql += ` AND pit_id <> $5`;
+    params.push(pit_id);
+  }
+
+  const res = await query(sql, params);
+  return res.rows;
 },
 
 async checkUserVoted(trip_id: number, pit_id: number, user_id: string) {
