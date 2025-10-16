@@ -771,10 +771,11 @@ async checkTimeOverlap2(
   const res = await query(
     `SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
     FROM places_in_trip
-    WHERE trip_id = $1 AND date = $2 AND pit_id <> $5 AND ($3 < time_end AND $4 > time_start)
+    WHERE trip_id = $1 AND date = $2 AND ($3 < time_end AND $4 > time_start)
       AND NOT (
         (place_id > 0 AND is_vote = true AND is_event = false) OR
-        (place_id = 0 AND is_vote = true AND is_event = true)
+        (place_id = 0 AND is_vote = true AND is_event = true) OR
+        (pit_id = $5)
       )`
     ,[trip_id, date, time_start, time_end, pit_id]
   )
