@@ -89,8 +89,8 @@ export async function copy_trip(trip_name: string, start_date: string, userId: s
       RETURNING 1
     ),
     added_collab AS (
-      INSERT INTO trip_collaborators (user_id, trip_id, role, accepted)
-      VALUES ($1, (SELECT trip_id FROM new_trip), 'Owner', TRUE)
+      INSERT INTO trip_collaborators (user_id, trip_id, role, accepted, seen_noti)
+      VALUES ($1, (SELECT trip_id FROM new_trip), 'Owner', TRUE, 0)
       RETURNING 1
     )
     SELECT trip_id
