@@ -71,8 +71,8 @@ export const PlaceService = {
 
 
 export const VoteService = {
-  async list(trip_id: number, pit_id: number) {
-    return await VoteRepo.list(trip_id, pit_id)
+  async list(trip_id: number, pit_id: number, user_id: string) {
+    return await VoteRepo.list(trip_id, pit_id, user_id)
   },
 
   init: async (trip_id:number, type:"places"|"events", body:any) => {

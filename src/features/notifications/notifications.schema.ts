@@ -7,7 +7,6 @@ export const trip_id_schema = z.object({
 
 export const get_notifications_schema = z.object({
   trip_id: z.coerce.number().min(1, "trip_id is required"),
-  limit: z.coerce.number().min(1, "limit is required"),
 })
 
 // DD/MM/YYYY
@@ -58,4 +57,8 @@ export const get_noti_schemas = z.object({
 export const get_noti_schema = z.object({
   count: z.number().openapi({ example: 50 }),
   noti: z.array(get_noti_schemas),
+});
+
+export const unseen_schema = z.object({
+  unseen: z.number().openapi({ example: 5 }),
 });

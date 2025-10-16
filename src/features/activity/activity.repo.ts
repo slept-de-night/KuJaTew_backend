@@ -253,7 +253,16 @@ function normalizeTime(val: any): string {
 }
 
 export const VoteRepo = {
-  async list(trip_id: number, pit_id: number) {
+  async list(trip_id: number, pit_id: number, user_id: string) {
+    const res = await query(
+      `SELECT pit_id AS pit_idUser
+      FROM vote
+      WHERE trip_id=$1 AND pit_id=$2 AND user_id=$3`,
+      [trip_id, pit_id, user_id]
+    )
+
+    const pit_idUser = res.rows[0]?.pit_id_user ?? null;
+    
     const blockRes = await query(
       `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
        FROM places_in_trip
@@ -330,7 +339,8 @@ export const VoteRepo = {
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
             rating: row.rating,
-            rating_count: row.rating_count
+            rating_count: row.rating_count,
+            is_voted: row.pit_id === pit_idUser
           }
         })
       )
@@ -354,6 +364,7 @@ export const VoteRepo = {
             event_title: row.event_title,
             voting_count,
             is_most_voted: voting_count === maxVote && maxVote > 0,
+            is_voted: row.pit_id === pit_idUser
           }
         })
       )
@@ -771,10 +782,11 @@ async checkTimeOverlap2(
   const res = await query(
     `SELECT pit_id, place_id, date, time_start, time_end, is_vote, is_event
     FROM places_in_trip
-    WHERE trip_id = $1 AND date = $2 AND pit_id <> $5 AND ($3 < time_end AND $4 > time_start)
+    WHERE trip_id = $1 AND date = $2 AND ($3 < time_end AND $4 > time_start)
       AND NOT (
         (place_id > 0 AND is_vote = true AND is_event = false) OR
-        (place_id = 0 AND is_vote = true AND is_event = true)
+        (place_id = 0 AND is_vote = true AND is_event = true) OR
+        (pit_id = $5)
       )`
     ,[trip_id, date, time_start, time_end, pit_id]
   )
