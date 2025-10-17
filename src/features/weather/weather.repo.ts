@@ -54,8 +54,8 @@ export const WeatherRepo = {
       WHERE
         pit.trip_id = $1
         AND pit.date = $2
-        AND COALESCE(pit.is_event, false) = false
-        AND COALESCE(pit.is_vote, false) = false
+        AND (pit.is_event IS NOT TRUE)
+        AND (pit.is_vote IS NOT TRUE)
         AND pit.place_id IS NOT NULL
       ORDER BY pit.time_start ASC
       LIMIT 1
