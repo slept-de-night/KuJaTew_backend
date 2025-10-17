@@ -48,4 +48,3 @@ activityRouter.get("/:pit_id/votes/:type/end", withRole("Viewer", VoteController
 activityRouter.get("/:pit_id/voted", withRole("Viewer", VoteController.getUserVoted))
 activityRouter.post("/:pit_id/votes/:type/endOwner", withRole("Owner", VoteController.endOwner))
 activityRouter.post("/:pit_id/votes/change", withRole("Viewer", VoteController.changeVote));
-

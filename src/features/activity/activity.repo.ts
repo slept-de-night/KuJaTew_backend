@@ -254,14 +254,17 @@ function normalizeTime(val: any): string {
 
 export const VoteRepo = {
   async list(trip_id: number, pit_id: number, user_id: string) {
-    const res = await query(
-      `SELECT pit_id AS pit_idUser
-      FROM vote
-      WHERE trip_id=$1 AND pit_id=$2 AND user_id=$3`,
-      [trip_id, pit_id, user_id]
-    )
-
-    const pit_idUser = res.rows[0]?.pit_id_user ?? null;
+    const votedRes = await query(
+      `SELECT v.pit_id
+      FROM vote v
+      JOIN places_in_trip pit ON v.pit_id = pit.pit_id
+      WHERE v.trip_id=$1 AND v.user_id=$2
+        AND pit.date = (SELECT date FROM places_in_trip WHERE pit_id=$3)
+        AND pit.time_start = (SELECT time_start FROM places_in_trip WHERE pit_id=$3)
+        AND pit.time_end = (SELECT time_end FROM places_in_trip WHERE pit_id=$3)`,
+      [trip_id, user_id, pit_id]
+    );
+    const votedPitIds = votedRes.rows[0]?.pit_id ?? null;
     
     const blockRes = await query(
       `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
@@ -322,7 +325,9 @@ export const VoteRepo = {
       votesMap[row.pit_id] = row.voting_count
     }
 
-    const maxVote = Math.max(...Object.values(votesMap), 0)
+    const maxVote = Object.keys(votesMap).length > 0
+      ? Math.max(...Object.values(votesMap))
+      : 0;
 
     if (!is_event) {
       const places_voting = await Promise.all(
@@ -337,10 +342,13 @@ export const VoteRepo = {
               ? (await UsersRepo.get_file_link(row.photo_url, "places", 3600)).signedUrl
               : null,
             voting_count,
-            is_most_voted: voting_count === maxVote && maxVote > 0,
+            is_most_voted:
+              Object.keys(votesMap).length === 0 
+                ? true
+                : voting_count === maxVote && maxVote > 0,
             rating: row.rating,
             rating_count: row.rating_count,
-            is_voted: row.pit_id === pit_idUser
+            is_voted: row.pit_id === votedPitIds
           }
         })
       )
@@ -363,8 +371,11 @@ export const VoteRepo = {
             event_names: row.event_names,
             event_title: row.event_title,
             voting_count,
-            is_most_voted: voting_count === maxVote && maxVote > 0,
-            is_voted: row.pit_id === pit_idUser
+            is_most_voted:
+              Object.keys(votesMap).length === 0 
+                ? true
+                : voting_count === maxVote && maxVote > 0,
+            is_voted: row.pit_id === votedPitIds
           }
         })
       )
@@ -442,8 +453,8 @@ export const VoteRepo = {
     }
 
     const checkPlaceALready = await query(
-      `SELECT place_id FROM places_in_trip WHERE trip_id=$1 AND place_id=$2 AND time_start=$3`,
-      [trip_id,place_id,time_start]
+      `SELECT place_id FROM places_in_trip WHERE trip_id=$1 AND place_id=$2 AND time_start=$3 AND date=$4`,
+      [trip_id,place_id,time_start,date]
     )
     if (checkPlaceALready.rows.length !== 0) {
       throw new Error(`This candidate has been added`)

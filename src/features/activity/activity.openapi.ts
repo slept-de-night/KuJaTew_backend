@@ -338,7 +338,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "post",
-    path: "/api/trips/{trip_id}/activities/{pit_id}/votes/{type}/endOwner",
+    path: "/api/trips/{trip_id}/activities/{pit_id}/votes/{type}/endOwner", 
     operationId: "endOwner",
     summary: "Close voting block and set winner (owner only)",
     request: { params: schema.PostVoteEndOwnerParams },
@@ -351,7 +351,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
 
   registry.registerPath({
   method: "post",
-  path: "/api/trips/{trip_id}/activities/votes/change",
+  path: "/api/trips/{trip_id}/activities/{pit_id}/votes/change",
   operationId: "changeVote",
   summary: "Change user's vote to a new candidate",
   request: {
