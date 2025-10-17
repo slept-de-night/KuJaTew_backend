@@ -91,12 +91,6 @@ async function getWeatherApiCodeForDate(lat: number, lon: number, dateISO: strin
 export const WeatherService = {
   async getByTripDate(trip_id: number, date: string): Promise<TWeatherItem[] | Record<string, never>> {
     const d = diffDaysUtc(date);
-    
-    if ( d < 0 ){
-      const cached = await WeatherRepo.findByTripDate(trip_id, date);
-      if (cached.length > 0) return cached; 
-    }
-
     if ( d > 2 ) {
       return {};
     }
@@ -104,19 +98,21 @@ export const WeatherService = {
     const cached = await WeatherRepo.findByTripDate(trip_id, date);
     if (cached.length > 0) return cached;
 
-    const first = await WeatherRepo.findFirstPlaceOfDate(trip_id, date);
-    if (!first || first.lat == null || first.lon == null) {
-      return {};
-    }
+    if ( d > 0 ) {
+      const first = await WeatherRepo.findFirstPlaceOfDate(trip_id, date);
+      if (!first || first.lat == null || first.lon == null) {
+        return {};
+      }
 
-    const apiCode = await getWeatherApiCodeForDate(first.lat, first.lon, date);
-    if (apiCode == null) {
-      return {};
-    }
-    const weather_code = mapApiCodeToBucket(apiCode);
+      const apiCode = await getWeatherApiCodeForDate(first.lat, first.lon, date);
+      if (apiCode == null) {
+        return {};
+      }
+      const weather_code = mapApiCodeToBucket(apiCode);
 
-    const row = await WeatherRepo.insertWeather(weather_code, first.pit_id);
-    return [row];
+      const row = await WeatherRepo.insertWeather(weather_code, first.pit_id);
+      return [row];
+    } return {};
   },
 
   async checkAndDelete(trip_id: number, date: string): Promise<{ deleted_ids: number[]; reason: string }> {
