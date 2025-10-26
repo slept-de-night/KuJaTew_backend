@@ -130,7 +130,7 @@ export const ActivityRepo = {
         AND pit.date = $2
         AND COALESCE(pit.is_event, false) = false
         AND pit.place_id IS NOT NULL
-        AND piy.is_vote IS NOT true
+        AND pit.is_vote IS NOT true
       ORDER BY pit.time_start ASC
     `;
     const res = await query(sql, [trip_id, date]);
