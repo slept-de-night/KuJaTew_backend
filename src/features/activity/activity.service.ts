@@ -24,7 +24,11 @@ export const ActivityService = {
 
   pit_idDetail:(pit_id:number)=>ActivityRepo.pit_idDetail(pit_id),
   
-  remove:(pit_id:number)=>ActivityRepo.remove(pit_id),
+  async remove(pit_id: number) {
+    await VoteRepo.cleanCandidate(pit_id);
+    await ActivityRepo.remove(pit_id);
+    return true;
+  },
 
   async getPlacesByTripDate(trip_id: number, date: string) {
     return ActivityRepo.findPlacesByTripDate(trip_id, date);

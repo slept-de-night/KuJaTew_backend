@@ -130,7 +130,6 @@ export const ActivityRepo = {
         AND pit.date = $2
         AND COALESCE(pit.is_event, false) = false
         AND pit.place_id IS NOT NULL
-        AND pit.is_vote IS NOT true
       ORDER BY pit.time_start ASC
     `;
     const res = await query(sql, [trip_id, date]);
@@ -639,6 +638,27 @@ async cleanVotingBlock(trip_id: number, pit_id: number) {
     )
 
     return (res.rows?.length ?? 0) > 0
+  },
+
+async cleanCandidate(pit_id: number) {
+  const candidate = await query(
+    `SELECT date, time_start, time_end
+     FROM places_in_trip
+     WHERE pit_id=$1 AND is_vote=true`,
+    [pit_id]
+  );
+
+  if (!candidate.rows || candidate.rows.length === 0) {
+    return false
+  }
+
+  await query(
+    `DELETE FROM vote
+    WHERE pit_id = $1`,   
+    [pit_id]
+  )
+
+  return true
   },
 
 
