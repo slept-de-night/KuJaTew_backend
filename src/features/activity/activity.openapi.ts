@@ -209,6 +209,13 @@ export function registerActivity(registry: OpenAPIRegistry) {
     summary: "Initialize voting block for places or events",
     request: {
       params: schema.PostVoteTypeParams,
+      body: {
+        content: {
+          "application/json": {
+            schema: schema.InitVotingAllPass
+          },
+        },
+      },
     },
     responses: {
       200: { description: "Voting block initialized" },

@@ -98,6 +98,17 @@ export const InitVotingBodyEvents = z.object({
   event_title: z.string().min(1)
 })
 
+export const InitVotingAllPass= z.object({
+  trip_id: z.coerce.number().int(),   
+  place_id: z.coerce.number().int(),
+  date: z.string(),
+  time_start: z.string(),
+  time_end: z.string(),
+  is_vote: z.boolean(),
+  is_event: z.boolean(),
+  event_title: z.string()
+})
+
 
 export const PostVoteByTypeEndParams = z.object({
   trip_id: z.coerce.number().int().positive(),
