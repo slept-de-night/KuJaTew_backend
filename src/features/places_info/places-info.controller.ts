@@ -16,13 +16,11 @@ export const autocomplete = asyncHandler(async (req: Request, res: Response) => 
 
 export const places_details = asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id;
-    if (!id) throw BadRequest("input do not exist in request");
+    if (!id) throw BadReFquest("input do not exist in request");
     const req_type = PlacesType.safeParse(req.params.type);
     if (!req_type.success) throw BadRequest("request type not exist");
 
     const places_data = await PlacesInfoService.get_places_details(id, req_type.data);
-    console.log("IS data exist")
-    console.log(places_data)
     if (places_data == null) {
         const widthPx = 300;
         const heightPx = 600;

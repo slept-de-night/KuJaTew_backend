@@ -43,7 +43,7 @@ export const PlacesInfoService = {
                 }
             },
         );
-        console.log(data)
+       
         const parsed = schema.GooglePlaceSchema.safeParse(data);
         if (!parsed.success) throw INTERNAL("google places details Can not parsed");
         return parsed.data;
@@ -72,7 +72,7 @@ export const PlacesInfoService = {
         const baseurl = "https://places.googleapis.com/v1/";
         const postfix = `/media?maxHeightPx=${heightPx}&maxWidthPx=${widthPx}`;
         const url = baseurl + photo_id + postfix;
-        console.log(url)
+
         const data = await axios.get(
             url,
             {
@@ -105,7 +105,6 @@ export const PlacesInfoService = {
     async getandupdate_gplace(id: string, widthPx: number, heightPx: number): Promise<schema.Places> {
 
         const gdata = await PlacesInfoService.google_places_details(id);
-        console.log(gdata)
         let path = "";
 
         if (gdata.photos && gdata.photos.length > 0) {
@@ -128,8 +127,6 @@ export const PlacesInfoService = {
             overview: gdata.editorialSummary?.text ?? gdata.generativeSummary?.overview.text ?? ""
 
         }
-        console.log("New place Data");
-        console.log(place_data);
         const upload_data = await PlacesInfoRepo.add_places(place_data);
         return upload_data;
     },

@@ -32,10 +32,10 @@ export const UsersService = {
         const payload = ticket.getPayload(); 
 
         if (!payload) throw BadRequest("Invalid token");
-        //if (env.GOOGLE_ANDROID_CLIENT_ID != payload.azp && env.GOOGLE_ANDROID_CLIENT_ID_1 != payload.azp) throw BadRequest("Invalid Application Request, Got azp"+payload.azp );
+        //if (env.GOOGLE_ANDROID_CLIENT_ID != payload.azp) throw BadRequest("Invalid Application Request, Got azp"+payload.azp );
         
         
-        console.log(payload);
+        //console.log(payload);
         return payload;
     },
     async gen_jwt(user_id:string):Promise<JWT_OBJ>{
@@ -47,7 +47,6 @@ export const UsersService = {
         const user_data = await UsersRepo.get_user_details(user_id);
         const {profile_picture_path,...remians} = user_data;
         if(user_data.profile_picture_path){
-          console.log("ggg")
           const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path,"profiles",3600);
           return {...remians,'profile_picture_link': profile_link.signedUrl}; 
 
@@ -71,7 +70,6 @@ export const UsersService = {
     async get_user_details_byemail(email:string):Promise<Omit<z.infer<typeof UsersFullSchema>,'profile_picture_path'> &{'profile_picture_link':string}|null>{
         const user_data = await UsersRepo.get_user_details_byemail(email);
         if (!user_data) return null;
-        console.log(user_data)
         const {profile_picture_path,...remians} = user_data;
         const profile_link = await UsersRepo.get_file_link(user_data.profile_picture_path!,"profiles",3600);
         return {...remians,'profile_picture_link': profile_link.signedUrl};
