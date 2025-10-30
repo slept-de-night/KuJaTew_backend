@@ -110,7 +110,7 @@ export const InitVotingAllPass= z.object({
 })
 
 export const CandidatePass = z.object({
-  event_name: z.string()
+  event_names: z.string()
 })
 
 
@@ -126,6 +126,7 @@ export const PostVotedTypeParams = z.object({
   type: z.enum(["places","events"])
 })
 export const PostVotedTypeBodyPlaces = z.object({})
+
 export const PostVotedTypeBodyEvents = z.object({
   event_name: z.string().min(1)
 })

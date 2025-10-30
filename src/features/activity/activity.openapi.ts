@@ -255,9 +255,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
       body: {
         content: {
           "application/json": {
-            schema: schema.PostVotedTypeBodyPlaces.or(
-              schema.PostVotedTypeBodyEvents
-            ),
+            schema: schema.CandidatePass 
           },
         },
       },

@@ -416,7 +416,7 @@ export const VoteRepo = {
   trip_id: number,
   pit_id: number,
   place_id: number,
-  body?: { event_name?: string; }
+  body?: { event_names?: string; }
 ) {
   const block = await query(
     `SELECT date, time_start, time_end, is_event
@@ -475,13 +475,13 @@ export const VoteRepo = {
     return rows[0];
   }
 
-  if (!body?.event_name) {
-    throw new Error(`event_name is required when place_id=0`)
+  if (!body?.event_names) {
+    throw new Error(`event_names is required when place_id=0`)
   }
 
   const checkEventALready = await query(
     `SELECT event_names FROM places_in_trip WHERE trip_id=$1 AND event_names=$2 AND time_start=$3`,
-    [trip_id,body.event_name,time_start]
+    [trip_id,body.event_names,time_start]
   )
 
   if ( checkEventALready.rows.length !== 0) {
@@ -494,7 +494,7 @@ export const VoteRepo = {
     RETURNING *
   `
   
-  const res = await query(sql, [trip_id, date, time_start, time_end, body.event_name])
+  const res = await query(sql, [trip_id, date, time_start, time_end, body.event_names])
   const rows = res.rows.map((r: any) => ({
     ...r,
     date: formatDate(new Date(r.date)),
