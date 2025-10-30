@@ -27,12 +27,14 @@ export const UsersService = {
         const googleClient = new OAuth2Client(env.GOOGLE_WEB_CLIENT_ID);
         const ticket = await googleClient.verifyIdToken({
             idToken,
-            audience: [env.GOOGLE_WEB_CLIENT_ID], // include all that your app uses
+            audience: [env.GOOGLE_WEB_CLIENT_ID], 
         });
         const payload = ticket.getPayload(); 
 
         if (!payload) throw BadRequest("Invalid token");
-        if (env.GOOGLE_ANDROID_CLIENT_ID != payload.azp) throw BadRequest("Invalid Application Request");
+        //if (env.GOOGLE_ANDROID_CLIENT_ID != payload.azp && env.GOOGLE_ANDROID_CLIENT_ID_1 != payload.azp) throw BadRequest("Invalid Application Request, Got azp"+payload.azp );
+        
+        
         console.log(payload);
         return payload;
     },
