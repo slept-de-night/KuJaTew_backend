@@ -109,6 +109,10 @@ export const InitVotingAllPass= z.object({
   event_title: z.string()
 })
 
+export const CandidatePass = z.object({
+  event_name: z.string()
+})
+
 
 export const PostVoteByTypeEndParams = z.object({
   trip_id: z.coerce.number().int().positive(),

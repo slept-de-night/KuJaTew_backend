@@ -229,7 +229,15 @@ export function registerActivity(registry: OpenAPIRegistry) {
     path: "/api/trips/{trip_id}/activities/{pit_id}/votes/{place_id}",
     operationId: "voteByCandidate",
     summary: "Vote by candidate place",
-    request: { params: schema.PostVoteByPlaceParams },
+    request: { params: schema.PostVoteByPlaceParams ,
+      body: {
+        content: {
+          "application/json": {
+            schema: schema.CandidatePass 
+          },
+        },
+      },
+    },
     responses: {
       200: { description: "Vote cast" },
       400: { description: "Validation error" },
