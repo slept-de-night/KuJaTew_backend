@@ -110,7 +110,7 @@ export const InitVotingAllPass= z.object({
 })
 
 export const CandidatePass = z.object({
-  event_names: z.string()
+  event_name: z.string()
 })
 
 
