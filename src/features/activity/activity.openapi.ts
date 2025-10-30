@@ -204,7 +204,7 @@ export function registerActivity(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "post",
-    path: "/api/trips/{trip_id}/activities/votes/{type}}",
+    path: "/api/trips/{trip_id}/activities/votes/{type}",
     operationId: "initVoting",
     summary: "Initialize voting block for places or events",
     request: {
