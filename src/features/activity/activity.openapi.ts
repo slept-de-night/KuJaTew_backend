@@ -204,40 +204,11 @@ export function registerActivity(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "post",
-    path: "/api/trips/{trip_id}/activities/votes/places",
+    path: "/api/trips/{trip_id}/activities/votes/{type}}",
     operationId: "initVoting",
     summary: "Initialize voting block for places or events",
     request: {
       params: schema.PostVoteTypeParams,
-      body: {
-        content: {
-          "application/json": {
-            schema: schema.InitVotingBodyPlaces
-          },
-        },
-      },
-    },
-    responses: {
-      200: { description: "Voting block initialized" },
-      400: { description: "Validation error" },
-    },
-    tags: ["Voting"],
-  });
-
-  registry.registerPath({
-    method: "post",
-    path: "/api/trips/{trip_id}/activities/votes/events",
-    operationId: "initVoting",
-    summary: "Initialize voting block for places or events",
-    request: {
-      params: schema.PostVoteTypeParams,
-      body: {
-        content: {
-          "application/json": {
-            schema: schema.InitVotingBodyEvents
-          },
-        },
-      },
     },
     responses: {
       200: { description: "Voting block initialized" },
