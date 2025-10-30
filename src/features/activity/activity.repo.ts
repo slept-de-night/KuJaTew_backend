@@ -480,8 +480,8 @@ export const VoteRepo = {
   }
 
   const checkEventALready = await query(
-    `SELECT event_names FROM places_in_trip WHERE trip_id=$1 AND event_names=$2 AND time_start=$3`,
-    [trip_id,body.event_name,time_start]
+    `SELECT event_names FROM places_in_trip WHERE trip_id=$1 AND event_names=$2 AND time_start=$3 AND date=$4`,
+    [trip_id,body.event_name,time_start,date]
   )
 
   if ( checkEventALready.rows.length !== 0) {
