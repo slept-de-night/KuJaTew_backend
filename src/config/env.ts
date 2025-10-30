@@ -8,7 +8,6 @@ const EnvSchema = z.object({
   JWT_ACCESS_SECRET:z.string(),
   JWT_REFRESH_SECRET:z.string(),
   GOOGLE_ANDROID_CLIENT_ID:z.string(),
-  GOOGLE_ANDROID_CLIENT_ID_1:z.string(),
   GOOGLE_WEB_CLIENT_ID:z.string(),
   DATABASE_URL:z.string(),
   GOOGLE_PLACE_API_KEY:z.string(),

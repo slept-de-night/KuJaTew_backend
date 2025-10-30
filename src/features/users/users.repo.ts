@@ -14,7 +14,6 @@ export type Profile = {
 export const UsersRepo = {
     async create_user(data: User &{email:string}): Promise<User &{user_id:string,email:string,profile_picture_path:string|null}> {
         const user_data = { user_id: crypto.randomUUID(), ...data,profile_picture_path:null };
-        console.log(user_data);
         const { error } = await supabase.from('users').insert(user_data);
         if (error) throw POSTGREST_ERR(error);
         
@@ -31,7 +30,6 @@ export const UsersRepo = {
         const {data,error} = await supabase.from('users').select('profile_picture_path').eq('user_id',user_id);
         if(error) throw POSTGREST_ERR(error);
         if(data.length>0){
-            console.log(data[0]?.profile_picture_path);
             const {error} = await supabase.storage.from('profiles').remove(data[0]?.profile_picture_path);
             if(error) throw STORAGE_ERR(error);
         }
@@ -39,7 +37,6 @@ export const UsersRepo = {
     async get_user_details(user_id:string):Promise<z.infer<typeof UsersFullSchema>>{
 
         const {data,error} = await supabase.from('users').select("*").eq("user_id",user_id);
-        console.log(data)
         if (error) throw POSTGREST_ERR(error);
 
         if (data.length != 1){console.log("user id have exist same value")}
@@ -53,9 +50,9 @@ export const UsersRepo = {
 
         const {data,error} = await supabase.from('users').select("*").eq("email",email);
         if (error) throw POSTGREST_ERR(error);
-        console.log(data[0])
+        //console.log(data[0])
         const parsed = UsersFullSchema.safeParse(data[0]);
-        console.log(parsed.data);
+        //console.log(parsed.data);
         if(!parsed.success) return null;
         return parsed.data;
     },
@@ -65,7 +62,7 @@ export const UsersRepo = {
         return data;
     },
     async update_user(user_data: User,user_id:string ){
-        console.log(user_data);
+        //console.log(user_data);
 
         const { error } = await supabase.from('users').update({"name":user_data.name,"phone":user_data.phone}).eq('user_id',user_id);
         if (error) throw POSTGREST_ERR(error);
@@ -85,7 +82,6 @@ export const UsersRepo = {
             ON a.trip_id = b.trip_id JOIN users c ON b.user_id = c.user_id";
         
         const result = await pool.query(query,[user_id]);
-        console.log(result.rows)
         const data = InvitedSchema.safeParse(result.rows);
         
         if(!data.success) throw INTERNAL("Fail to parsed data");
