@@ -267,7 +267,7 @@ export const VoteRepo = {
     const votedPitIds = votedRes.rows[0]?.pit_id ?? null;
     
     const blockRes = await query(
-      `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event
+      `SELECT date::text AS date, time_start::text AS time_start, time_end::text AS time_end, is_event, event_title
        FROM places_in_trip
        WHERE trip_id=$1 AND pit_id=$2 AND is_vote=true`,
       [trip_id, pit_id]
@@ -277,11 +277,12 @@ export const VoteRepo = {
       throw new Error(`Voting block ${pit_id} not found or not active`)
     }
 
-    const { date, time_start, time_end, is_event } = blockRes.rows[0] as {
+    const { date, time_start, time_end, is_event , event_title} = blockRes.rows[0] as {
       date: string
       time_start: string
       time_end: string
       is_event: boolean
+      event_title: string
     }
     
     const formattedDate = formatDate(new Date(date));
@@ -369,7 +370,6 @@ export const VoteRepo = {
             place_id: row.place_id,
             address: row.address,
             event_names: row.event_names,
-            event_title: row.event_title,
             voting_count,
             is_most_voted:
               Object.keys(votesMap).length === 0 
@@ -385,6 +385,7 @@ export const VoteRepo = {
         date : formattedDate ,
         time_start,
         time_end,
+        event_title,
         event_voting,
       }
     }
