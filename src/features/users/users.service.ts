@@ -32,7 +32,7 @@ export const UsersService = {
         const payload = ticket.getPayload(); 
 
         if (!payload) throw BadRequest("Invalid token");
-        if (env.GOOGLE_ANDROID_CLIENT_ID != payload.azp && env.GOOGLE_ANDROID_CLIENT_ID_1 != payload.azp) throw BadRequest("Invalid Application Request, Got azp"+payload.azp );
+        //if (env.GOOGLE_ANDROID_CLIENT_ID != payload.azp && env.GOOGLE_ANDROID_CLIENT_ID_1 != payload.azp) throw BadRequest("Invalid Application Request, Got azp"+payload.azp );
         
         
         console.log(payload);
