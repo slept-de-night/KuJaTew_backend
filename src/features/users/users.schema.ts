@@ -8,7 +8,7 @@ export const UserSchema = z.object({
 
 export const UsersFullSchema = z.object({
   name: z.string().min(1, 'name is required'),
-  phone: z.string(),
+  phone: z.string().nullable(),
   email: z.string(),
   user_id: z.string(),
   profile_picture_path: z.string().nullable()

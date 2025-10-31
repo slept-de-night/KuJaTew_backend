@@ -70,6 +70,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   if(!parsed_payload.success) throw INTERNAL("Payload Can not parsed");
 
   const old_data = await UsersService.get_user_details_byemail(parsed_payload.data.email);
+  
   if(old_data!=null){
     console.log("Account exist.")
     const token = await UsersService.gen_jwt(old_data.user_id);

@@ -49,10 +49,11 @@ export const UsersRepo = {
         return parsed.data;
     },
     async get_user_details_byemail(email:string):Promise<z.infer<typeof UsersFullSchema>|null>{
+        console.log(email)
 
         const {data,error} = await supabase.from('users').select("*").eq("email",email);
         if (error) throw POSTGREST_ERR(error);
-        //console.log(data[0])
+        console.log(data[0])
         const parsed = UsersFullSchema.safeParse(data[0]);
         //console.log(parsed.data);
         if(!parsed.success) return null;
