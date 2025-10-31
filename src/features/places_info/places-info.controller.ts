@@ -16,7 +16,7 @@ export const autocomplete = asyncHandler(async (req: Request, res: Response) => 
 
 export const places_details = asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id;
-    if (!id) throw BadReFquest("input do not exist in request");
+    if (!id) throw BadRequest("input do not exist in request");
     const req_type = PlacesType.safeParse(req.params.type);
     if (!req_type.success) throw BadRequest("request type not exist");
 
