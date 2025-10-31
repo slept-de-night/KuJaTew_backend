@@ -71,17 +71,22 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
   const old_data = await UsersService.get_user_details_byemail(parsed_payload.data.email);
   if(old_data!=null){
+    console.log("Account exist.")
     const token = await UsersService.gen_jwt(old_data.user_id);
     res.status(200).json({...old_data,...token});
   }
   else {
+    console.log("Try to create new account")
     const profile = await downloadToProfileFile(parsed_payload.data.picture);
     //console.log(profile)
 
-    const profile_parsed = ImageFileSchema.safeParse(profile) ;
-    if(!profile_parsed.success) console.log("Fail to retrive profile picture");
-    //console.log(profile_parsed.data);
-    
+    let profile_parsed = ImageFileSchema.safeParse(profile) ;
+    if(!profile_parsed.success) {
+      console.log("Fail to retrive profile picture");
+      const dummy_profile = await downloadToProfileFile("https://macromissionary.com/wp-content/uploads/2021/10/dummy-avatar-2.jpg");
+      profile_parsed = ImageFileSchema.safeParse(dummy_profile);
+    }
+    console.log(profile_parsed.data);
     const unique_name = await UsersService.gen_name(parsed_payload.data.name);
    
     const user = await UsersService.create_user({email:parsed_payload.data.email,phone:"",
