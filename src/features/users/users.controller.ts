@@ -93,6 +93,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
       name:unique_name},profile_parsed.data ?? null);
     
     const token = await UsersService.gen_jwt(user.user_id);
+    console.log("  Login success !!!")
     res.status(201).json({...user,...token});
   }
 });
