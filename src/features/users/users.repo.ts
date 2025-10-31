@@ -14,7 +14,9 @@ export type Profile = {
 export const UsersRepo = {
     async create_user(data: User &{email:string}): Promise<User &{user_id:string,email:string,profile_picture_path:string|null}> {
         const user_data = { user_id: crypto.randomUUID(), ...data,profile_picture_path:null };
+        console.log(user_data)
         const { error } = await supabase.from('users').insert(user_data);
+        console.log(error)
         if (error) throw POSTGREST_ERR(error);
         
         return user_data;

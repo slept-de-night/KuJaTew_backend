@@ -11,9 +11,12 @@ import { ImageFile } from "../../etc/etc.schema";
 import {etcService} from "../../etc/etc.service"
 export const UsersService = {
     async create_user(input: User& {"email":string}, profile: ImageFile | null | undefined): Promise<User & { user_id: string,profile_picture_link:string }> {
+
+        console.log("Creating user?")
         
         const created_user = await UsersRepo.create_user(input);
         if (profile) {
+            console.log("Update profile path")
             const upload_profile = await etcService.upload_img_storage(profile, created_user.user_id+"_profile","profiles");
             
             await UsersRepo.update_profile_path(upload_profile, created_user.user_id);
@@ -21,7 +24,10 @@ export const UsersService = {
             const profile_link = await UsersRepo.get_file_link(upload_profile,"profiles",3600);
             return { ...created_user ,profile_picture_link:profile_link.signedUrl};
         }
-        return { ...created_user ,profile_picture_link:""}; 
+        else {
+          return { ...created_user ,profile_picture_link:""}; 
+        }
+        
     },
     async google_verify(idToken: string) {
         const googleClient = new OAuth2Client(env.GOOGLE_WEB_CLIENT_ID);

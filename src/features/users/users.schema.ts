@@ -3,7 +3,7 @@ import z from 'zod';
 
 export const UserSchema = z.object({
   name: z.string().min(1, 'name is required'),
-  phone: z.string().min(6, 'phone is too short'),
+  phone: z.string().min(6, 'phone is too short').nullable(),
 })
 
 export const UsersFullSchema = z.object({

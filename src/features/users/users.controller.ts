@@ -63,7 +63,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const body_parsed =IdTokenSchema.safeParse(req.body);
   if(!body_parsed.success) throw BadRequest("Request Structure is not invalide!") 
   
-  //console.log(body_parsed.data.idToken);
+  console.log("idToken:"+body_parsed.data.idToken);
 
   const  payload = await UsersService.google_verify(body_parsed.data.idToken);
   const parsed_payload = GoogleAuthSchema.safeParse(payload);
@@ -88,8 +88,8 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     }
     console.log(profile_parsed.data);
     const unique_name = await UsersService.gen_name(parsed_payload.data.name);
-   
-    const user = await UsersService.create_user({email:parsed_payload.data.email,phone:"",
+    console.log(unique_name)
+    const user = await UsersService.create_user({email:parsed_payload.data.email,phone:null,
       name:unique_name},profile_parsed.data ?? null);
     
     const token = await UsersService.gen_jwt(user.user_id);
